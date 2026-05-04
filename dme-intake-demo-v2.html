@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -283,6 +283,47 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
 .ep-footer{padding:14px 24px;border-top:1px solid var(--gray-m);display:flex;justify-content:flex-end}
 .ep-resolution{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;font-size:11.5px;color:#166534}
 .ep-resolution.pending{background:#eff6ff;border-color:#93c5fd;color:#1e40af}
+
+/* ── LIVE PROCESSING ── */
+.live-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.live-log-panel{background:#0f172a;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.live-log-hdr{padding:10px 16px;background:#1e293b;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:#94a3b8}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 1.2s infinite;flex-shrink:0}
+.live-dot.done{background:#60a5fa;animation:none}
+.lp-page-ctr{margin-left:auto;font-size:10px;font-weight:600;color:#475569}
+.live-log-body{padding:12px 14px;font-family:monospace;font-size:10.5px;line-height:1.9;color:#94a3b8;min-height:340px;max-height:400px;overflow-y:auto;flex:1}
+.ll-page{color:#60a5fa;font-weight:700}
+.ll-ok{color:#4ade80}
+.ll-warn{color:#fbbf24}
+.ll-err{color:#f87171}
+.ll-sys{color:#a78bfa}
+.live-fields-panel{background:white;border-radius:12px;border:1px solid var(--gray-m);padding:16px;display:flex;flex-direction:column;gap:12px}
+.lp-prog-label{font-size:11px;font-weight:700;color:var(--dark);margin-bottom:5px}
+.lp-prog-track{height:6px;background:var(--gray-m);border-radius:3px;overflow:hidden}
+.lp-prog-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .6s ease}
+.lp-counters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.lp-ctr{text-align:center;padding:10px 6px;border-radius:8px}
+.lp-ctr-n{font-size:22px;font-weight:900;display:block}
+.lp-ctr-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--gray)}
+.lp-ctr-ok{background:var(--green-l);border:1px solid var(--green-m)}
+.lp-ctr-ok .lp-ctr-n{color:var(--green)}
+.lp-ctr-miss{background:var(--red-l);border:1px solid var(--red-m)}
+.lp-ctr-miss .lp-ctr-n{color:var(--red)}
+.lp-ctr-warn{background:var(--yellow-l);border:1px solid var(--yellow-m)}
+.lp-ctr-warn .lp-ctr-n{color:var(--yellow)}
+.lp-field-grid{display:flex;flex-wrap:wrap;gap:5px;flex:1;align-content:flex-start;min-height:160px}
+.lp-chip{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;animation:fadeIn .25s ease both;white-space:nowrap}
+.lp-chip-ok{background:var(--green-l);color:var(--green);border:1px solid var(--green-m)}
+.lp-chip-miss{background:var(--red-l);color:var(--red);border:1px solid var(--red-m)}
+.lp-chip-warn{background:var(--yellow-l);color:var(--yellow);border:1px solid var(--yellow-m)}
+.live-done-bar{background:var(--green-l);border:2px solid var(--green-m);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.live-done-stats{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.lds{text-align:center}
+.lds .n{font-size:20px;font-weight:900}
+.lds .l{font-size:9px;color:var(--gray);font-weight:700;text-transform:uppercase}
+.lds.ok .n{color:var(--green)}
+.lds.red .n{color:var(--red)}
+.lds.pri .n{color:var(--purple)}
 
 /* ── ESCALATION MODAL ── */
 .esc-modal{position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -654,6 +695,50 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
 
   <div class="btn-row">
     <button class="btn btn-blue" id="run-btn" onclick="startPipeline()">▶ Run Intake Pipeline</button>
+  </div>
+</div>
+
+<!-- ── SEC LIVE: Live Document Processing ── -->
+<div class="section" id="sec-live">
+  <div class="page-title">AI Reading Referral Package — Live</div>
+  <div class="page-sub">Extracting structured fields from 3 documents · 5 pages</div>
+
+  <div class="live-split">
+
+    <!-- LEFT: AI log terminal -->
+    <div class="live-log-panel">
+      <div class="live-log-hdr">
+        <span class="live-dot" id="lp-dot"></span>
+        AI Extraction Engine
+        <span class="lp-page-ctr" id="lp-page-ctr">Page 0 / 5</span>
+      </div>
+      <div class="live-log-body" id="lp-log"></div>
+    </div>
+
+    <!-- RIGHT: Fields panel -->
+    <div class="live-fields-panel">
+      <div>
+        <div class="lp-prog-label" id="lp-doc-name">Initializing…</div>
+        <div class="lp-prog-track"><div class="lp-prog-fill" id="lp-fill" style="width:0%"></div></div>
+      </div>
+      <div class="lp-counters">
+        <div class="lp-ctr lp-ctr-ok"><span class="lp-ctr-n" id="lp-n-ok">0</span><span class="lp-ctr-l">Extracted</span></div>
+        <div class="lp-ctr lp-ctr-miss"><span class="lp-ctr-n" id="lp-n-miss">0</span><span class="lp-ctr-l">Gaps Found</span></div>
+        <div class="lp-ctr lp-ctr-warn"><span class="lp-ctr-n" id="lp-n-warn">0</span><span class="lp-ctr-l">Low Conf.</span></div>
+      </div>
+      <div class="lp-field-grid" id="lp-fields"></div>
+    </div>
+  </div>
+
+  <!-- Completion bar — hidden until done -->
+  <div class="live-done-bar" id="lp-done" style="display:none">
+    <div class="live-done-stats">
+      <div class="lds ok"><div class="n">20</div><div class="l">Fields Extracted</div></div>
+      <div class="lds red"><div class="n">5</div><div class="l">Gaps Detected</div></div>
+      <div class="lds warn"><div class="n">3</div><div class="l">Low Confidence</div></div>
+      <div class="lds pri"><div class="n">7 · HIGH</div><div class="l">Priority Score</div></div>
+    </div>
+    <button class="btn btn-blue" onclick="goTo(1)">View Extraction Results →</button>
   </div>
 </div>
 
@@ -1390,6 +1475,114 @@ function selectChannel(ch) {
   if (rb) { rb.disabled = false; rb.textContent = ch === 'fax' ? '▶ Run Intake Pipeline' : '▶ Start Voice Intake'; }
 }
 
+// ── LIVE PROCESSING SIMULATION ──
+const liveSeq = [
+  {ms:0,    type:'sys',  msg:'Initializing extraction pipeline...'},
+  {ms:450,  type:'sys',  msg:'📨 Fax received: WC-2026-084431 · 3 documents · 5 pages'},
+  {ms:950,  type:'sys',  msg:'⚡ Routing to AI extraction engine...'},
+  {ms:1450, type:'page', msg:'📄 Page 1/5 — Referral Form (image PDF)', page:1, doc:'📄 Referral Form — Page 1 of 5', pct:12},
+  {ms:1950, type:'ok',   msg:'  ✓ worker.name → James Holloway',          chip:'worker.name'},
+  {ms:2250, type:'ok',   msg:'  ✓ worker.dob → 1978-03-14',               chip:'worker.dob'},
+  {ms:2550, type:'ok',   msg:'  ✓ worker.address → 4821 Elmwood Dr, Anaheim CA', chip:'worker.address'},
+  {ms:2900, type:'ok',   msg:'  ✓ insurance.carrier → Coastal Insurance Group', chip:'insurance.carrier'},
+  {ms:3200, type:'ok',   msg:'  ✓ insurance.claim_number → WC-2026-084431', chip:'claim_number'},
+  {ms:3600, type:'miss', msg:'  ⚠ insurance.auth_reference → not found',  chip:'auth_reference'},
+  {ms:4050, type:'miss', msg:'  ⚠ worker.language → not found',           chip:'worker.language'},
+  {ms:4500, type:'page', msg:'📄 Page 2/5 — Fax Cover Sheet', page:2, doc:'📠 Fax Cover Sheet — Page 2 of 5', pct:32},
+  {ms:4900, type:'ok',   msg:'  ✓ adjuster.name → Maria Santos',          chip:'adjuster.name'},
+  {ms:5200, type:'ok',   msg:'  ✓ adjuster.phone → 714-555-0192',         chip:'adjuster.phone'},
+  {ms:5500, type:'ok',   msg:'  ✓ case_manager.name → Linda Torres',      chip:'case_mgr.name'},
+  {ms:5800, type:'ok',   msg:'  ✓ case_manager.email → l.torres@coastalins.com', chip:'cm.email'},
+  {ms:6200, type:'page', msg:'📄 Page 3/5 — Clinical Notes', page:3, doc:'🩺 Clinical Notes — Page 3 of 5', pct:56},
+  {ms:6650, type:'ok',   msg:'  ✓ provider.name → Kevin Marsh, MD',       chip:'provider.name'},
+  {ms:6950, type:'warn', msg:'  ✓ provider.npi → 1234567890 (confidence: 71%)', chip:'provider.npi ⚡71%'},
+  {ms:7250, type:'warn', msg:'  ✓ diagnosis.icd10_codes → S83.209A (confidence: 67%)', chip:'icd10 ⚡67%'},
+  {ms:7550, type:'ok',   msg:'  ✓ diagnosis.description → Post-ACL reconstruction, right knee', chip:'diagnosis.desc'},
+  {ms:7850, type:'ok',   msg:'  ✓ services.hcpcs_code → E0143 (auto-corrected: e0143→E0143)', chip:'hcpcs E0143 ✎'},
+  {ms:8150, type:'ok',   msg:'  ✓ clinical_justification → bariatric req. (285 lbs)', chip:'clinical.just'},
+  {ms:8500, type:'page', msg:'📄 Page 4/5 — Rx Prescription', page:4, doc:'💊 Rx Prescription — Page 4 of 5', pct:78},
+  {ms:8900, type:'warn', msg:'  ✓ equipment desc. → Rollator Walker (confidence: 58%)', chip:'equip.desc ⚡58%'},
+  {ms:9200, type:'ok',   msg:'  ✓ prescription.item → Rollator Walker, 4-Wheel', chip:'rx.item'},
+  {ms:9500, type:'ok',   msg:'  ✓ prescription.signed_by → Kevin Marsh, MD', chip:'rx.signed_by'},
+  {ms:9800, type:'ok',   msg:'  ✓ prescription.signed_date → 2026-04-25', chip:'rx.date'},
+  {ms:10100,type:'miss', msg:'  ⚠ prescription.specifications → not specified', chip:'rx.spec'},
+  {ms:10500,type:'page', msg:'📄 Page 5/5 — Authorization (checking...)', page:5, doc:'🔐 Authorization — Page 5 of 5', pct:95},
+  {ms:11000,type:'miss', msg:'  ⚠ insurance.auth_reference → not found on any page', chip:'auth_ref MISSING'},
+  {ms:11400,type:'miss', msg:'  ⚠ scheduling.appointment_window → not found', chip:'appt.window'},
+  {ms:11800,type:'miss', msg:'  ⚠ scheduling.transportation → not found', chip:'transportation'},
+  {ms:12100,type:'sys',  msg:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', pct:100},
+  {ms:12350,type:'sys',  msg:'✅ Extraction complete in 12.1s'},
+  {ms:12600,type:'sys',  msg:'📊 20 / 25 fields extracted · 5 gaps detected'},
+  {ms:12900,type:'sys',  msg:'🔴 Priority score: 7 · HIGH · Routing blocked — gaps must be resolved'},
+  {ms:13300,type:'done'},
+];
+
+function showLiveProcessing() {
+  sections.forEach(id => document.getElementById(id).classList.remove('active'));
+  const el = document.getElementById('sec-live');
+  el.classList.add('active');
+  // reset
+  document.getElementById('lp-log').innerHTML = '';
+  document.getElementById('lp-fields').innerHTML = '';
+  document.getElementById('lp-fill').style.width = '0%';
+  document.getElementById('lp-doc-name').textContent = 'Initializing…';
+  document.getElementById('lp-page-ctr').textContent = 'Page 0 / 5';
+  document.getElementById('lp-n-ok').textContent = '0';
+  document.getElementById('lp-n-miss').textContent = '0';
+  document.getElementById('lp-n-warn').textContent = '0';
+  document.getElementById('lp-dot').className = 'live-dot';
+  document.getElementById('lp-done').style.display = 'none';
+  document.getElementById('progress').style.width = '5%';
+
+  let nOk=0, nMiss=0, nWarn=0;
+  liveSeq.forEach(ev => {
+    setTimeout(() => {
+      const logEl = document.getElementById('lp-log');
+      const fieldsEl = document.getElementById('lp-fields');
+      if (ev.type === 'page') {
+        addLpLine(logEl, ev.msg, 'll-page');
+        document.getElementById('lp-doc-name').textContent = ev.doc;
+        document.getElementById('lp-page-ctr').textContent = 'Page ' + ev.page + ' / 5';
+        document.getElementById('lp-fill').style.width = ev.pct + '%';
+      } else if (ev.type === 'ok') {
+        addLpLine(logEl, ev.msg, 'll-ok');
+        addLpChip(fieldsEl, '✓ ' + ev.chip, 'lp-chip-ok');
+        nOk++; document.getElementById('lp-n-ok').textContent = nOk;
+      } else if (ev.type === 'miss') {
+        addLpLine(logEl, ev.msg, 'll-err');
+        addLpChip(fieldsEl, '⚠ ' + ev.chip, 'lp-chip-miss');
+        nMiss++; document.getElementById('lp-n-miss').textContent = nMiss;
+      } else if (ev.type === 'warn') {
+        addLpLine(logEl, ev.msg, 'll-warn');
+        addLpChip(fieldsEl, '⚡ ' + ev.chip, 'lp-chip-warn');
+        nWarn++; document.getElementById('lp-n-warn').textContent = nWarn;
+      } else if (ev.type === 'sys') {
+        addLpLine(logEl, ev.msg, 'll-sys');
+        if (ev.pct) document.getElementById('lp-fill').style.width = ev.pct + '%';
+      } else if (ev.type === 'done') {
+        document.getElementById('lp-dot').className = 'live-dot done';
+        document.getElementById('lp-done').style.display = 'flex';
+        log('🤖 AI extraction complete — 20 fields, 5 gaps, priority HIGH');
+      }
+    }, ev.ms);
+  });
+}
+
+function addLpLine(container, text, cls) {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = text;
+  container.appendChild(d);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addLpChip(container, label, cls) {
+  const d = document.createElement('span');
+  d.className = 'lp-chip ' + cls;
+  d.textContent = label;
+  container.appendChild(d);
+}
+
 function loadReferral(ref) {
   channel = 'fax';
   document.getElementById('ep-id').textContent = 'EP-20260501-WC2026084431';
@@ -1399,7 +1592,7 @@ function loadReferral(ref) {
   document.getElementById('rv-channel').className = 'ch-badge ch-fax';
   document.getElementById('rv-channel').textContent = 'fax';
   document.getElementById('nv-channel').textContent = 'fax';
-  goTo(1);
+  showLiveProcessing();
 }
 
 function startPipeline() {
@@ -1670,6 +1863,7 @@ function confirmEscalation() {
 
 function goTo(n) {
   sections.forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('sec-live').classList.remove('active');
   document.getElementById(sections[n]).classList.add('active');
 
   for (let i=1; i<=7; i++) {
