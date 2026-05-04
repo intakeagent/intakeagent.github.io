@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workers&rsquo; Comp Intake &mdash; AI Agent Platform</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #ffffff;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 24px 32px;
+  }
+  .top-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    background: #1e3a5f;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    z-index: 100;
+  }
+  .top-nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .01em;
+  }
+  .top-nav a:hover { opacity: .85; }
+  .top-nav .nav-icon {
+    width: 30px; height: 30px;
+    background: rgba(255,255,255,.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .top-nav .nav-tag {
+    font-size: 10px;
+    background: rgba(255,255,255,.15);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+  .badge {
+    display: inline-block;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 700;
+    text-align: center;
+    color: #0f172a;
+    line-height: 1.25;
+    max-width: 700px;
+    margin-bottom: 6px;
+  }
+  .sub {
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: center;
+    max-width: 560px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    max-width: 1020px;
+    width: 100%;
+  }
+  .cards-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    max-width: 1020px;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .section-label {
+    width: 100%;
+    max-width: 1020px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 10px;
+    margin-top: 8px;
+    padding-left: 2px;
+  }
+  .card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: #475569;
+    box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  }
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 99px;
+    width: fit-content;
+  }
+  .tag-blue  { background: rgba(59,130,246,.15); color: #60a5fa; border: 1px solid rgba(59,130,246,.3); }
+  .tag-green { background: rgba(34,197,94,.12); color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
+  .tag-amber { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.25); }
+  .tag-red    { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.25); }
+  .tag-purple { background: rgba(124,58,237,.12); color: #a78bfa; border: 1px solid rgba(124,58,237,.25); }
+  .card-icon { font-size: 22px; line-height: 1; }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.3;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .footer {
+    margin-top: 52px;
+    font-size: 13px;
+    color: #475569;
+    text-align: center;
+    letter-spacing: .02em;
+  }
+  .footer span { color: #64748b; }
+  @media (max-width: 720px) {
+    .cards, .cards-two { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="dme-intake-demo-v2.html">
+    <div class="nav-icon">⚕</div>
+    Intake Agent
+    <span class="nav-tag">AI-Powered · v2.0</span>
+  </a>
+</nav>
+
+<div style="height:52px"></div>
+
+<div class="badge">Workers&rsquo; Comp &middot; AI Agent Platform</div>
+
+<h1>Making Intake &amp; Referral Management an Advantage</h1>
+<p class="sub">Delivering Experience, Speed &amp; Agility &mdash; autonomous, digital, clean route-ready episodes with human in the loop.</p>
+
+<div class="section-label">&#x25CF; Resources</div>
+<div class="cards">
+
+  <a class="card" href="dme-intake-visual.html">
+    <div class="tag tag-green">Value Proposition</div>
+    <div class="card-icon">&#x1F4C8;</div>
+    <div class="card-title">Value Proposition</div>
+    <div class="card-desc">Context to intake &amp; domain — extracts fields, detects gaps, resolves exceptions digitally with embedded AI voice, human in the loop, left shifting operations.</div>
+  </a>
+
+  <a class="card" href="agent-ecosystem-visual.html">
+    <div class="tag tag-amber">Architecture</div>
+    <div class="card-icon">&#x1F9E9;</div>
+    <div class="card-title">Agent Ecosystem</div>
+    <div class="card-desc">Modular, auditable, deployable in your environment &mdash; a network of agents orchestrated for end-to-end value chain from referral to payment, with human in the loop.</div>
+  </a>
+
+  <a class="card" href="production-considerations-visual.html">
+    <div class="tag tag-red">Production Readiness</div>
+    <div class="card-icon">&#x2705;</div>
+    <div class="card-title">Considerations</div>
+    <div class="card-desc">Key questions on the path to production: Safety &amp; Guardrails, Observability, Data &amp; Compliance, Integration, and People &amp; Change.</div>
+  </a>
+
+</div>
+
+<div class="section-label" style="margin-top:20px">&#x25CB; Demos</div>
+<div class="cards-two">
+
+  <a class="card" href="dme-intake-demo-v2.html">
+    <div class="tag tag-blue">Intake Agent Demo</div>
+    <div class="card-icon">&#x1F916;</div>
+    <div class="card-title">Context Intelligence</div>
+    <div class="card-desc">Full intake pipeline for a single referral &mdash; fax arrival to routed episode. AI reads context, detects gaps, and makes a live outbound voice call to resolve missing information.</div>
+  </a>
+
+  <a class="card" href="batch-demo.html">
+    <div class="tag tag-green">Intake Agent Demo</div>
+    <div class="card-icon">&#x1F4C4;</div>
+    <div class="card-title">Live Processing</div>
+    <div class="card-desc">Watch AI read 75 real referral PDFs live &mdash; 225 pages extracted, gaps detected, and routes assigned in real time in front of your audience.</div>
+  </a>
+
+  <a class="card" href="batch-demo.html?mode=scale">
+    <div class="tag tag-purple">Intake Agent Demo</div>
+    <div class="card-icon">&#x26A1;</div>
+    <div class="card-title">Scale Processing</div>
+    <div class="card-desc">Pre-run results from 3,500 referral packets &mdash; gap detection, priority scoring, and route assignment across a full Monday morning intake queue.</div>
+  </a>
+
+</div>
+
+<div class="footer">
+  Live intake line &middot; <span>(201) 897-3854</span> &middot; AI answers 24/7
+</div>
+
+</body>
+</html>

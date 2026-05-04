@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>75 Referral Packets — Ready for Processing</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;color:#fff;text-decoration:none}
+.logo-icon{width:32px;height:32px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.back-btn{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.back-btn:hover{background:rgba(255,255,255,.18)}
+
+.main{max-width:1200px;margin:0 auto;padding:32px 24px 64px}
+
+.page-header{margin-bottom:32px}
+.page-tag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-bottom:10px}
+.page-title{font-size:26px;font-weight:800;color:#f1f5f9;margin-bottom:8px}
+.page-sub{font-size:14px;color:#64748b;line-height:1.6;max-width:640px;margin-bottom:20px}
+
+.stats-row{display:flex;gap:24px;margin-bottom:32px;flex-wrap:wrap}
+.stat{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:14px 20px;text-align:center;min-width:110px}
+.stat-num{font-size:26px;font-weight:800}
+.stat-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.stat.green .stat-num{color:#4ade80}
+.stat.red .stat-num{color:#f87171}
+.stat.yellow .stat-num{color:#fbbf24}
+.stat.blue .stat-num{color:#60a5fa}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.packet{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px;transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease;position:relative}
+.packet:hover{transform:translateY(-2px);border-color:#475569;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.packet-num{font-size:10px;font-weight:700;letter-spacing:.06em;color:#475569;font-family:monospace}
+.packet-name{font-size:14px;font-weight:700;color:#f1f5f9}
+.packet-claim{font-size:11px;color:#64748b;font-family:monospace}
+.packet-item{font-size:12px;color:#94a3b8;line-height:1.4}
+.packet-carrier{font-size:11px;color:#64748b}
+.packet-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.04em}
+.b-high{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+.b-med{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.b-low{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
+.b-routed{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
+.b-outreach{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.open-link{font-size:10px;color:#60a5fa;font-weight:600}
+.icd{font-size:10px;color:#475569;font-family:monospace}
+.pages-tag{font-size:10px;color:#475569;margin-top:2px}
+
+.proc-btn{display:inline-flex;align-items:center;gap:8px;background:#16a34a;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;transition:background .15s}
+.proc-btn:hover{background:#15803d}
+
+@media(max-width:600px){.grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">⚕</div>
+    Intake Agent
+  </a>
+  <a href="batch-demo.html" class="back-btn">← Back to Batch Demo</a>
+</header>
+
+<div class="main">
+
+  <div class="page-header">
+    <div class="page-tag">Live Processing Queue</div>
+    <div class="page-title">75 Referral Packets — Ready for AI Processing</div>
+    <div class="page-sub">Each packet contains 3 documents: intake form, prescription, and clinical notes. The AI reads all 225 pages and extracts fields across all three documents per referral.</div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:28px">
+      <a href="batch-demo.html" class="proc-btn">🔴 Process These 75 Live →</a>
+      <span style="font-size:12px;color:#475569">Click to return to batch demo and run live processing</span>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat blue"><div class="stat-num">75</div><div class="stat-label">Referrals</div></div>
+    <div class="stat blue"><div class="stat-num">225</div><div class="stat-label">Pages Total</div></div>
+    <div class="stat yellow"><div class="stat-num">3</div><div class="stat-label">Docs / Packet</div></div>
+    <div class="stat green"><div class="stat-num">~25s</div><div class="stat-label">Processing Time</div></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+</div>
+
+<script>
+const referrals = [
+  {i:1,  n:"Amanda Johnson",     c:"WC-2026-00001", e:"Ankle-Foot Orthosis (AFO)",        carrier:"State Fund Insurance",          icd:"M23.611", p:"HIGH",  ok:false},
+  {i:2,  n:"Andrew Wilson",      c:"WC-2026-00002", e:"Axillary Crutches",                carrier:"State Fund Insurance",          icd:"S93.401A",p:"LOW",   ok:true},
+  {i:3,  n:"Patricia Carter",    c:"WC-2026-00003", e:"Cervical Collar — Soft Foam",      carrier:"Central Valley Insurance",      icd:"S72.001A",p:"HIGH",  ok:false},
+  {i:4,  n:"Andrew Garcia",      c:"WC-2026-00004", e:"TENS Unit — Dual Channel",         carrier:"Bay Area Workers Comp",         icd:"M19.011", p:"LOW",   ok:true},
+  {i:5,  n:"Karen Davis",        c:"WC-2026-00005", e:"CPAP Machine",                     carrier:"LA County Workers Comp Fund",   icd:"S46.011A",p:"LOW",   ok:true},
+  {i:6,  n:"Lisa Miller",        c:"WC-2026-00006", e:"TENS Unit — Dual Channel",         carrier:"State Fund Insurance",          icd:"M25.511", p:"LOW",   ok:true},
+  {i:7,  n:"Jennifer Davis",     c:"WC-2026-00007", e:"Hospital Bed Semi-Electric",       carrier:"CalComp Insurance",             icd:"S22.001A",p:"LOW",   ok:true},
+  {i:8,  n:"Lisa Campbell",      c:"WC-2026-00008", e:"Axillary Crutches",                carrier:"Bay Area Workers Comp",         icd:"S22.001A",p:"MED",   ok:false},
+  {i:9,  n:"William Baker",      c:"WC-2026-00009", e:"Shoulder Immobilizer — Abduction", carrier:"Coastal Insurance Group",       icd:"M54.4",   p:"MED",   ok:false},
+  {i:10, n:"Thomas Rivera",      c:"WC-2026-00010", e:"TENS Unit — Dual Channel",         carrier:"Coastal Insurance Group",       icd:"M23.611", p:"MED",   ok:false},
+  {i:11, n:"Melissa Thomas",     c:"WC-2026-00011", e:"CPAP Machine",                     carrier:"Bay Area Workers Comp",         icd:"M16.11",  p:"MED",   ok:false},
+  {i:12, n:"Paul Nguyen",        c:"WC-2026-00012", e:"Power Wheelchair",                 carrier:"SoCal Comp Insurance",          icd:"M75.1",   p:"MED",   ok:false},
+  {i:13, n:"Kenneth Nguyen",     c:"WC-2026-00013", e:"Arm Sling — Shoulder Immobilizer", carrier:"Bay Area Workers Comp",         icd:"S39.001A",p:"HIGH",  ok:false},
+  {i:14, n:"Dorothy Green",      c:"WC-2026-00014", e:"Hospital Bed Semi-Electric",       carrier:"Central Valley Insurance",      icd:"G54.2",   p:"MED",   ok:false},
+  {i:15, n:"Lisa Mitchell",      c:"WC-2026-00015", e:"Forearm Crutches",                 carrier:"LA County Workers Comp Fund",   icd:"S22.001A",p:"MED",   ok:false},
+  {i:16, n:"Donna Ramirez",      c:"WC-2026-00016", e:"Cervical Collar — Soft Foam",      carrier:"Coastal Insurance Group",       icd:"M19.011", p:"MED",   ok:false},
+  {i:17, n:"Charles Miller",     c:"WC-2026-00017", e:"CPAP Machine",                     carrier:"Central Valley Insurance",      icd:"S52.501A",p:"LOW",   ok:true},
+  {i:18, n:"Steven Jackson",     c:"WC-2026-00018", e:"Axillary Crutches",                carrier:"LA County Workers Comp Fund",   icd:"M75.1",   p:"MED",   ok:false},
+  {i:19, n:"Melissa Thompson",   c:"WC-2026-00019", e:"Knee Immobilizer",                 carrier:"Central Valley Insurance",      icd:"S22.001A",p:"HIGH",  ok:false},
+  {i:20, n:"Paul Campbell",      c:"WC-2026-00020", e:"TENS Unit — Dual Channel",         carrier:"Pacific Coast Workers Comp",    icd:"S42.002A",p:"MED",   ok:false},
+  {i:21, n:"Patricia Robinson",  c:"WC-2026-00021", e:"Hospital Bed Semi-Electric",       carrier:"SoCal Comp Insurance",          icd:"M54.5",   p:"MED",   ok:false},
+  {i:22, n:"Melissa Nguyen",     c:"WC-2026-00022", e:"Axillary Crutches",                carrier:"CalComp Insurance",             icd:"S52.501A",p:"LOW",   ok:true},
+  {i:23, n:"Joseph Hernandez",   c:"WC-2026-00023", e:"Forearm Crutches",                 carrier:"LA County Workers Comp Fund",   icd:"S83.006A",p:"MED",   ok:false},
+  {i:24, n:"Richard Wilson",     c:"WC-2026-00024", e:"CPAP Machine",                     carrier:"Pacific Mutual Insurance",      icd:"M54.4",   p:"MED",   ok:false},
+  {i:25, n:"George Gonzalez",    c:"WC-2026-00025", e:"Axillary Crutches",                carrier:"Central Valley Insurance",      icd:"S46.011A",p:"MED",   ok:false},
+  {i:26, n:"Susan Hernandez",    c:"WC-2026-00026", e:"Lumbar Back Brace — Rigid TLSO",   carrier:"LA County Workers Comp Fund",   icd:"M16.11",  p:"MED",   ok:false},
+  {i:27, n:"Sarah Nelson",       c:"WC-2026-00027", e:"Axillary Crutches",                carrier:"State Fund Insurance",          icd:"M79.621", p:"MED",   ok:false},
+  {i:28, n:"Thomas Thomas",      c:"WC-2026-00028", e:"Ankle-Foot Orthosis (AFO)",        carrier:"SoCal Comp Insurance",          icd:"M54.4",   p:"HIGH",  ok:false},
+  {i:29, n:"Sarah Torres",       c:"WC-2026-00029", e:"Shoulder Immobilizer — Abduction", carrier:"CalComp Insurance",             icd:"M54.4",   p:"LOW",   ok:true},
+  {i:30, n:"Anthony Sanchez",    c:"WC-2026-00030", e:"Arm Sling — Shoulder Immobilizer", carrier:"Bay Area Workers Comp",         icd:"M25.511", p:"MED",   ok:false},
+  {i:31, n:"Carol Campbell",     c:"WC-2026-00031", e:"Lumbar Back Brace — Rigid TLSO",   carrier:"Central Valley Insurance",      icd:"S82.001A",p:"MED",   ok:false},
+  {i:32, n:"Thomas Carter",      c:"WC-2026-00032", e:"Axillary Crutches",                carrier:"Western Mutual Workers Comp",   icd:"M19.011", p:"MED",   ok:false},
+  {i:33, n:"Ashley Sanchez",     c:"WC-2026-00033", e:"Arm Sling — Shoulder Immobilizer", carrier:"Bay Area Workers Comp",         icd:"M23.611", p:"MED",   ok:false},
+  {i:34, n:"Edward Green",       c:"WC-2026-00034", e:"Commode Chair — Raised Toilet",    carrier:"CalComp Insurance",             icd:"S39.001A",p:"MED",   ok:false},
+  {i:35, n:"Andrew Rivera",      c:"WC-2026-00035", e:"Lumbar Back Brace — Rigid TLSO",   carrier:"LA County Workers Comp Fund",   icd:"M79.621", p:"MED",   ok:false},
+  {i:36, n:"Carol Walker",       c:"WC-2026-00036", e:"TENS Unit — Dual Channel",         carrier:"SoCal Comp Insurance",          icd:"M75.1",   p:"MED",   ok:false},
+  {i:37, n:"Matthew Green",      c:"WC-2026-00037", e:"Knee Immobilizer",                 carrier:"Bay Area Workers Comp",         icd:"S83.006A",p:"MED",   ok:false},
+  {i:38, n:"Carlos Baker",       c:"WC-2026-00038", e:"Hospital Bed Semi-Electric",       carrier:"Coastal Insurance Group",       icd:"M79.621", p:"MED",   ok:false},
+  {i:39, n:"Richard King",       c:"WC-2026-00039", e:"Axillary Crutches",                carrier:"CalComp Insurance",             icd:"G54.2",   p:"MED",   ok:false},
+  {i:40, n:"Betty Taylor",       c:"WC-2026-00040", e:"Hospital Bed Semi-Electric",       carrier:"State Fund Insurance",          icd:"S83.006A",p:"MED",   ok:false},
+  {i:41, n:"Ashley Campbell",    c:"WC-2026-00041", e:"Hospital Bed Semi-Electric",       carrier:"Central Valley Insurance",      icd:"M54.5",   p:"LOW",   ok:true},
+  {i:42, n:"Ronald Harris",      c:"WC-2026-00042", e:"Cervical Collar — Soft Foam",      carrier:"Western Mutual Workers Comp",   icd:"S46.011A",p:"HIGH",  ok:false},
+  {i:43, n:"Donald Allen",       c:"WC-2026-00043", e:"CPAP Machine",                     carrier:"Pacific Coast Workers Comp",    icd:"S39.001A",p:"MED",   ok:false},
+  {i:44, n:"Sandra Perez",       c:"WC-2026-00044", e:"Rollator Walker — 4-wheel",        carrier:"Bay Area Workers Comp",         icd:"S39.001A",p:"MED",   ok:false},
+  {i:45, n:"Amanda Roberts",     c:"WC-2026-00045", e:"Standard Wheelchair — Lightweight",carrier:"State Fund Insurance",          icd:"M23.611", p:"MED",   ok:false},
+  {i:46, n:"Paul Brown",         c:"WC-2026-00046", e:"Shoulder Immobilizer — Abduction", carrier:"LA County Workers Comp Fund",   icd:"M75.1",   p:"MED",   ok:false},
+  {i:47, n:"Donald Davis",       c:"WC-2026-00047", e:"Rollator Walker — 4-wheel",        carrier:"Coastal Insurance Group",       icd:"M75.1",   p:"MED",   ok:false},
+  {i:48, n:"Andrew Jones",       c:"WC-2026-00048", e:"Hospital Bed Semi-Electric",       carrier:"LA County Workers Comp Fund",   icd:"M25.511", p:"HIGH",  ok:false},
+  {i:49, n:"Paul Scott",         c:"WC-2026-00049", e:"Knee Immobilizer",                 carrier:"LA County Workers Comp Fund",   icd:"G54.2",   p:"LOW",   ok:true},
+  {i:50, n:"Christopher Harris", c:"WC-2026-00050", e:"Commode Chair — Raised Toilet",    carrier:"CalComp Insurance",             icd:"S52.501A",p:"MED",   ok:false},
+  {i:51, n:"Joshua Williams",    c:"WC-2026-00051", e:"Cervical Collar — Soft Foam",      carrier:"SoCal Comp Insurance",          icd:"M54.5",   p:"MED",   ok:false},
+  {i:52, n:"Michael Gonzalez",   c:"WC-2026-00052", e:"Arm Sling — Shoulder Immobilizer", carrier:"LA County Workers Comp Fund",   icd:"S93.401A",p:"LOW",   ok:true},
+  {i:53, n:"Amanda Carter",      c:"WC-2026-00053", e:"Power Wheelchair",                 carrier:"LA County Workers Comp Fund",   icd:"M79.621", p:"MED",   ok:false},
+  {i:54, n:"Andrew Carter",      c:"WC-2026-00054", e:"Commode Chair — Raised Toilet",    carrier:"LA County Workers Comp Fund",   icd:"M54.4",   p:"MED",   ok:false},
+  {i:55, n:"Donna Robinson",     c:"WC-2026-00055", e:"Shoulder Immobilizer — Abduction", carrier:"CalComp Insurance",             icd:"M25.511", p:"HIGH",  ok:false},
+  {i:56, n:"Christopher Nelson", c:"WC-2026-00056", e:"Standard Wheelchair — Lightweight",carrier:"Pacific Mutual Insurance",      icd:"S42.002A",p:"MED",   ok:false},
+  {i:57, n:"Maria Wilson",       c:"WC-2026-00057", e:"Forearm Crutches",                 carrier:"State Fund Insurance",          icd:"M65.311", p:"MED",   ok:false},
+  {i:58, n:"Brian Wright",       c:"WC-2026-00058", e:"Shoulder Immobilizer — Abduction", carrier:"SoCal Comp Insurance",          icd:"S39.001A",p:"MED",   ok:false},
+  {i:59, n:"Michelle Thomas",    c:"WC-2026-00059", e:"Commode Chair — Raised Toilet",    carrier:"LA County Workers Comp Fund",   icd:"S82.001A",p:"LOW",   ok:true},
+  {i:60, n:"Matthew Carter",     c:"WC-2026-00060", e:"Rollator Walker — 4-wheel",        carrier:"Bay Area Workers Comp",         icd:"M25.511", p:"HIGH",  ok:false},
+  {i:61, n:"Elizabeth Lewis",    c:"WC-2026-00061", e:"Power Wheelchair",                 carrier:"LA County Workers Comp Fund",   icd:"S82.001A",p:"MED",   ok:false},
+  {i:62, n:"Sarah Martin",       c:"WC-2026-00062", e:"Power Wheelchair",                 carrier:"CalComp Insurance",             icd:"S83.006A",p:"HIGH",  ok:false},
+  {i:63, n:"Maria Ramirez",      c:"WC-2026-00063", e:"Cervical Collar — Soft Foam",      carrier:"Western Mutual Workers Comp",   icd:"M47.816", p:"MED",   ok:false},
+  {i:64, n:"James Martinez",     c:"WC-2026-00064", e:"Hospital Bed Semi-Electric",       carrier:"Central Valley Insurance",      icd:"M65.311", p:"LOW",   ok:true},
+  {i:65, n:"Lisa Nguyen",        c:"WC-2026-00065", e:"Rollator Walker — 4-wheel",        carrier:"SoCal Comp Insurance",          icd:"M25.511", p:"MED",   ok:false},
+  {i:66, n:"Andrew Young",       c:"WC-2026-00066", e:"Standard Wheelchair — Lightweight",carrier:"SoCal Comp Insurance",          icd:"M54.5",   p:"MED",   ok:false},
+  {i:67, n:"David Walker",       c:"WC-2026-00067", e:"Hospital Bed Semi-Electric",       carrier:"Pacific Mutual Insurance",      icd:"S42.002A",p:"MED",   ok:false},
+  {i:68, n:"Emily Lee",          c:"WC-2026-00068", e:"Cervical Collar — Soft Foam",      carrier:"CalComp Insurance",             icd:"M25.511", p:"HIGH",  ok:false},
+  {i:69, n:"Andrew Gonzalez",    c:"WC-2026-00069", e:"Standard Wheelchair — Lightweight",carrier:"Central Valley Insurance",      icd:"M79.621", p:"MED",   ok:false},
+  {i:70, n:"Carlos Miller",      c:"WC-2026-00070", e:"TENS Unit — Dual Channel",         carrier:"CalComp Insurance",             icd:"M54.4",   p:"MED",   ok:false},
+  {i:71, n:"Kimberly Nelson",    c:"WC-2026-00071", e:"Power Wheelchair",                 carrier:"SoCal Comp Insurance",          icd:"M79.621", p:"MED",   ok:false},
+  {i:72, n:"Anthony King",       c:"WC-2026-00072", e:"Ankle-Foot Orthosis (AFO)",        carrier:"State Fund Insurance",          icd:"S39.001A",p:"MED",   ok:false},
+  {i:73, n:"Joseph Nelson",      c:"WC-2026-00073", e:"Shoulder Immobilizer — Abduction", carrier:"Pacific Coast Workers Comp",    icd:"S93.401A",p:"MED",   ok:false},
+  {i:74, n:"Robert Martin",      c:"WC-2026-00074", e:"Forearm Crutches",                 carrier:"LA County Workers Comp Fund",   icd:"S39.001A",p:"HIGH",  ok:false},
+  {i:75, n:"Amanda Scott",       c:"WC-2026-00075", e:"Commode Chair — Raised Toilet",    carrier:"Bay Area Workers Comp",         icd:"M23.611", p:"MED",   ok:false},
+];
+
+const grid = document.getElementById('grid');
+referrals.forEach(r => {
+  const padded = String(r.i).padStart(4,'0');
+  const pClass = r.p === 'HIGH' ? 'b-high' : r.p === 'MED' ? 'b-med' : 'b-low';
+  const sClass = r.ok ? 'b-routed' : 'b-outreach';
+  const sText  = r.ok ? 'ROUTED' : 'OUTREACH';
+  const card   = document.createElement('a');
+  card.className = 'packet';
+  card.href = 'sample-pdfs/referral-' + padded + '.pdf';
+  card.target = '_blank';
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="packet-num">PACKET #${padded}</div>
+      <div class="icd">${r.icd}</div>
+    </div>
+    <div class="packet-name">${r.n}</div>
+    <div class="packet-claim">${r.c}</div>
+    <div class="packet-item">${r.e}</div>
+    <div class="packet-carrier">${r.carrier}</div>
+    <div class="pages-tag">3 pages · Intake + Rx + Clinical</div>
+    <div class="packet-footer">
+      <span class="badge ${pClass}">${r.p}</span>
+      <span class="badge ${sClass}">${sText}</span>
+      <span class="open-link">View PDF →</span>
+    </div>`;
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>

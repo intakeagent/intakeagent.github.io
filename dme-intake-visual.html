@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intake Agent — Value Proposition</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#0a0f1e;color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 20px}
+
+.card{width:100%;max-width:1060px;background:linear-gradient(145deg,#0f1c35,#111827);border:1px solid rgba(255,255,255,.08);border-radius:24px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.6)}
+
+/* ── HEADER ── */
+.hero{background:linear-gradient(135deg,#0f2744 0%,#1a3a6b 50%,#0f2744 100%);padding:48px 52px 44px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(37,99,235,.3) 0%,transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-40px;left:20%;width:200px;height:200px;background:radial-gradient(circle,rgba(16,185,129,.15) 0%,transparent 70%);pointer-events:none}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(37,99,235,.25);border:1px solid rgba(37,99,235,.5);color:#93c5fd;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px}
+.hero-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.hero-title{font-size:42px;font-weight:900;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px}
+.hero-title span{background:linear-gradient(90deg,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.65);max-width:580px;line-height:1.6;font-weight:400}
+.hero-badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.hbadge{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:rgba(255,255,255,.8);display:flex;align-items:center;gap:6px}
+.hbadge-icon{font-size:14px}
+
+/* ── METRICS ── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid rgba(255,255,255,.07)}
+.metric{padding:28px 30px;border-right:1px solid rgba(255,255,255,.07);text-align:center;position:relative}
+.metric:last-child{border-right:none}
+.metric-num{font-size:36px;font-weight:900;letter-spacing:-.02em;line-height:1}
+.metric-num.blue{color:#60a5fa}
+.metric-num.green{color:#34d399}
+.metric-num.purple{color:#a78bfa}
+.metric-num.amber{color:#fbbf24}
+.metric-label{font-size:11px;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-top:6px}
+.metric-sub{font-size:11px;color:rgba(255,255,255,.3);margin-top:3px}
+
+/* ── PIPELINE ── */
+.pipeline-section{padding:36px 52px 32px;border-bottom:1px solid rgba(255,255,255,.07)}
+.section-label{font-size:10px;font-weight:800;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px}
+.pipeline{display:flex;align-items:stretch;gap:0;position:relative}
+.pipe-step{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 14px;position:relative;display:flex;flex-direction:column;gap:6px}
+.pipe-step.highlight{background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(16,185,129,.1));border-color:rgba(37,99,235,.35)}
+.pipe-arrow{display:flex;align-items:center;padding:0 6px;color:rgba(255,255,255,.2);font-size:16px;flex-shrink:0;align-self:center;margin-top:-8px}
+.pipe-num{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.08);font-size:10px;font-weight:800;color:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;margin-bottom:2px}
+.pipe-step.highlight .pipe-num{background:rgba(37,99,235,.4);color:#93c5fd}
+.pipe-icon{font-size:18px;margin-bottom:2px}
+.pipe-title{font-size:12px;font-weight:700;color:white;line-height:1.2}
+.pipe-sub{font-size:10px;color:rgba(255,255,255,.4);line-height:1.3}
+.pipe-tag{display:inline-block;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;width:fit-content}
+.pipe-tag.blue{background:rgba(96,165,250,.12);border-color:rgba(96,165,250,.3);color:#93c5fd}
+.pipe-tag.amber{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3);color:#fcd34d}
+
+/* ── FEATURES ── */
+.features-section{padding:32px 52px 36px;border-bottom:1px solid rgba(255,255,255,.07)}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.feat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:20px 20px 18px;transition:border-color .2s}
+.feat:hover{border-color:rgba(255,255,255,.15)}
+.feat-icon{font-size:22px;margin-bottom:10px}
+.feat-title{font-size:13px;font-weight:700;color:white;margin-bottom:5px}
+.feat-body{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5}
+.feat-pill{display:inline-flex;align-items:center;gap:4px;margin-top:10px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;letter-spacing:.03em}
+.feat-pill.green{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.feat-pill.blue{background:rgba(96,165,250,.12);color:#93c5fd;border:1px solid rgba(96,165,250,.2)}
+.feat-pill.purple{background:rgba(167,139,250,.12);color:#c4b5fd;border:1px solid rgba(167,139,250,.2)}
+.feat-pill.amber{background:rgba(251,191,36,.1);color:#fcd34d;border:1px solid rgba(251,191,36,.2)}
+
+/* ── COMPARISON ── */
+.compare-section{padding:32px 52px 36px;border-bottom:1px solid rgba(255,255,255,.07)}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.compare-col{border-radius:14px;padding:22px 24px}
+.compare-col.before{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15)}
+.compare-col.after{background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2)}
+.compare-head{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+.compare-col.before .compare-head{color:#f87171}
+.compare-col.after .compare-head{color:#4ade80}
+.compare-item{display:flex;align-items:flex-start;gap:9px;margin-bottom:10px;font-size:12px;line-height:1.45}
+.compare-item:last-child{margin-bottom:0}
+.ci-icon{flex-shrink:0;margin-top:1px;font-size:13px}
+.ci-text{color:rgba(255,255,255,.6)}
+.compare-col.after .ci-text{color:rgba(255,255,255,.75)}
+
+/* ── FOOTER ── */
+.footer{padding:22px 52px;display:flex;align-items:center;justify-content:space-between}
+.footer-logo{display:flex;align-items:center;gap:10px}
+.footer-icon{width:32px;height:32px;background:#2563eb;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.footer-name{font-size:13px;font-weight:800;color:white}
+.footer-tag{font-size:11px;color:rgba(255,255,255,.35)}
+.footer-cta{background:linear-gradient(90deg,#2563eb,#1d4ed8);border:none;color:white;font-size:13px;font-weight:700;padding:10px 24px;border-radius:10px;cursor:pointer;letter-spacing:.01em}
+.footer-url{font-size:11px;color:rgba(255,255,255,.35);margin-top:4px;text-align:right}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- HERO -->
+  <div class="hero">
+    <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:rgba(255,255,255,.75);text-decoration:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:5px 12px;border-radius:8px;margin-bottom:16px">⌂ Home</a>
+    <div class="hero-tag"><span class="hero-dot"></span> Agentic AI · Workers' Comp Operations</div>
+    <div class="hero-title">Making Intake &amp; Referral Management<br>an <span>Advantage</span> — Delivering Experience,<br>Speed &amp; Agility</div>
+    <div class="hero-sub">The Intake Agent handles the full referral loop: extracts fields from fax & voice, detects gaps, outreaches via email and AI phone call, and delivers autonomous, digital, clean route-ready episode records — with human in the loop.</div>
+    <div class="hero-badges">
+      <div class="hbadge"><span class="hbadge-icon">📠</span> Fax Intake</div>
+      <div class="hbadge"><span class="hbadge-icon">🎙</span> Voice Intake · 24/7</div>
+      <div class="hbadge"><span class="hbadge-icon">🤖</span> Agentic Gap Resolution</div>
+      <div class="hbadge"><span class="hbadge-icon">📋</span> ICD-10 &amp; HCPCS Validation</div>
+      <div class="hbadge"><span class="hbadge-icon">✅</span> Route-State Output</div>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-num blue">~80%</div>
+      <div class="metric-label">Intake Automated</div>
+      <div class="metric-sub">vs. manual processing</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num green">&lt; 2 min</div>
+      <div class="metric-label">Time to Route</div>
+      <div class="metric-sub">complete referrals</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num purple">24 / 24</div>
+      <div class="metric-label">Fields Validated</div>
+      <div class="metric-sub">per episode record</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num amber">24 / 7</div>
+      <div class="metric-label">AI Intake Line Live</div>
+      <div class="metric-sub">(201) 897-3854</div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="pipeline-section">
+    <div class="section-label">How It Works — 7-Step Agentic Pipeline</div>
+    <div class="pipeline">
+
+      <div class="pipe-step">
+        <div class="pipe-icon">📠</div>
+        <div class="pipe-title">Channel Intake</div>
+        <div class="pipe-sub">Fax package or live voice call received</div>
+        <div class="pipe-tag blue">Fax · Voice</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+
+      <div class="pipe-step">
+        <div class="pipe-icon">🔍</div>
+        <div class="pipe-title">Field Extraction</div>
+        <div class="pipe-sub">AI reads all docs, maps to 9-section record</div>
+        <div class="pipe-tag blue">LLM Parse</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+
+      <div class="pipe-step highlight">
+        <div class="pipe-icon">⚙️</div>
+        <div class="pipe-title">Normalization</div>
+        <div class="pipe-sub">Dates, phones, HCPCS standardized to spec</div>
+        <div class="pipe-tag">Auto-fix</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+
+      <div class="pipe-step highlight">
+        <div class="pipe-icon">🧠</div>
+        <div class="pipe-title">Intelligence</div>
+        <div class="pipe-sub">ICD-10, auth rules, risk score, urgency</div>
+        <div class="pipe-tag">AI Validated</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+
+      <div class="pipe-step">
+        <div class="pipe-icon">📋</div>
+        <div class="pipe-title">Gap Detection</div>
+        <div class="pipe-sub">24-field completeness check, gap list built</div>
+        <div class="pipe-tag amber">Gaps Flagged</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+
+      <div class="pipe-step">
+        <div class="pipe-icon">📞</div>
+        <div class="pipe-title">Auto Outreach</div>
+        <div class="pipe-sub">Email → AI voice call if no response in 24h</div>
+        <div class="pipe-tag amber">Resolved</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+
+      <div class="pipe-step" style="background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(16,185,129,.08));border-color:rgba(34,197,94,.3)">
+        <div class="pipe-icon">✅</div>
+        <div class="pipe-title">Route Output</div>
+        <div class="pipe-sub">Complete episode locked &amp; dispatched</div>
+        <div class="pipe-tag">ROUTED</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features-section">
+    <div class="section-label">Key Capabilities</div>
+    <div class="features-grid">
+
+      <div class="feat">
+        <div class="feat-icon">🎙</div>
+        <div class="feat-title">Live AI Voice Intake Line</div>
+        <div class="feat-body">Case managers call a real number — an AI coordinator guides them through all 9 referral sections and captures every field conversationally.</div>
+        <div class="feat-pill green">✓ 24/7 Available</div>
+      </div>
+
+      <div class="feat">
+        <div class="feat-icon">🔁</div>
+        <div class="feat-title">Autonomous Gap Resolution</div>
+        <div class="feat-body">When fields are missing, the agent emails the case manager, waits 24 hours, then places an outbound AI call — with human in the loop at every key decision.</div>
+        <div class="feat-pill amber">✓ Self-Healing Loop</div>
+      </div>
+
+      <div class="feat">
+        <div class="feat-icon">🧠</div>
+        <div class="feat-title">Clinical Intelligence Layer</div>
+        <div class="feat-body">Validates ICD-10 codes, checks HCPCS-to-diagnosis match, identifies auth requirements, and scores referrals by medical risk and urgency.</div>
+        <div class="feat-pill blue">✓ Rules Engine</div>
+      </div>
+
+      <div class="feat">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">Structured Episode Record</div>
+        <div class="feat-body">Every referral — regardless of source — is normalized into a 24-field, 9-section episode record ready for downstream fulfillment systems.</div>
+        <div class="feat-pill green">✓ Fully Normalized</div>
+      </div>
+
+      <div class="feat">
+        <div class="feat-icon">📠</div>
+        <div class="feat-title">Multi-Channel Intake</div>
+        <div class="feat-body">Handles inbound fax packages (multi-doc) and live voice calls on the same pipeline. Both channels produce identical, validated output records.</div>
+        <div class="feat-pill blue">✓ Fax + Voice</div>
+      </div>
+
+      <div class="feat">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Priority Queue + Routing</div>
+        <div class="feat-body">Risk scores, urgency flags, and carrier auth rules determine priority. High-risk or surgical cases surface immediately for coordinator review.</div>
+        <div class="feat-pill purple">✓ Smart Triage</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BEFORE / AFTER -->
+  <div class="compare-section">
+    <div class="section-label">Before &amp; After</div>
+    <div class="compare-grid">
+
+      <div class="compare-col before">
+        <div class="compare-head">✗ Manual Intake Today</div>
+        <div class="compare-item"><span class="ci-icon">⏱</span><span class="ci-text">15–30 min per referral — staff reads fax, types fields into system</span></div>
+        <div class="compare-item"><span class="ci-icon">☎️</span><span class="ci-text">Phone tag with case managers for missing auth refs and appointment windows</span></div>
+        <div class="compare-item"><span class="ci-icon">❌</span><span class="ci-text">Incomplete referrals sit in queue for days, delaying equipment delivery</span></div>
+        <div class="compare-item"><span class="ci-icon">🕐</span><span class="ci-text">After-hours and weekend faxes wait until Monday morning</span></div>
+        <div class="compare-item"><span class="ci-icon">📋</span><span class="ci-text">No validation — wrong HCPCS codes and missing auth pass through untouched</span></div>
+      </div>
+
+      <div class="compare-col after">
+        <div class="compare-head">✓ With Intake Agent</div>
+        <div class="compare-item"><span class="ci-icon">⚡</span><span class="ci-text">Fax ingested and fields extracted in under 60 seconds, automatically</span></div>
+        <div class="compare-item"><span class="ci-icon">🤖</span><span class="ci-text">AI agent emails and calls case manager autonomously — no staff involvement</span></div>
+        <div class="compare-item"><span class="ci-icon">✅</span><span class="ci-text">Gap resolution completes within 24–48 hours on every referral</span></div>
+        <div class="compare-item"><span class="ci-icon">🌙</span><span class="ci-text">24/7 voice intake — case managers can call at any hour</span></div>
+        <div class="compare-item"><span class="ci-icon">🧠</span><span class="ci-text">Every record validated against ICD-10, HCPCS, and carrier auth rules before routing</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-logo">
+      <div class="footer-icon">⚕</div>
+      <div>
+        <div class="footer-name">Intake Agent</div>
+        <div class="footer-tag">Agentic AI · Workers' Compensation · v2.0</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <button class="footer-cta" onclick="window.open('https://effulgent-sunflower-8b5b55.netlify.app','_blank')">▶ View Live Demo</button>
+      <div class="footer-url">effulgent-sunflower-8b5b55.netlify.app</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

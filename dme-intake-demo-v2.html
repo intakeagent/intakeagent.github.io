@@ -1,0 +1,2768 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intake Agent — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#2563eb;--blue-l:#eff6ff;--blue-m:#bfdbfe;
+  --green:#16a34a;--green-l:#f0fdf4;--green-m:#bbf7d0;
+  --red:#dc2626;--red-l:#fef2f2;--red-m:#fecaca;
+  --yellow:#d97706;--yellow-l:#fffbeb;--yellow-m:#fde68a;
+  --purple:#7c3aed;--purple-l:#f5f3ff;--purple-m:#ddd6fe;
+  --gray:#6b7280;--gray-l:#f9fafb;--gray-m:#e5e7eb;
+  --dark:#111827;--radius:10px;
+  --shadow:0 1px 3px rgba(0,0,0,.1);
+  --shadow-md:0 4px 12px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f1f5f9;color:var(--dark);min-height:100vh}
+
+/* Header */
+header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;color:white;font-weight:800;font-size:15px}
+.logo-icon{width:30px;height:30px;background:#2563eb;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.header-tag{font-size:11px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);padding:2px 9px;border-radius:20px;font-weight:600}
+
+@keyframes rowFadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.queue-row{display:none}
+.queue-row.visible{display:table-row;animation:rowFadeIn .35s ease forwards}
+/* Auto-play bar */
+.ap-bar{background:#0f2744;border-bottom:1px solid rgba(255,255,255,.1);padding:9px 24px;display:none;align-items:center;gap:14px}
+.ap-bar.visible{display:flex}
+.ap-tag{font-size:10px;font-weight:800;color:#22c55e;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.ap-track{flex:1;height:3px;background:rgba(255,255,255,.15);border-radius:2px;min-width:80px}
+.ap-fill{height:100%;background:#22c55e;border-radius:2px;transition:width 1s ease}
+.ap-label{font-size:12px;font-weight:700;color:white;min-width:200px}
+.ap-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:white;font-size:11px;font-weight:700;padding:4px 12px;border-radius:6px;cursor:pointer;transition:background .15s;white-space:nowrap}
+.ap-btn:hover{background:rgba(255,255,255,.22)}
+.ap-btn-green{background:#15803d;border-color:#16a34a;color:white;font-size:12px;font-weight:800;padding:6px 18px;border-radius:20px;cursor:pointer;border:none;transition:background .15s}
+.ap-btn-green:hover{background:#166534}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 56px)}
+
+/* Sidebar */
+.sidebar{background:white;border-right:1px solid var(--gray-m);padding:20px 14px;display:flex;flex-direction:column;gap:4px}
+.sidebar-label{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;padding:0 8px;margin:12px 0 6px}
+.sidebar-label:first-child{margin-top:0}
+.step{display:flex;align-items:flex-start;gap:10px;padding:9px 8px;border-radius:8px;transition:background .15s}
+.step.active{background:var(--blue-l)}
+.step-num{width:22px;height:22px;border-radius:50%;border:2px solid var(--gray-m);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--gray);flex-shrink:0;margin-top:1px;transition:all .2s}
+.step.active .step-num{border-color:var(--blue);background:var(--blue);color:white}
+.step.done .step-num{border-color:var(--green);background:var(--green);color:white;font-size:11px}
+.step-title{font-size:12px;font-weight:600;color:var(--dark)}
+.step.active .step-title{color:var(--blue)}
+.step.done .step-title{color:var(--green)}
+.step-sub{font-size:11px;color:var(--gray);margin-top:1px}
+.divider{height:1px;background:var(--gray-m);margin:8px 0}
+.ep-card{background:var(--gray-l);border-radius:8px;padding:10px 12px}
+.ep-label{font-size:10px;color:var(--gray);font-weight:700;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em}
+.ep-val{font-size:12px;font-weight:700;margin-bottom:6px}
+.status-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
+.status-pill.incomplete{background:var(--yellow-m);color:var(--yellow)}
+.status-pill.awaiting-email{background:#dbeafe;color:#1d4ed8}
+.status-pill.awaiting-call{background:#fce7f3;color:#be185d}
+.status-pill.routed{background:var(--purple-m);color:var(--purple)}
+.status-pill.escalated{background:var(--red-m);color:var(--red)}
+.status-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.log-box{flex:1;overflow-y:auto;padding:4px 0;max-height:160px}
+.log-line{font-size:10px;color:var(--gray);font-family:monospace;padding:2px 0;line-height:1.4}
+.log-line .ts{color:var(--blue);margin-right:6px}
+
+/* Main */
+.main{padding:24px 28px;overflow-y:auto}
+.prog-track{height:3px;background:var(--gray-m);border-radius:2px;margin-bottom:22px}
+.prog-fill{height:100%;border-radius:2px;background:var(--blue);transition:width .4s ease}
+
+.section{display:none}
+.section.active{display:block}
+.page-title{font-size:20px;font-weight:800;margin-bottom:3px}
+.page-sub{font-size:13px;color:var(--gray);margin-bottom:20px}
+
+/* Cards */
+.card{background:white;border-radius:var(--radius);border:1px solid var(--gray-m);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card-title{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+
+/* Channel cards */
+.channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.channel-card{background:white;border:2px solid var(--gray-m);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s;text-align:center}
+.channel-card:hover{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
+.channel-card.selected{border-color:var(--blue);background:var(--blue-l);box-shadow:0 0 0 3px var(--blue-m)}
+.ch-icon{font-size:32px;margin-bottom:10px}
+.ch-title{font-size:14px;font-weight:800;margin-bottom:4px}
+.ch-sub{font-size:12px;color:var(--gray)}
+
+/* Document list */
+.doc-list{display:flex;flex-direction:column;gap:6px}
+.doc-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;border:1px solid var(--gray-m);background:white;font-size:12px;transition:all .15s}
+.doc-item:hover{border-color:var(--blue);background:var(--blue-l)}
+.doc-item .doc-icon{font-size:18px;flex-shrink:0}
+.doc-item .doc-name{flex:1;font-weight:600}
+.doc-item .doc-type-tag{font-size:10px;color:var(--gray);background:var(--gray-m);padding:2px 7px;border-radius:10px}
+.doc-item .doc-status{font-size:10px;font-weight:700}
+.doc-item.required .doc-status{color:var(--red)}
+.doc-item.received .doc-status{color:var(--green)}
+.doc-item.optional .doc-status{color:var(--gray)}
+.doc-add-row{display:flex;gap:8px;margin-top:8px}
+.doc-input{flex:1;padding:7px 10px;border-radius:7px;border:1.5px solid var(--gray-m);font-size:12px;font-family:inherit;outline:none}
+.doc-input:focus{border-color:var(--blue)}
+.doc-select{padding:7px 10px;border-radius:7px;border:1.5px solid var(--gray-m);font-size:12px;font-family:inherit;outline:none;background:white}
+
+/* Field grid */
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field{background:var(--gray-l);border-radius:7px;padding:9px 11px;border-left:3px solid var(--gray-m)}
+.field.present{border-left-color:var(--green)}
+.field.missing{border-left-color:var(--red);background:var(--red-l)}
+.f-label{font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
+.f-val{font-size:12px;font-weight:600}
+.field.missing .f-val{color:var(--red);font-style:italic}
+.f-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;display:inline-block;margin-top:3px;text-transform:uppercase}
+.fb-present{background:var(--green-m);color:var(--green)}
+.fb-missing{background:var(--red-m);color:var(--red)}
+.fb-src{background:var(--blue-m);color:var(--blue)}
+
+/* Normalized record */
+.norm-section{margin-bottom:14px}
+.norm-section-title{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--gray-m)}
+.norm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.norm-field{display:flex;flex-direction:column;gap:1px}
+.norm-field .nl{font-size:10px;color:var(--gray)}
+.norm-field .nv{font-size:12px;font-weight:600}
+.norm-field .nv.null{color:var(--red);font-style:italic}
+
+/* Gap list */
+.gap-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.gap-list li{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:7px;background:var(--red-l);border:1px solid var(--red-m);font-size:12px;font-weight:600;color:var(--red)}
+
+/* Email box */
+.email-box{background:var(--gray-l);border:1px solid var(--gray-m);border-radius:var(--radius);overflow:hidden}
+.email-hdr{background:white;border-bottom:1px solid var(--gray-m);padding:10px 14px;display:grid;gap:3px}
+.email-row{display:flex;gap:7px;font-size:11px}
+.email-row .ek{color:var(--gray);font-weight:700;width:44px;flex-shrink:0}
+.email-body{padding:14px;font-size:12px;line-height:1.7;white-space:pre-wrap}
+.hl{background:#fef9c3;padding:0 2px;border-radius:2px;font-weight:600}
+
+/* Voice call */
+.call-box{background:#0f172a;border-radius:var(--radius);padding:20px;color:white}
+.call-status-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.call-badge{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700}
+.call-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
+.call-timer{font-size:13px;font-family:monospace;color:#94a3b8}
+.transcript{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto}
+.t-line{display:flex;gap:10px;align-items:flex-start}
+.t-speaker{font-size:10px;font-weight:700;flex-shrink:0;margin-top:3px;width:40px}
+.t-speaker.agent{color:#60a5fa}
+.t-speaker.cm{color:#4ade80}
+.t-text{font-size:12px;line-height:1.5;color:#e2e8f0}
+.t-text .captured{background:rgba(250,204,21,.2);border-radius:3px;padding:0 2px;color:#fde68a;font-weight:600}
+
+/* Route card */
+.route-card{background:white;border-radius:var(--radius);border:2px solid var(--purple);padding:20px;box-shadow:0 0 0 4px var(--purple-l)}
+.route-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--gray-m)}
+.route-title{font-size:15px;font-weight:800}
+.route-ts{font-size:11px;color:var(--gray)}
+.route-section{margin-bottom:14px}
+.route-section-title{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+.route-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.route-field .rl{font-size:10px;color:var(--gray)}
+.route-field .rv{font-size:12px;font-weight:600}
+
+/* Buttons */
+.btn{padding:9px 18px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:#1d4ed8}
+.btn-green{background:var(--green);color:white}.btn-green:hover{background:#15803d}
+.btn-purple{background:var(--purple);color:white}.btn-purple:hover{background:#6d28d9}
+.btn-outline{background:white;color:var(--dark);border:1.5px solid var(--gray-m)}.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+.btn-red{background:var(--red);color:white}.btn-red:hover{background:#b91c1c}
+.btn-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+/* Alert */
+.alert{border-radius:8px;padding:10px 14px;font-size:12px;display:flex;gap:9px;align-items:flex-start;margin-bottom:12px}
+.alert-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.alert-blue{background:var(--blue-l);border:1px solid var(--blue-m);color:#1e40af}
+.alert-green{background:var(--green-l);border:1px solid var(--green-m);color:#166534}
+.alert-yellow{background:var(--yellow-l);border:1px solid var(--yellow-m);color:#92400e}
+.alert-red{background:var(--red-l);border:1px solid var(--red-m);color:#991b1b}
+
+/* Tab bar */
+.tab-bar{display:flex;border-bottom:1px solid var(--gray-m);margin-bottom:14px;gap:0}
+.tab{padding:8px 16px;font-size:12px;font-weight:600;color:var(--gray);border-bottom:2px solid transparent;cursor:pointer;transition:all .15s}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .25s ease both}
+
+/* Channel badge */
+.ch-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block}
+.ch-fax{background:#dbeafe;color:#1d4ed8}
+.ch-voice{background:#dcfce7;color:#15803d}
+.ch-email{background:#fef9c3;color:#92400e}
+/* Doc preview modal */
+.doc-modal{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1001;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.doc-modal.open{opacity:1;pointer-events:all}
+.doc-panel{background:#fff;border-radius:14px;width:100%;max-width:680px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.18);transform:translateY(16px);transition:transform .2s}
+.doc-modal.open .doc-panel{transform:translateY(0)}
+.doc-ph{padding:16px 22px 0;border-bottom:1px solid var(--gray-m);flex-shrink:0}
+.doc-ph-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.doc-tabs{display:flex;gap:0}
+.doc-tab{padding:8px 18px;font-size:12px;font-weight:700;color:var(--gray);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.doc-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.doc-tab-body{flex:1;overflow-y:auto;padding:18px 22px}
+.doc-tab-pane{display:none}
+.doc-tab-pane.active{display:block}
+/* Raw document styles */
+.raw-doc{background:#fafaf8;border:1px solid #e2e0d8;border-radius:8px;padding:20px 24px;font-size:11.5px;line-height:1.7;font-family:'Courier New',monospace;color:#2d2d2d}
+.raw-doc .rd-header{text-align:center;border-bottom:2px solid #2d2d2d;padding-bottom:10px;margin-bottom:14px}
+.raw-doc .rd-org{font-size:13px;font-weight:800;letter-spacing:.06em}
+.raw-doc .rd-title{font-size:11px;letter-spacing:.04em;color:#555}
+.raw-doc .rd-section{margin-bottom:12px}
+.raw-doc .rd-sec-title{font-weight:800;text-transform:uppercase;font-size:10px;letter-spacing:.08em;border-bottom:1px solid #ccc;margin-bottom:6px;color:#444}
+.raw-doc .rd-row{display:flex;gap:6px;margin-bottom:3px}
+.raw-doc .rd-label{width:160px;flex-shrink:0;color:#666}
+.raw-doc .rd-val{color:#111;font-weight:600}
+.raw-doc .rd-blank{color:#bbb;font-style:italic;border-bottom:1px solid #bbb;flex:1;min-width:120px}
+.rd-handwritten{font-family:'Caveat',cursive;font-size:14px;font-weight:600;color:#1a3a6b;letter-spacing:.02em}
+/* Checklist styles */
+.cl-section{margin-bottom:16px}
+.cl-title{font-size:10px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)}
+.cl-row{display:flex;align-items:flex-start;gap:10px;padding:5px 0;font-size:12px;border-bottom:1px solid #f8fafc}
+.cl-check{width:16px;height:16px;border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px}
+.cl-check.ok{background:#dcfce7;color:#16a34a}
+.cl-check.miss{background:#fee2e2;color:#dc2626}
+.cl-field{width:150px;flex-shrink:0;color:var(--gray);font-weight:600}
+.cl-val{color:var(--dark);flex:1}
+.cl-val.missing{color:var(--red);font-style:italic}
+/* Fax intake modal */
+.fax-modal{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.fax-modal.open{opacity:1;pointer-events:all}
+.fax-panel{background:#fff;border-radius:14px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(16px);transition:transform .2s}
+.fax-modal.open .fax-panel{transform:translateY(0)}
+.fax-hdr{padding:18px 24px 14px;border-bottom:1px solid var(--gray-m);display:flex;align-items:center;justify-content:space-between}
+.fax-hdr-title{font-size:15px;font-weight:800;color:var(--dark)}
+.fax-body{padding:20px 24px}
+.upload-zones{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.upload-zone{border:2px dashed var(--gray-m);border-radius:10px;padding:18px 12px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.upload-zone:hover{border-color:var(--blue);background:var(--blue-l)}
+.upload-zone.filled{border:2px solid var(--green);background:var(--green-l);border-style:solid}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone.filled input[type=file]{pointer-events:none}
+.uz-icon{font-size:24px;margin-bottom:8px}
+.uz-label{font-size:11px;font-weight:700;color:var(--dark);margin-bottom:4px}
+.uz-sub{font-size:10px;color:var(--gray)}
+.uz-file{font-size:10px;font-weight:700;color:var(--green);margin-top:6px;word-break:break-all;display:none}
+.upload-zone.filled .uz-file{display:block}
+.upload-zone.filled .uz-sub{display:none}
+.fax-log{background:#0f172a;border-radius:8px;padding:14px 16px;font-family:monospace;font-size:11px;color:#94a3b8;max-height:240px;overflow-y:auto;line-height:1.8;margin-bottom:14px}
+.fax-log .fl-ok{color:#4ade80}.fax-log .fl-warn{color:#fbbf24}.fax-log .fl-red{color:#f87171}.fax-log .fl-blue{color:#60a5fa}
+.gap-card{background:var(--red-l);border:1px solid var(--red-m);border-radius:9px;padding:14px 16px;margin-bottom:14px}
+.gap-card-title{font-size:12px;font-weight:800;color:var(--red);margin-bottom:10px}
+.gap-items{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.gap-item{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--red)}
+.fax-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Episode view modal */
+.ep-modal{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.ep-modal.open{opacity:1;pointer-events:all}
+.ep-panel{background:#fff;border-radius:14px;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.18);transform:translateY(16px);transition:transform .2s}
+.ep-modal.open .ep-panel{transform:translateY(0)}
+.ep-header{padding:20px 24px 16px;border-bottom:1px solid var(--gray-m);display:flex;align-items:flex-start;gap:12px}
+.ep-hname{font-size:17px;font-weight:800;color:var(--dark);flex:1}
+.ep-hclaim{font-size:11px;color:var(--gray);margin-top:3px}
+.ep-body{padding:20px 24px}
+.ep-section{margin-bottom:18px}
+.ep-section-title{font-size:10px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)}
+.ep-row{display:flex;gap:8px;margin-bottom:5px;font-size:12px;line-height:1.5}
+.ep-label{width:136px;flex-shrink:0;color:var(--gray);font-weight:600}
+.ep-value{color:var(--dark)}
+.ep-value.missing{color:var(--red);font-style:italic}
+.ep-footer{padding:14px 24px;border-top:1px solid var(--gray-m);display:flex;justify-content:flex-end}
+.ep-resolution{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;font-size:11.5px;color:#166534}
+.ep-resolution.pending{background:#eff6ff;border-color:#93c5fd;color:#1e40af}
+
+/* ── ESCALATION MODAL ── */
+.esc-modal{position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.esc-modal.open{opacity:1;pointer-events:all}
+.esc-panel{background:#fff;border-radius:16px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.3);transform:translateY(20px);transition:transform .25s}
+.esc-modal.open .esc-panel{transform:translateY(0)}
+.esc-header{background:linear-gradient(135deg,#fef3c7,#fde68a);border-bottom:2px solid #f59e0b;padding:20px 24px 16px}
+.esc-badge{display:inline-flex;align-items:center;gap:6px;background:#dc2626;color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.esc-title{font-size:17px;font-weight:900;color:#92400e;margin-bottom:4px}
+.esc-sub{font-size:12px;color:#b45309;line-height:1.5}
+.esc-routing{display:flex;align-items:center;gap:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:9px 13px;margin-top:12px;font-size:12px;font-weight:600;color:#b91c1c}
+.esc-body{padding:20px 24px}
+.esc-field{border:1.5px solid var(--gray-m);border-radius:10px;padding:14px 16px;margin-bottom:12px;transition:all .2s}
+.esc-field.approved{border-color:var(--green);background:var(--green-l)}
+.esc-field.overridden{border-color:var(--blue);background:var(--blue-l)}
+.esc-field-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.esc-field-name{font-size:13px;font-weight:800;color:var(--dark)}
+.esc-field-tag{font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.04em;margin-left:7px}
+.esc-conf{display:flex;align-items:center;gap:7px}
+.esc-conf-bar{width:64px;height:7px;background:var(--gray-m);border-radius:4px;overflow:hidden}
+.esc-conf-fill{height:100%;border-radius:4px}
+.esc-conf-fill.low{background:#ef4444}
+.esc-conf-fill.med{background:#f59e0b}
+.esc-conf-pct{font-size:12px;font-weight:800}
+.esc-conf-pct.low{color:#dc2626}
+.esc-conf-pct.med{color:#d97706}
+.esc-ai-val{font-size:12px;color:var(--gray);margin-bottom:10px;line-height:1.5}
+.esc-ai-val strong{color:var(--dark);font-size:13px}
+.esc-reason{font-size:11px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:5px 9px;margin-bottom:10px}
+.esc-input-row{display:flex;gap:8px;align-items:center}
+.esc-input{flex:1;padding:8px 11px;border-radius:7px;border:1.5px solid var(--gray-m);font-size:12px;font-family:inherit;outline:none;transition:border-color .15s}
+.esc-input:focus{border-color:var(--blue)}
+.esc-field.approved .esc-input-row{display:none}
+.esc-field.overridden .esc-input-row{display:none}
+.esc-resolved-label{font-size:12px;font-weight:700;display:none;align-items:center;gap:6px;margin-top:4px}
+.esc-field.approved .esc-resolved-label{display:flex;color:var(--green)}
+.esc-field.overridden .esc-resolved-label{display:flex;color:var(--blue)}
+.esc-footer{padding:16px 24px;border-top:1px solid var(--gray-m);display:flex;justify-content:space-between;align-items:center;background:#fafafa;border-radius:0 0 16px 16px}
+.esc-remaining{font-size:12px;font-weight:600;color:var(--gray)}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:16px">
+    <a href="index.html" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:rgba(255,255,255,.75);text-decoration:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:5px 12px;border-radius:8px;white-space:nowrap" title="Back to Hub">⌂ Home</a>
+    <a href="index.html" class="logo" style="text-decoration:none;color:inherit" title="Back to Home">
+      <div class="logo-icon">⚕</div>
+      Intake Agent
+      <span class="header-tag">AI-Powered · v2.0</span>
+    </a>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="font-size:12px;color:rgba(255,255,255,.6)">Workers' Comp · Intake Coordination</div>
+    <button class="ap-btn-green" id="header-autoplay-btn" onclick="startAutoPlay()">▶ Auto-Play Demo</button>
+  </div>
+</header>
+
+<!-- Auto-play control bar -->
+<div class="ap-bar" id="ap-bar">
+  <span class="ap-tag">▶ Auto Demo</span>
+  <div class="ap-track"><div class="ap-fill" id="ap-fill" style="width:0%"></div></div>
+  <span class="ap-label" id="ap-label">Starting…</span>
+  <button class="ap-btn" id="ap-voice-btn" onclick="toggleApVoice()" style="background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.4)">🔊 Voice On</button>
+  <button class="ap-btn" id="ap-pause-btn" onclick="toggleAutoPlayPause()">⏸ Pause</button>
+  <button class="ap-btn" onclick="resetAutoPlay()">↺ Reset</button>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-label">Pipeline</div>
+  <div class="step" id="step-1">
+    <div class="step-num">1</div>
+    <div>
+      <div class="step-title">Channel Intake</div>
+      <div class="step-sub">Fax, Voice, or Email</div>
+    </div>
+  </div>
+  <div class="step" id="step-2">
+    <div class="step-num">2</div>
+    <div>
+      <div class="step-title">Normalization</div>
+      <div class="step-sub">Standard Episode Record</div>
+    </div>
+  </div>
+  <div class="step" id="step-3">
+    <div class="step-num">3</div>
+    <div>
+      <div class="step-title">Intelligence Layer</div>
+      <div class="step-sub">Validate, score, fix codes</div>
+    </div>
+  </div>
+  <div class="step" id="step-4">
+    <div class="step-num">4</div>
+    <div>
+      <div class="step-title">Completeness Check</div>
+      <div class="step-sub">Detect gaps</div>
+    </div>
+  </div>
+  <div class="step" id="step-5">
+    <div class="step-num">5</div>
+    <div>
+      <div class="step-title">Digital Outreach</div>
+      <div class="step-sub">Email case manager</div>
+    </div>
+  </div>
+  <div class="step" id="step-6">
+    <div class="step-num">6</div>
+    <div>
+      <div class="step-title">Voice Outreach</div>
+      <div class="step-sub">Outbound AI call</div>
+    </div>
+  </div>
+  <div class="step" id="step-7">
+    <div class="step-num">7</div>
+    <div>
+      <div class="step-title">Route Output</div>
+      <div class="step-sub">Finalize &amp; dispatch</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sidebar-label">Episode</div>
+  <div class="ep-card">
+    <div class="ep-label">Episode ID</div><div class="ep-val" id="ep-id">—</div>
+    <div class="ep-label">Patient</div><div class="ep-val" id="ep-patient">—</div>
+    <div class="ep-label">Claim #</div><div class="ep-val" id="ep-claim">—</div>
+    <div class="ep-label">Channel</div><div id="ep-channel" style="margin-bottom:6px">—</div>
+    <div id="ep-status"></div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sidebar-label">Agent Log</div>
+  <div class="log-box" id="agent-log"></div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+<div class="prog-track"><div class="prog-fill" id="progress" style="width:0%"></div></div>
+
+<!-- ── SEC 0: Queue Dashboard ── -->
+<div class="section active" id="sec-0">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div>
+      <div class="page-title">Intake — Referral Queue</div>
+      <div class="page-sub" id="queue-sub">Waiting for referrals — intake agent is listening...</div>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 16px;text-align:center;min-width:180px">
+      <div style="font-size:10px;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">📞 Intake Line — LIVE</div>
+      <div style="font-size:18px;font-weight:800;color:#15803d;letter-spacing:.04em">(201) 897-3854</div>
+      <div style="font-size:10px;color:#166534;margin-top:2px">AI answers · 24/7</div>
+    </div>
+  </div>
+
+  <!-- Queue stats -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+    <div style="background:white;border-radius:9px;padding:14px;border:1px solid var(--gray-m);text-align:center">
+      <div style="font-size:24px;font-weight:900;color:var(--dark)" id="stat-total">0</div>
+      <div style="font-size:11px;color:var(--gray);font-weight:600;margin-top:2px">TOTAL REFERRALS</div>
+    </div>
+    <div style="background:var(--purple-l);border-radius:9px;padding:14px;border:1px solid var(--purple-m);text-align:center">
+      <div style="font-size:24px;font-weight:900;color:var(--purple)" id="stat-routed">0</div>
+      <div style="font-size:11px;color:var(--purple);font-weight:600;margin-top:2px">ROUTED</div>
+    </div>
+    <div style="background:var(--yellow-l);border-radius:9px;padding:14px;border:1px solid var(--yellow-m);text-align:center">
+      <div style="font-size:24px;font-weight:900;color:var(--yellow)" id="stat-progress">0</div>
+      <div style="font-size:11px;color:var(--yellow);font-weight:600;margin-top:2px">IN PROGRESS</div>
+    </div>
+    <div style="background:var(--red-l);border-radius:9px;padding:14px;border:1px solid var(--red-m);text-align:center">
+      <div style="font-size:24px;font-weight:900;color:var(--red)" id="stat-high">0</div>
+      <div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px">HIGH PRIORITY</div>
+    </div>
+  </div>
+
+  <!-- Queue table -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--gray-m);display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="card-title" style="margin:0">📋 Referral Inbox</div>
+        <div id="live-poll-badge" style="display:none;align-items:center;gap:5px;background:#f0fdf4;border:1px solid #86efac;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;color:#15803d">
+          <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;animation:pulse 1.2s infinite"></span> LIVE
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:11px;color:var(--gray)" id="queue-hint" style="display:none">Click any row to run pipeline</div>
+        <div style="font-size:10px;color:var(--gray)" id="last-poll-label"></div>
+        <button class="btn btn-outline" onclick="openFaxModal()" style="font-size:11px;padding:5px 14px">📠 New Fax</button>
+        <button class="btn btn-blue" id="queue-load-btn" onclick="loadQueue()" style="font-size:11px;padding:5px 14px">▶ Load Referral Queue</button>
+      </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="background:var(--gray-l);border-bottom:1px solid var(--gray-m)">
+          <th style="padding:9px 14px;text-align:left;font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Patient</th>
+          <th style="padding:9px 8px;text-align:left;font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Claim #</th>
+          <th style="padding:9px 8px;text-align:left;font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Equipment Item</th>
+          <th style="padding:9px 8px;text-align:center;font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Channel</th>
+          <th style="padding:9px 8px;text-align:center;font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Priority</th>
+          <th style="padding:9px 8px;text-align:center;font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Resolution</th>
+          <th style="padding:9px 8px;text-align:center;font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Status</th>
+          <th style="padding:9px 14px;text-align:center;font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="queue-empty-row">
+          <td colspan="8" style="padding:40px;text-align:center;color:var(--gray)">
+            <div style="font-size:24px;margin-bottom:10px">📭</div>
+            <div style="font-size:13px;font-weight:700;color:var(--gray);margin-bottom:4px">No referrals yet</div>
+            <div style="font-size:11px;color:var(--gray)">Intake agent is listening on (201) 897-3854 · 24/7</div>
+          </td>
+        </tr>
+        <!-- ROW 1 — HIGH priority, fax, voice resolution -->
+        <tr class="queue-row" style="border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="loadReferral('holloway')">
+          <td style="padding:11px 14px"><div style="font-weight:700">James Holloway</div><div style="font-size:10px;color:var(--gray)">DOB: 1978-03-14</div></td>
+          <td style="padding:11px 8px;color:var(--gray)">WC-2026-084431</td>
+          <td style="padding:11px 8px">Rollator Walker<div style="font-size:10px;color:var(--gray)">E0143</div></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-fax">fax</span></td>
+          <td style="padding:11px 8px;text-align:center"><span style="font-size:11px;font-weight:800;color:var(--red);background:var(--red-l);padding:2px 8px;border-radius:10px">HIGH 7</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-voice">voice call</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="status-pill awaiting-call"><span class="status-dot"></span>Awaiting Call Back</span></td>
+          <td style="padding:11px 14px;text-align:center"><button class="btn btn-blue" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();loadReferral('holloway')">▶ Demo</button></td>
+        </tr>
+        <!-- ROW 2 — HIGH, fax, voice resolution -->
+        <tr class="queue-row" style="border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="viewEpisode('mendez')">
+          <td style="padding:11px 14px"><div style="font-weight:700">Carlos Mendez</div><div style="font-size:10px;color:var(--gray)">DOB: 1979-09-05</div></td>
+          <td style="padding:11px 8px;color:var(--gray)">WC-2026-095678</td>
+          <td style="padding:11px 8px">Knee Brace<div style="font-size:10px;color:var(--gray)">L1820</div></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-fax">fax</span></td>
+          <td style="padding:11px 8px;text-align:center"><span style="font-size:11px;font-weight:800;color:var(--red);background:var(--red-l);padding:2px 8px;border-radius:10px">HIGH 8</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-voice">voice call</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="status-pill routed"><span class="status-dot"></span>Routed</span></td>
+          <td style="padding:11px 14px;text-align:center"><button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();viewEpisode('mendez')">View</button></td>
+        </tr>
+        <!-- ROW 3 — MEDIUM, fax, email resolution -->
+        <tr class="queue-row" style="border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="viewEpisode('rodriguez')">
+          <td style="padding:11px 14px"><div style="font-weight:700">Maria Rodriguez</div><div style="font-size:10px;color:var(--gray)">DOB: 1985-07-22</div></td>
+          <td style="padding:11px 8px;color:var(--gray)">WC-2026-091205</td>
+          <td style="padding:11px 8px">Power Wheelchair<div style="font-size:10px;color:var(--gray)">K0001</div></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-fax">fax</span></td>
+          <td style="padding:11px 8px;text-align:center"><span style="font-size:11px;font-weight:800;color:var(--yellow);background:var(--yellow-l);padding:2px 8px;border-radius:10px">MED 6</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-email">email</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="status-pill awaiting-email"><span class="status-dot"></span>Awaiting Email Reply</span></td>
+          <td style="padding:11px 14px;text-align:center"><button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();viewEpisode('rodriguez')">View</button></td>
+        </tr>
+        <!-- ROW 4 — MEDIUM, fax, email resolution -->
+        <tr class="queue-row" style="border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="viewEpisode('foster')">
+          <td style="padding:11px 14px"><div style="font-weight:700">Diane Foster</div><div style="font-size:10px;color:var(--gray)">DOB: 1963-02-17</div></td>
+          <td style="padding:11px 8px;color:var(--gray)">WC-2026-083101</td>
+          <td style="padding:11px 8px">Hospital Bed<div style="font-size:10px;color:var(--gray)">E0260</div></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-fax">fax</span></td>
+          <td style="padding:11px 8px;text-align:center"><span style="font-size:11px;font-weight:800;color:var(--yellow);background:var(--yellow-l);padding:2px 8px;border-radius:10px">MED 6</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-email">email</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="status-pill routed"><span class="status-dot"></span>Routed</span></td>
+          <td style="padding:11px 14px;text-align:center"><button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();viewEpisode('foster')">View</button></td>
+        </tr>
+        <!-- ROW 5 — MEDIUM, fax, email resolution -->
+        <tr class="queue-row" style="border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="viewEpisode('chen')">
+          <td style="padding:11px 14px"><div style="font-weight:700">Robert Chen</div><div style="font-size:10px;color:var(--gray)">DOB: 1971-11-03</div></td>
+          <td style="padding:11px 8px;color:var(--gray)">WC-2026-077834</td>
+          <td style="padding:11px 8px">CPAP Machine<div style="font-size:10px;color:var(--gray)">E0601</div></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-fax">fax</span></td>
+          <td style="padding:11px 8px;text-align:center"><span style="font-size:11px;font-weight:800;color:var(--yellow);background:var(--yellow-l);padding:2px 8px;border-radius:10px">MED 5</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-email">email</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="status-pill routed"><span class="status-dot"></span>Routed</span></td>
+          <td style="padding:11px 14px;text-align:center"><button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();viewEpisode('chen')">View</button></td>
+        </tr>
+        <!-- ROW 6 — voice, complete -->
+        <tr class="queue-row" style="border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="viewEpisode('kim')">
+          <td style="padding:11px 14px"><div style="font-weight:700">Sarah Kim</div><div style="font-size:10px;color:var(--gray)">DOB: 1990-04-12</div></td>
+          <td style="padding:11px 8px;color:var(--gray)">WC-2026-088944</td>
+          <td style="padding:11px 8px">Arm Sling<div style="font-size:10px;color:var(--gray)">A4570</div></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-voice">voice</span></td>
+          <td style="padding:11px 8px;text-align:center"><span style="font-size:11px;font-weight:800;color:var(--green);background:var(--green-l);padding:2px 8px;border-radius:10px">LOW 4</span></td>
+          <td style="padding:11px 8px;text-align:center"><span style="font-size:10px;color:var(--green);font-weight:700">Complete at intake</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="status-pill routed"><span class="status-dot"></span>Routed</span></td>
+          <td style="padding:11px 14px;text-align:center"><button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();viewEpisode('kim')">View</button></td>
+        </tr>
+        <!-- ROW 7 — voice, complete -->
+        <tr class="queue-row" style="cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="viewEpisode('williams')">
+          <td style="padding:11px 14px"><div style="font-weight:700">Marcus Williams</div><div style="font-size:10px;color:var(--gray)">DOB: 1968-12-29</div></td>
+          <td style="padding:11px 8px;color:var(--gray)">WC-2026-079312</td>
+          <td style="padding:11px 8px">Back Brace<div style="font-size:10px;color:var(--gray)">L0631</div></td>
+          <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-voice">voice</span></td>
+          <td style="padding:11px 8px;text-align:center"><span style="font-size:11px;font-weight:800;color:var(--green);background:var(--green-l);padding:2px 8px;border-radius:10px">LOW 3</span></td>
+          <td style="padding:11px 8px;text-align:center"><span style="font-size:10px;color:var(--green);font-weight:700">Complete at intake</span></td>
+          <td style="padding:11px 8px;text-align:center"><span class="status-pill routed"><span class="status-dot"></span>Routed</span></td>
+          <td style="padding:11px 14px;text-align:center"><button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();viewEpisode('williams')">View</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-blue" style="margin-top:4px">
+    <div class="alert-icon">ℹ️</div>
+    <div>Click <b>▶ Demo</b> on James Holloway to walk through the full intake pipeline. Click <b>View</b> on any referral to see its episode record and place an outbound call. Live inbound line: <b>(201) 897-3854</b>.</div>
+  </div>
+
+  <!-- Channel selector -->
+  <div class="card">
+    <div class="card-title">🔀 Select Intake Channel</div>
+    <div class="channel-grid">
+      <div class="channel-card" id="ch-fax" onclick="selectChannel('fax')">
+        <div class="ch-icon">📠</div>
+        <div class="ch-title">Fax / Document</div>
+        <div class="ch-sub">PDF, image scan, or text referral with attached clinical notes</div>
+      </div>
+      <div class="channel-card" id="ch-voice" onclick="selectChannel('voice')">
+        <div class="ch-icon">📞</div>
+        <div class="ch-title">Inbound Voice Call</div>
+        <div class="ch-sub">Case manager calls in — AI conducts live intake interview</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document / package list -->
+  <div class="card" id="doc-package-card">
+    <div class="card-title">📂 Referral Package — Document Checklist</div>
+    <div class="doc-list" id="doc-list">
+      <div class="doc-item received" data-id="0" style="cursor:pointer" onclick="openDocPreview(0)" title="Click to view">
+        <div class="doc-icon">📄</div>
+        <div class="doc-name">WC-2026-084431_ReferralForm.pdf</div>
+        <div class="doc-type-tag">Fax — Image PDF</div>
+        <div class="doc-status">✓ Received</div>
+        <div style="font-size:11px;color:var(--blue);margin-left:4px">View ›</div>
+      </div>
+      <div class="doc-item received" data-id="1" style="cursor:pointer" onclick="openDocPreview(1)" title="Click to view">
+        <div class="doc-icon">🩺</div>
+        <div class="doc-name">WC-2026-084431_ClinicalNotes.pdf</div>
+        <div class="doc-type-tag">Physician Notes</div>
+        <div class="doc-status">✓ Received</div>
+        <div style="font-size:11px;color:var(--blue);margin-left:4px">View ›</div>
+      </div>
+      <div class="doc-item received" data-id="2" style="cursor:pointer" onclick="openDocPreview(2)" title="Click to view">
+        <div class="doc-icon">🖼️</div>
+        <div class="doc-name">WC-2026-084431_RxPrescription.jpg</div>
+        <div class="doc-type-tag">Scanned Image</div>
+        <div class="doc-status">✓ Received</div>
+        <div style="font-size:11px;color:var(--blue);margin-left:4px">View ›</div>
+      </div>
+      <div class="doc-item required" data-id="3" style="cursor:pointer" onclick="openDocPreview(3)" title="Click to view">
+        <div class="doc-icon">📋</div>
+        <div class="doc-name">Authorization Document</div>
+        <div class="doc-type-tag">Auth / Insurance</div>
+        <div class="doc-status">⚠ Missing</div>
+        <div style="font-size:11px;color:var(--red);margin-left:4px">View ›</div>
+      </div>
+    </div>
+    <!-- Add document row -->
+    <div class="doc-add-row">
+      <input class="doc-input" id="new-doc-name" placeholder="Add document name (e.g. Prior Auth Letter)" />
+      <select class="doc-select" id="new-doc-type">
+        <option>Fax — Image PDF</option>
+        <option>Physician Notes</option>
+        <option>Authorization</option>
+        <option>Scanned Image</option>
+        <option>Clinical Notes</option>
+        <option>Other</option>
+      </select>
+      <select class="doc-select" id="new-doc-status">
+        <option value="received">✓ Received</option>
+        <option value="required">⚠ Missing</option>
+        <option value="optional">○ Optional</option>
+      </select>
+      <button class="btn btn-outline" onclick="addDoc()" style="white-space:nowrap">+ Add</button>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-blue" id="run-btn" onclick="startPipeline()">▶ Run Intake Pipeline</button>
+  </div>
+</div>
+
+<!-- ── SEC 1: Intake ── -->
+<div class="section" id="sec-1">
+  <div class="page-title">Step 1 — Channel Intake</div>
+  <div class="page-sub" id="sec1-sub">Extracting fields from referral package</div>
+
+  <!-- FAX VIEW -->
+  <div id="fax-intake">
+    <div class="card">
+      <div class="card-title">🔍 Extraction Results — All Documents</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)">§1 · Worker Details</div>
+        <div class="field-grid">
+          <div class="field present"><div class="f-label">worker.name</div><div class="f-val">James Holloway</div><span class="f-badge fb-src">Referral Form</span></div>
+          <div class="field present"><div class="f-label">worker.dob</div><div class="f-val">1978-03-14</div><span class="f-badge fb-src">Referral Form</span></div>
+          <div class="field present"><div class="f-label">worker.address</div><div class="f-val">4821 Elmwood Dr, Anaheim CA 92801</div><span class="f-badge fb-src">Referral Form</span></div>
+          <div class="field missing"><div class="f-label">worker.language / interpreter</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>
+        </div></div>
+
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)">§2 · Insurance Details</div>
+        <div class="field-grid">
+          <div class="field present"><div class="f-label">insurance.carrier</div><div class="f-val">Coastal Insurance Group</div><span class="f-badge fb-src">Referral Form</span></div>
+          <div class="field present"><div class="f-label">insurance.claim_number</div><div class="f-val">WC-2026-084431</div><span class="f-badge fb-src">Referral Form</span></div>
+          <div class="field missing"><div class="f-label">insurance.auth_reference</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>
+        </div></div>
+
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)">§3 · Adjuster Details</div>
+        <div class="field-grid">
+          <div class="field present"><div class="f-label">adjuster.name</div><div class="f-val">Maria Santos</div><span class="f-badge fb-src">Referral Form</span></div>
+          <div class="field present"><div class="f-label">adjuster.phone / email</div><div class="f-val">714-555-0192 · m.santos@coastalins.com</div><span class="f-badge fb-src">Referral Form</span></div>
+          <div class="field present"><div class="f-label">adjuster.case_manager_name</div><div class="f-val">Linda Torres</div><span class="f-badge fb-src">Fax Cover</span></div>
+          <div class="field present"><div class="f-label">adjuster.case_manager_email</div><div class="f-val">l.torres@coastalins.com</div><span class="f-badge fb-src">Fax Cover</span></div>
+        </div></div>
+
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)">§4 · Provider Details</div>
+        <div class="field-grid">
+          <div class="field present"><div class="f-label">provider.name</div><div class="f-val">Kevin Marsh, MD</div><span class="f-badge fb-src">Clinical Notes</span></div>
+          <div class="field present"><div class="f-label">provider.npi</div><div class="f-val">1234567890</div><span class="f-badge fb-src">Clinical Notes</span></div>
+          <div class="field present"><div class="f-label">provider.practice</div><div class="f-val">Pacific Orthopedic Associates</div><span class="f-badge fb-src">Clinical Notes</span></div>
+        </div></div>
+
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)">§5 · Diagnosis Details</div>
+        <div class="field-grid">
+          <div class="field present"><div class="f-label">diagnosis.icd10_codes</div><div class="f-val">S83.209A</div><span class="f-badge fb-src">Clinical Notes</span></div>
+          <div class="field present"><div class="f-label">diagnosis.description</div><div class="f-val">Post-ACL reconstruction, right knee</div><span class="f-badge fb-src">Clinical Notes</span></div>
+          <div class="field present"><div class="f-label">diagnosis.body_part</div><div class="f-val">Right knee</div><span class="f-badge fb-src">Clinical Notes</span></div>
+          <div class="field present"><div class="f-label">diagnosis.surgical_history</div><div class="f-val">ACL reconstruction 2026-03-28</div><span class="f-badge fb-src">Clinical Notes</span></div>
+        </div></div>
+
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)">§6 · Services Requested</div>
+        <div class="field-grid">
+          <div class="field present"><div class="f-label">services.item_description</div><div class="f-val">Rollator Walker — 4-wheel</div><span class="f-badge fb-src">Referral Form</span></div>
+          <div class="field present"><div class="f-label">services.hcpcs_code</div><div class="f-val">E0143</div><span class="f-badge fb-src">Referral Form</span></div>
+          <div class="field present"><div class="f-label">services.clinical_justification</div><div class="f-val">Bariatric rating required (285 lbs). Post-ACL instability.</div><span class="f-badge fb-src">Clinical Notes</span></div>
+        </div></div>
+
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)">§7 · Prescription Details</div>
+        <div class="field-grid">
+          <div class="field present"><div class="f-label">prescription.item</div><div class="f-val">Rollator Walker, 4-Wheel</div><span class="f-badge fb-src">Rx Prescription</span></div>
+          <div class="field null"><div class="f-label">prescription.specifications</div><div class="f-val">— not specified</div><span class="f-badge fb-src">Rx Prescription</span></div>
+          <div class="field present"><div class="f-label">prescription.signed_by</div><div class="f-val">Kevin Marsh, MD</div><span class="f-badge fb-src">Rx Prescription</span></div>
+          <div class="field present"><div class="f-label">prescription.signed_date</div><div class="f-val">2026-04-25</div><span class="f-badge fb-src">Rx Prescription</span></div>
+          <div class="field present"><div class="f-label">prescription.no_substitution</div><div class="f-val">true</div><span class="f-badge fb-src">Rx Prescription</span></div>
+        </div></div>
+
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)">§8 · Provider Notes</div>
+        <div class="field-grid">
+          <div class="field present"><div class="f-label">provider_notes.clinical_narrative</div><div class="f-val">Patient 4 wks post-op ACL repair. Limited weight-bearing. ROM 0–65°.</div><span class="f-badge fb-src">Clinical Notes</span></div>
+          <div class="field present"><div class="f-label">provider_notes.functional_status</div><div class="f-val">Ambulatory with assistance, fall risk</div><span class="f-badge fb-src">Clinical Notes</span></div>
+          <div class="field present"><div class="f-label">provider_notes.treatment_plan</div><div class="f-val">PT 3x/week. Reassess at 6-week follow-up.</div><span class="f-badge fb-src">Clinical Notes</span></div>
+          <div class="field present"><div class="f-label">provider_notes.follow_up_date</div><div class="f-val">2026-05-28</div><span class="f-badge fb-src">Clinical Notes</span></div>
+        </div></div>
+
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--gray-m)">§9 · Appointment Window</div>
+        <div class="field-grid">
+          <div class="field missing"><div class="f-label">scheduling.appointment_window</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>
+          <div class="field missing"><div class="f-label">scheduling.transportation</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>
+        </div></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- VOICE VIEW -->
+  <div id="voice-intake" style="display:none">
+    <div class="card">
+      <div class="card-title">📞 Inbound Call — Live Transcript</div>
+      <div id="vapi-connect-panel" style="text-align:center;padding:18px 0 6px">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:12px">Case manager calls the AI intake line to submit a referral</div>
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 24px;display:inline-block;margin-bottom:16px">
+          <div style="font-size:10px;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">📞 Inbound Intake Line — LIVE</div>
+          <div style="font-size:26px;font-weight:800;color:#15803d;letter-spacing:.04em">(201) 897-3854</div>
+          <div style="font-size:11px;color:#166534;margin-top:4px">Dial this number — AI answers and collects the referral</div>
+        </div>
+        <div>
+          <button class="btn btn-outline" onclick="runVoiceSimulation()">▶ Run Simulated Demo</button>
+        </div>
+      </div>
+      <div class="call-box" id="vapi-call-box" style="display:none">
+        <div class="call-status-row">
+          <div class="call-badge" id="call-badge-live"><span class="call-dot"></span> Connecting...</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="call-timer" id="call-timer">00:00</div>
+            <button id="end-call-btn" onclick="endLiveCall()" style="display:none;padding:3px 10px;font-size:11px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700">⏹ End</button>
+          </div>
+        </div>
+        <div class="transcript" id="transcript"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-blue" id="sec1-next" onclick="goTo(2)" style="display:none">→ Normalize Data</button>
+  </div>
+</div>
+
+<!-- ── SEC 2: Normalize ── -->
+<div class="section" id="sec-2">
+  <div class="page-title">Step 2 — Normalization</div>
+  <div class="page-sub">Raw extracted data mapped to standard Episode Record format</div>
+
+  <div class="card">
+    <div class="card-title">📋 Episode Record — Normalized</div>
+    <div class="tab-bar" style="flex-wrap:wrap">
+      <div class="tab active" onclick="switchNormTab(0)">§1 Worker</div>
+      <div class="tab" onclick="switchNormTab(1)">§2 Insurance</div>
+      <div class="tab" onclick="switchNormTab(2)">§3 Adjuster</div>
+      <div class="tab" onclick="switchNormTab(3)">§4 Provider</div>
+      <div class="tab" onclick="switchNormTab(4)">§5 Diagnosis</div>
+      <div class="tab" onclick="switchNormTab(5)">§6 Services</div>
+      <div class="tab" onclick="switchNormTab(6)">§7 Prescription</div>
+      <div class="tab" onclick="switchNormTab(7)">§8 Notes</div>
+      <div class="tab" onclick="switchNormTab(8)">§9 Scheduling</div>
+    </div>
+    <div class="tab-panel active" id="nt-0">
+      <div class="norm-grid">
+        <div class="norm-field"><div class="nl">worker.name</div><div class="nv">James Holloway</div></div>
+        <div class="norm-field"><div class="nl">worker.dob</div><div class="nv">1978-03-14</div></div>
+        <div class="norm-field"><div class="nl">worker.address</div><div class="nv">4821 Elmwood Drive, Anaheim, CA 92801</div></div>
+        <div class="norm-field"><div class="nl">worker.language</div><div class="nv null" id="nv-lang">null</div></div>
+        <div class="norm-field"><div class="nl">worker.interpreter</div><div class="nv null" id="nv-interp">null</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="nt-1">
+      <div class="norm-grid">
+        <div class="norm-field"><div class="nl">insurance.carrier</div><div class="nv">Coastal Insurance Group</div></div>
+        <div class="norm-field"><div class="nl">insurance.claim_number</div><div class="nv">WC-2026-084431</div></div>
+        <div class="norm-field"><div class="nl">insurance.auth_reference</div><div class="nv null" id="nv-auth">null</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="nt-2">
+      <div class="norm-grid">
+        <div class="norm-field"><div class="nl">adjuster.name</div><div class="nv">Maria Santos</div></div>
+        <div class="norm-field"><div class="nl">adjuster.phone</div><div class="nv">+17145550192</div></div>
+        <div class="norm-field"><div class="nl">adjuster.email</div><div class="nv">m.santos@coastalins.com</div></div>
+        <div class="norm-field"><div class="nl">adjuster.case_manager_name</div><div class="nv">Linda Torres</div></div>
+        <div class="norm-field"><div class="nl">adjuster.case_manager_email</div><div class="nv">l.torres@coastalins.com</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="nt-3">
+      <div class="norm-grid">
+        <div class="norm-field"><div class="nl">provider.name</div><div class="nv">Kevin Marsh</div></div>
+        <div class="norm-field"><div class="nl">provider.npi</div><div class="nv">1234567890</div></div>
+        <div class="norm-field"><div class="nl">provider.practice</div><div class="nv">Pacific Orthopedic Associates</div></div>
+        <div class="norm-field"><div class="nl">provider.phone</div><div class="nv">+17145552200</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="nt-4">
+      <div class="norm-grid">
+        <div class="norm-field"><div class="nl">diagnosis.icd10_codes</div><div class="nv">S83.209A</div></div>
+        <div class="norm-field"><div class="nl">diagnosis.description</div><div class="nv">Post-ACL reconstruction, right knee</div></div>
+        <div class="norm-field"><div class="nl">diagnosis.body_part</div><div class="nv">Right knee</div></div>
+        <div class="norm-field"><div class="nl">diagnosis.surgical_history</div><div class="nv">ACL reconstruction 2026-03-28</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="nt-5">
+      <div class="norm-grid">
+        <div class="norm-field"><div class="nl">services.item_description</div><div class="nv">Rollator Walker — 4-wheel</div></div>
+        <div class="norm-field"><div class="nl">services.hcpcs_code</div><div class="nv">E0143</div></div>
+        <div class="norm-field"><div class="nl">services.quantity</div><div class="nv">1</div></div>
+        <div class="norm-field"><div class="nl">services.duration</div><div class="nv">90 days</div></div>
+        <div class="norm-field"><div class="nl">services.clinical_justification</div><div class="nv">Bariatric rating req. (285 lbs). Post-ACL instability.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="nt-6">
+      <div class="norm-grid">
+        <div class="norm-field"><div class="nl">prescription.item</div><div class="nv">Rollator Walker, 4-Wheel</div></div>
+        <div class="norm-field"><div class="nl">prescription.specifications</div><div class="nv" style="color:var(--red);font-style:italic">not specified</div></div>
+        <div class="norm-field"><div class="nl">prescription.signed_by</div><div class="nv">Kevin Marsh, MD</div></div>
+        <div class="norm-field"><div class="nl">prescription.signed_date</div><div class="nv">2026-04-25</div></div>
+        <div class="norm-field"><div class="nl">prescription.no_substitution</div><div class="nv">true</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="nt-7">
+      <div class="norm-grid">
+        <div class="norm-field"><div class="nl">provider_notes.clinical_narrative</div><div class="nv">4 wks post-op ACL repair. Limited weight-bearing. ROM 0–65°.</div></div>
+        <div class="norm-field"><div class="nl">provider_notes.functional_status</div><div class="nv">Ambulatory with assistance, fall risk</div></div>
+        <div class="norm-field"><div class="nl">provider_notes.treatment_plan</div><div class="nv">PT 3x/week. Reassess 6-week follow-up.</div></div>
+        <div class="norm-field"><div class="nl">provider_notes.follow_up_date</div><div class="nv">2026-05-28</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="nt-8">
+      <div class="norm-grid">
+        <div class="norm-field"><div class="nl">scheduling.appointment_window</div><div class="nv null" id="nv-appt">null</div></div>
+        <div class="norm-field"><div class="nl">scheduling.transportation</div><div class="nv null" id="nv-transport">null</div></div>
+        <div class="norm-field"><div class="nl">episode.channel</div><div class="nv" id="nv-channel">fax</div></div>
+        <div class="norm-field"><div class="nl">episode.status</div><div class="nv">incomplete</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-blue" onclick="goTo(3)">→ Run Intelligence Layer</button>
+  </div>
+</div>
+
+<!-- ── SEC IQ: Intelligence Layer ── -->
+<div class="section" id="sec-iq">
+  <div class="page-title">Step 3 — Intelligence Layer</div>
+  <div class="page-sub">Validate, score, fix codes, check duplicates, and determine authorization before outreach</div>
+
+  <!-- Duplicate Check -->
+  <div class="card">
+    <div class="card-title">🔁 Duplicate Detection</div>
+    <div class="alert alert-green" style="margin-bottom:0">
+      <div class="alert-icon">✅</div>
+      <div>No duplicate episode found. Checked against claim number <b>WC-2026-084431</b> and patient <b>James Holloway / 1978-03-14</b> — no existing open or routed episode matches.</div>
+    </div>
+  </div>
+
+  <!-- Compliance -->
+  <div class="card">
+    <div class="card-title">✅ Compliance Validation</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px">
+        <span>✅</span><div><b>ICD-10 S83.209A</b> — Active code, valid format, matches injury description</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px">
+        <span>✅</span><div><b>HCPCS E0143</b> — Active code, valid format, matches rollator walker description</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px">
+        <span>✅</span><div><b>HCPCS ↔ Diagnosis match</b> — E0143 (rollator walker) is appropriate for S83.209A (knee injury, post-surgical)</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px">
+        <span>✅</span><div><b>Prescription date 2026-04-25</b> — Valid, within 12 months</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px">
+        <span>✅</span><div><b>NPI 1234567890</b> — Valid 10-digit format</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:var(--yellow-l);border:1px solid var(--yellow-m);font-size:12px">
+        <span>⚠️</span><div><b>Code auto-corrected:</b> HCPCS input was <code>e0143</code> (lowercase) → normalized to <b>E0143</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Clarification -->
+  <div class="card">
+    <div class="card-title">🔧 Service Clarification</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 11px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px">
+        <span>✅</span><div><b>Item confirmed:</b> Rollator Walker (4-wheel) is appropriate for post-ACL surgical recovery with fall risk. HCPCS E0143 matches diagnosis.</div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 11px;border-radius:7px;background:var(--red-l);border:1px solid var(--red-m);font-size:12px">
+        <span>⚠️</span><div><b>Spec mismatch flagged:</b> Prescription does not specify frame size or weight capacity. Clinical notes indicate patient weight is <b>285 lbs</b> — standard rollator is contraindicated. Bariatric specification (400 lb capacity) is required. <b>prescription.specifications is null</b> → added to gap list. Case manager confirmation required before vendor dispatch.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Determination -->
+  <div class="card">
+    <div class="card-title">🔑 Authorization Determination</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 11px;border-radius:7px;background:var(--red-l);border:1px solid var(--red-m);font-size:12px">
+        <span>🔑</span><div><b>Prior authorization REQUIRED</b> — Coastal Insurance Group requires prior auth for HCPCS E0143 (rollator walker). <b>insurance.auth_reference is null</b> → added as priority gap. Routing is blocked until resolved.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Risk & Urgency Scoring -->
+  <div class="card">
+    <div class="card-title">📊 Risk & Urgency Score</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="text-align:center;padding:14px;background:var(--red-l);border-radius:8px;border:1px solid var(--red-m)">
+        <div style="font-size:28px;font-weight:900;color:var(--red)">4</div>
+        <div style="font-size:11px;font-weight:700;color:var(--gray);margin-top:3px">CLINICAL RISK</div>
+        <div style="font-size:10px;color:var(--gray);margin-top:2px">Post-surgical, fall risk</div>
+      </div>
+      <div style="text-align:center;padding:14px;background:var(--yellow-l);border-radius:8px;border:1px solid var(--yellow-m)">
+        <div style="font-size:28px;font-weight:900;color:var(--yellow)">3</div>
+        <div style="font-size:11px;font-weight:700;color:var(--gray);margin-top:3px">URGENCY</div>
+        <div style="font-size:10px;color:var(--gray);margin-top:2px">Appt within 1 week</div>
+      </div>
+      <div style="text-align:center;padding:14px;background:#fdf4ff;border-radius:8px;border:1px solid var(--purple-m)">
+        <div style="font-size:28px;font-weight:900;color:var(--purple)">7</div>
+        <div style="font-size:11px;font-weight:700;color:var(--gray);margin-top:3px">PRIORITY SCORE</div>
+        <div style="font-size:10px;color:var(--purple);font-weight:700;margin-top:2px">MEDIUM</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--gray);background:var(--gray-l);border-radius:7px;padding:10px 12px;line-height:1.6">
+      <b style="color:var(--dark)">Summary:</b> Post-surgical ACL recovery with fall risk (risk: 4). Appointment window not yet confirmed but referral is within standard scheduling window (urgency: 3). Prior authorization required and missing — this is the primary blocker. Code E0143 validated and corrected to uppercase. No duplicate found. Episode is ready for completeness check and CM outreach to resolve 5 missing fields.
+    </div>
+  </div>
+
+  <!-- Low Confidence Card -->
+  <div class="card" style="border:2px solid #f59e0b;background:#fffbeb">
+    <div class="card-title" style="color:#92400e">⚠️ Low Confidence — 3 Fields Flagged for Human Review</div>
+    <div style="font-size:12px;color:#b45309;margin-bottom:12px">AI extracted these fields but confidence is below threshold (80%). Episode cannot proceed until an associate reviews each field.</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;background:white;border:1px solid #fde68a">
+        <div style="font-size:12px;font-weight:700;color:var(--dark)">ICD-10 Code <span style="font-weight:400;color:var(--gray)">— S83.209A</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><div style="width:50px;height:5px;background:var(--gray-m);border-radius:3px;overflow:hidden"><div style="width:67%;height:100%;background:#ef4444;border-radius:3px"></div></div><span style="font-size:11px;font-weight:800;color:#dc2626">67%</span></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;background:white;border:1px solid #fde68a">
+        <div style="font-size:12px;font-weight:700;color:var(--dark)">Physician NPI <span style="font-weight:400;color:var(--gray)">— 1234567890</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><div style="width:50px;height:5px;background:var(--gray-m);border-radius:3px;overflow:hidden"><div style="width:71%;height:100%;background:#ef4444;border-radius:3px"></div></div><span style="font-size:11px;font-weight:800;color:#dc2626">71%</span></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;background:white;border:1px solid #fde68a">
+        <div style="font-size:12px;font-weight:700;color:var(--dark)">Equipment Description <span style="font-weight:400;color:var(--gray)">— Rollator Walker</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><div style="width:50px;height:5px;background:var(--gray-m);border-radius:3px;overflow:hidden"><div style="width:58%;height:100%;background:#ef4444;border-radius:3px"></div></div><span style="font-size:11px;font-weight:800;color:#dc2626">58%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-red" onclick="openEscalation()">⚠ Review Flagged Fields — Associate Required</button>
+  </div>
+</div>
+
+<!-- ── SEC 3: Completeness ── -->
+<div class="section" id="sec-3">
+  <div class="page-title">Step 3 — Completeness Check</div>
+  <div class="page-sub">Episode Record compared against required fields</div>
+
+  <div class="alert alert-yellow">
+    <div class="alert-icon">⚠️</div>
+    <div><b>4 required fields are null.</b> Package incomplete — proceeding to digital outreach.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✅ Present (20 / 25 required fields)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §1 worker.name</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §1 worker.dob</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §1 worker.address</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §2 insurance.carrier</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §2 insurance.claim_number</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §3 adjuster.name + email</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §3 case_manager.name + email</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §4 provider.name + npi</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §5 diagnosis.icd10_codes</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §5 diagnosis.description</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §6 services.item + hcpcs</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §6 services.clinical_justification</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §7 prescription.item</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §7 prescription.signed_by + date</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §8 provider_notes.clinical_narrative</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔴 Gap List — 5 Fields Required from Case Manager</div>
+    <ul class="gap-list">
+      <li>🔑 §2 insurance.auth_reference — Authorization reference number</li>
+      <li>🌐 §1 worker.language / worker.interpreter — Primary language</li>
+      <li>📅 §9 scheduling.appointment_window — Preferred date + time range</li>
+      <li>🚗 §9 scheduling.transportation — Transportation confirmation</li>
+      <li>⚖️ §6 item.specification — Equipment spec not confirmed for patient context (weight 285 lbs — bariatric required)</li>
+    </ul>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-blue" onclick="goTo(5)">→ Send Digital Outreach</button>
+  </div>
+</div>
+
+<!-- ── SEC 4: Email Outreach ── -->
+<div class="section" id="sec-4">
+  <div class="page-title">Step 4 — Digital Outreach</div>
+  <div class="page-sub">Agent emails case manager requesting only the 5 missing fields</div>
+
+  <div class="card">
+    <div class="card-title">📧 Outreach Email — Sent</div>
+    <div class="email-box">
+      <div class="email-hdr">
+        <div class="email-row"><span class="ek">To:</span><span>Linda Torres &lt;l.torres@coastalins.com&gt;</span></div>
+        <div class="email-row"><span class="ek">Subj:</span><span><b>Action Required — Missing Info · Referral [WC-2026-084431]</b></span></div>
+        <div class="email-row"><span class="ek">Sent:</span><span>2026-05-01 09:02 · via email</span></div>
+      </div>
+      <div class="email-body">Hi Linda,
+
+Thank you for the referral for <span class="hl">James Holloway</span> (DOB: 1978-03-14, Claim: <span class="hl">WC-2026-084431</span>).
+
+To complete coordination, we still need:
+
+  <span class="hl">🔑 Authorization reference number</span>
+  <span class="hl">📅 Appointment window</span> — preferred date and time range
+  <span class="hl">🚗 Transportation</span> — will the patient need a ride arranged?
+  <span class="hl">🌐 Language / interpreter</span> — patient's primary language?
+  <span class="hl">⚖️ Equipment specification</span> — confirm bariatric spec for patient weight (285 lbs)
+
+Please reply within <b>24 business hours</b>. If we don't hear back, our coordination agent will follow up by phone.
+
+Thank you,
+Intake Coordination Agent</div>
+    </div>
+  </div>
+
+  <div class="alert alert-yellow">
+    <div class="alert-icon">⏱</div>
+    <div>No response received after <b>24 business hours</b>. Escalating to outbound voice call.</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-blue" onclick="goTo(6)">→ Place Outbound Call</button>
+  </div>
+</div>
+
+<!-- ── SEC 5: Voice Outreach ── -->
+<div class="section" id="sec-5">
+  <div class="page-title">Step 5 — Voice Outreach</div>
+  <div class="page-sub">No email response — agent places outbound AI call to case manager</div>
+
+  <div class="alert alert-blue">
+    <div class="alert-icon">📞</div>
+    <div>Calling <b>Linda Torres</b> at <b>+1 (609) 216-1820</b> · Outreach attempt #2</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📞 Outbound Call — Transcript</div>
+    <div class="call-box">
+      <div class="call-status-row">
+        <div class="call-badge"><span class="call-dot" style="background:#f59e0b"></span> Call complete</div>
+        <div class="call-timer">01:48</div>
+      </div>
+      <div class="transcript">
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Hi, this is the Intake Coordination Agent calling for Linda Torres. I'm following up on the referral for James Holloway, claim WC-2026-084431. We sent an email yesterday but haven't heard back. Do you have a moment?</span></div>
+        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes, sorry about that — I've been swamped. Go ahead.</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">No problem at all. We just need five things. First — do you have the authorization reference number for this claim?</span></div>
+        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes it's <span class="captured">AUTH-2026-CIG-7741</span>.</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Got it — AUTH-2026-CIG-7741. Next, what's the preferred appointment window for the equipment delivery?</span></div>
+        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Can you do <span class="captured">May 5th, between 10 and noon</span>?</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Perfect — May 5th, 10 AM to 12 PM. Will the patient need transportation arranged?</span></div>
+        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">No, <span class="captured">he'll drive himself</span>.</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Confirmed — patient self-transports. What's the patient's primary language and does he need an interpreter?</span></div>
+        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">English, no interpreter needed</span>.</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Got it. Last one — the prescription lists a rollator walker but doesn't specify bariatric. Our records show patient weight at 285 lbs, which requires a bariatric frame. Can you confirm <span class="captured">bariatric specification</span> is correct?</span></div>
+        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes, <span class="captured">bariatric — 4-wheel, 400 lb capacity</span>. Sorry that wasn't on the form.</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Confirmed — bariatric rollator, 4-wheel, 400 lb capacity. To recap: auth AUTH-2026-CIG-7741, May 5th 10–noon, self-transport, English no interpreter, bariatric spec confirmed. All correct?</span></div>
+        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes that's right.</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Thank you Linda. Your referral is now complete. We'll coordinate the delivery and follow up with a confirmation. Have a great day!</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-green">
+    <div class="alert-icon">✅</div>
+    <div>All 5 missing fields captured from call. Episode Record updated. Running completeness check.</div>
+  </div>
+
+  <div class="card" style="background:#f8fafc;border:1.5px dashed var(--gray-m)">
+    <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:6px">Try it live — place a real outbound call</div>
+    <div style="font-size:11px;color:var(--gray);margin-bottom:12px">Vapi AI calls <b>(609) 216-1820</b> and asks for the 5 missing fields on Holloway's referral</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn btn-blue" id="live-outbound-btn" onclick="placeOutboundResolutionCall()" style="font-size:12px">📲 Place Live Outbound Call</button>
+      <span id="live-outbound-status" style="font-size:11px;color:var(--gray)"></span>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-blue" onclick="goTo(7)">→ Generate Route Output</button>
+  </div>
+</div>
+
+<!-- ── SEC 6: Route Output ── -->
+<div class="section" id="sec-6">
+  <div class="page-title">Step 6 — Route State Output</div>
+  <div class="page-sub">Episode complete. Normalized record locked and dispatched.</div>
+
+  <div class="alert alert-green">
+    <div class="alert-icon">✅</div>
+    <div>All required fields confirmed across both channels. Saved to <b>output/dme-intake-WC-2026-084431-20260501.md</b></div>
+  </div>
+
+  <div class="route-card fade-in">
+    <div class="route-hdr">
+      <div>
+        <div class="route-title">Referral — Route State</div>
+        <div class="route-ts">Episode: EP-20260501-WC2026084431 · Completed: 2026-05-01 11:52</div>
+      </div>
+      <div class="status-pill routed"><span class="status-dot"></span>ROUTED</div>
+    </div>
+
+    <div class="route-section">
+      <div class="route-section-title">§1 · Worker</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">worker.name</div><div class="rv">James Holloway</div></div>
+        <div class="route-field"><div class="rl">worker.dob</div><div class="rv">1978-03-14</div></div>
+        <div class="route-field"><div class="rl">worker.address</div><div class="rv">4821 Elmwood Drive, Anaheim, CA 92801</div></div>
+        <div class="route-field"><div class="rl">worker.language / interpreter</div><div class="rv" style="color:var(--purple);font-weight:800">English / false ✦ via call</div></div>
+      </div>
+    </div>
+    <div class="route-section">
+      <div class="route-section-title">§2 · Insurance</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">insurance.carrier</div><div class="rv">Coastal Insurance Group</div></div>
+        <div class="route-field"><div class="rl">insurance.claim_number</div><div class="rv">WC-2026-084431</div></div>
+        <div class="route-field"><div class="rl">insurance.auth_reference</div><div class="rv" style="color:var(--purple);font-weight:800">AUTH-2026-CIG-7741 ✦ via call</div></div>
+      </div>
+    </div>
+    <div class="route-section">
+      <div class="route-section-title">§3 · Adjuster</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">adjuster.name</div><div class="rv">Maria Santos</div></div>
+        <div class="route-field"><div class="rl">adjuster.phone / email</div><div class="rv">+17145550192 · m.santos@coastalins.com</div></div>
+        <div class="route-field"><div class="rl">case_manager</div><div class="rv">Linda Torres · l.torres@coastalins.com</div></div>
+      </div>
+    </div>
+    <div class="route-section">
+      <div class="route-section-title">§4 · Provider</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">provider.name / npi</div><div class="rv">Kevin Marsh, MD / 1234567890</div></div>
+        <div class="route-field"><div class="rl">provider.practice</div><div class="rv">Pacific Orthopedic Associates</div></div>
+      </div>
+    </div>
+    <div class="route-section">
+      <div class="route-section-title">§5 · Diagnosis</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">diagnosis.icd10_codes</div><div class="rv">S83.209A</div></div>
+        <div class="route-field"><div class="rl">diagnosis.description</div><div class="rv">Post-ACL reconstruction, right knee</div></div>
+        <div class="route-field"><div class="rl">diagnosis.body_part</div><div class="rv">Right knee</div></div>
+        <div class="route-field"><div class="rl">diagnosis.surgical_history</div><div class="rv">ACL reconstruction 2026-03-28</div></div>
+      </div>
+    </div>
+    <div class="route-section">
+      <div class="route-section-title">§6 · Services Requested</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">services.item_description</div><div class="rv">Rollator Walker — 4-wheel, bariatric</div></div>
+        <div class="route-field"><div class="rl">services.hcpcs_code</div><div class="rv">E0143</div></div>
+        <div class="route-field"><div class="rl">services.quantity / duration</div><div class="rv">1 / 90 days</div></div>
+        <div class="route-field"><div class="rl">services.clinical_justification</div><div class="rv">Bariatric rating req. Post-ACL instability.</div></div>
+      </div>
+    </div>
+    <div class="route-section">
+      <div class="route-section-title">§7 · Prescription</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">prescription.item</div><div class="rv">Rollator Walker, 4-Wheel, Bariatric</div></div>
+        <div class="route-field"><div class="rl">prescription.specifications</div><div class="rv">285 lb capacity, 4-wheel</div></div>
+        <div class="route-field"><div class="rl">prescription.signed_by / date</div><div class="rv">Kevin Marsh, MD / 2026-04-25</div></div>
+        <div class="route-field"><div class="rl">prescription.no_substitution</div><div class="rv">true</div></div>
+      </div>
+    </div>
+    <div class="route-section">
+      <div class="route-section-title">§8 · Provider Notes</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">provider_notes.clinical_narrative</div><div class="rv">4 wks post-op ACL. Limited weight-bearing. ROM 0–65°.</div></div>
+        <div class="route-field"><div class="rl">provider_notes.functional_status</div><div class="rv">Ambulatory with assistance, fall risk</div></div>
+        <div class="route-field"><div class="rl">provider_notes.treatment_plan</div><div class="rv">PT 3x/week. Reassess 6-week follow-up.</div></div>
+        <div class="route-field"><div class="rl">provider_notes.follow_up_date</div><div class="rv">2026-05-28</div></div>
+      </div>
+    </div>
+    <div class="route-section">
+      <div class="route-section-title">§9 · Scheduling</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">scheduling.appointment_window</div><div class="rv" style="color:var(--purple);font-weight:800">2026-05-05 · 10:00–12:00 ✦ via call</div></div>
+        <div class="route-field"><div class="rl">scheduling.transportation</div><div class="rv" style="color:var(--purple);font-weight:800">self ✦ via call</div></div>
+      </div>
+    </div>
+    <div class="route-section">
+      <div class="route-section-title">Intake Metadata</div>
+      <div class="route-grid">
+        <div class="route-field"><div class="rl">episode.channel</div><div class="rv"><span id="rv-channel" class="ch-badge ch-fax">fax</span></div></div>
+        <div class="route-field"><div class="rl">outreach.last_channel</div><div class="rv"><span class="ch-badge ch-voice">voice</span></div></div>
+        <div class="route-field"><div class="rl">outreach.attempts</div><div class="rv">2</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row" style="margin-top:18px">
+    <button class="btn btn-purple" onclick="window.print()">⬇ Export Route State</button>
+    <button class="btn btn-outline" onclick="resetDemo()">↺ New Referral</button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+const sections = ['sec-0','sec-1','sec-2','sec-iq','sec-3','sec-4','sec-5','sec-6'];
+const progress = [0,14,28,43,57,71,85,100];
+const totalSteps = 7;
+const VAPI_KEY = '7b3ba923-a283-4b78-b51a-b73a7a9bbcc9';
+const VAPI_ASSISTANT_ID = '50709c92-4768-4571-ae17-40176aa72989';
+const VAPI_PHONE_NUMBER_ID = '9613a479-df90-40a7-a9bb-b9cddadd20a5';
+const OUTBOUND_TEST_NUMBER = '+16092161820';
+let vapiClient = null;
+let vapiCallActive = false;
+let currentEpisodeRef = null;
+let channel = null;
+let callTimer = null;
+let callSeconds = 0;
+let voiceTranscriptTimer = null;
+
+// ── Live referral polling ──
+let knownReferralIds = new Set();
+let pollInterval = null;
+let liveReferralCount = 0;
+
+function startLivePolling() {
+  const badge = document.getElementById('live-poll-badge');
+  if (badge) badge.style.display = 'flex';
+  pollReferrals(); // immediate first check
+  pollInterval = setInterval(pollReferrals, 15000);
+}
+
+async function pollReferrals() {
+  try {
+    const res = await fetch('/.netlify/functions/get-referrals');
+    if (!res.ok) return;
+    const referrals = await res.json();
+    if (!Array.isArray(referrals)) return;
+
+    const label = document.getElementById('last-poll-label');
+    if (label) label.textContent = 'Last sync: ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+    let newCount = 0;
+    referrals.forEach(ref => {
+      if (!knownReferralIds.has(ref.id)) {
+        knownReferralIds.add(ref.id);
+        injectLiveReferralRow(ref);
+        newCount++;
+        liveReferralCount++;
+      }
+    });
+
+    if (newCount > 0) {
+      const total = parseInt(document.getElementById('stat-total').textContent || '0');
+      document.getElementById('stat-total').textContent = total + newCount;
+      showNewReferralToast(newCount);
+    }
+  } catch (e) { /* silent fail — keep polling */ }
+}
+
+function injectLiveReferralRow(ref) {
+  const tbody = document.querySelector('#sec-0 table tbody');
+  if (!tbody) return;
+
+  const emptyRow = document.getElementById('queue-empty-row');
+  if (emptyRow) emptyRow.style.display = 'none';
+
+  const dur = ref.duration ? Math.floor(ref.duration / 60) + 'm ' + (ref.duration % 60) + 's' : '—';
+  const time = new Date(ref.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  const caller = ref.callerNumber !== 'Unknown' ? ref.callerNumber.replace('+1','') : '—';
+
+  const tr = document.createElement('tr');
+  tr.className = 'queue-row live-row';
+  tr.style.cssText = 'border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s;background:#f0fdf4';
+  tr.onmouseover = () => tr.style.background = '#dcfce7';
+  tr.onmouseout  = () => tr.style.background = '#f0fdf4';
+  tr.innerHTML = `
+    <td style="padding:11px 14px">
+      <div style="font-weight:700">${ref.patient}</div>
+      <div style="font-size:10px;color:var(--gray)">📞 ${caller} · ${time}</div>
+    </td>
+    <td style="padding:11px 8px;color:var(--gray)">${ref.claimNum}</td>
+    <td style="padding:11px 8px">Intake Complete<div style="font-size:10px;color:var(--gray)">Review required · ${dur}</div></td>
+    <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-voice">voice</span></td>
+    <td style="padding:11px 8px;text-align:center"><span style="font-size:11px;font-weight:800;color:#15803d;background:#f0fdf4;padding:2px 8px;border-radius:10px;border:1px solid #86efac">NEW</span></td>
+    <td style="padding:11px 8px;text-align:center"><span style="font-size:10px;color:#15803d;font-weight:700">Complete at intake</span></td>
+    <td style="padding:11px 8px;text-align:center"><span class="status-pill" style="background:#f0fdf4;color:#15803d;border:1px solid #86efac"><span class="status-dot" style="background:#22c55e"></span>New</span></td>
+    <td style="padding:11px 14px;text-align:center">
+      <button class="btn btn-outline" style="padding:5px 12px;font-size:11px;border-color:#86efac;color:#15803d" onclick="event.stopPropagation();showLiveCallDetail('${ref.id}')">View</button>
+    </td>`;
+
+  // Insert before first static row (after empty row)
+  const firstStaticRow = tbody.querySelector('.queue-row:not(.live-row)');
+  if (firstStaticRow) {
+    tbody.insertBefore(tr, firstStaticRow);
+  } else {
+    tbody.appendChild(tr);
+  }
+  requestAnimationFrame(() => tr.classList.add('visible'));
+}
+
+function showLiveCallDetail(id) {
+  // For now just show an alert with the referral summary — full modal can be added later
+  alert('Live inbound referral — intake complete. Claim: ' + id + '\nReview and assign to coordinator.');
+}
+
+function showNewReferralToast(count) {
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:70px;right:24px;background:#15803d;color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);animation:rowFadeIn .3s ease';
+  toast.textContent = '📞 ' + count + ' new inbound referral' + (count > 1 ? 's' : '') + ' — intake complete';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+const logMsgs = {
+  1: { fax: ['Opened referral package (3 documents + 1 missing)','Extracted: WC-2026-084431_ReferralForm.pdf','Extracted: ClinicalNotes.pdf','Extracted: RxPrescription.jpg','channel = fax','20 fields extracted, 5 missing'], voice: ['Inbound call received','AI agent answered','Conducting live intake interview...','Collecting required fields conversationally','channel = voice'] },
+  2: ['Mapping raw fields to 9-section Episode Record','Normalizing dates → YYYY-MM-DD','Normalizing phones → E.164','Normalizing HCPCS → uppercase (e0143 → E0143)','Episode ID: EP-20260501-WC2026084431','5 null fields remain'],
+  3: ['Running Intelligence Layer...','Duplicate check: no match found','ICD-10 S83.209A: valid and active','HCPCS E0143: valid, auto-corrected to uppercase','HCPCS ↔ Diagnosis: match confirmed','Auth required: YES (Coastal Ins. + E0143)','Risk score: 4 · Urgency: 3 · Priority: MEDIUM','⚠ Spec mismatch: patient 285 lbs — bariatric required, spec not on prescription'],
+  4: ['Checking 25 required fields','20 fields PRESENT','5 fields NULL → gap list generated','Auth ref flagged as priority blocker','Spec mismatch flagged: bariatric confirmation required','Proceeding to digital outreach'],
+  5: ['Case manager email on file','Outreach email drafted (5 gap items)','Email sent to l.torres@coastalins.com','status → pending_response','24hr response window started'],
+  6: ['No email response after 24hrs','Placing outbound call to +17145550192','Call connected · 02:14 duration','All 5 fields captured from call','Bariatric spec confirmed: 4-wheel, 400 lb capacity','Episode Record updated','status → complete'],
+  7: ['Completeness check passed (24/24)','Episode Record locked','Route state generated','Saved: output/dme-intake-WC-2026-084431-20260501.md','status → routed','Coordinator notified ✓']
+};
+
+function log(text) {
+  const box = document.getElementById('agent-log');
+  const now = new Date();
+  const ts = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+  const el = document.createElement('div');
+  el.className = 'log-line';
+  el.innerHTML = `<span class="ts">${ts}</span>${text}`;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+}
+
+function setStatus(label, cls) {
+  document.getElementById('ep-status').innerHTML = `<div class="status-pill ${cls}"><span class="status-dot"></span>${label}</div>`;
+}
+
+function selectChannel(ch) {
+  channel = ch;
+  const fc = document.getElementById('ch-fax');
+  const vc = document.getElementById('ch-voice');
+  if (fc) fc.classList.toggle('selected', ch === 'fax');
+  if (vc) vc.classList.toggle('selected', ch === 'voice');
+  const dpc = document.getElementById('doc-package-card');
+  if (dpc) dpc.style.display = ch === 'fax' ? '' : 'none';
+  const rb = document.getElementById('run-btn');
+  if (rb) { rb.disabled = false; rb.textContent = ch === 'fax' ? '▶ Run Intake Pipeline' : '▶ Start Voice Intake'; }
+}
+
+function loadReferral(ref) {
+  channel = 'fax';
+  document.getElementById('ep-id').textContent = 'EP-20260501-WC2026084431';
+  document.getElementById('ep-patient').textContent = 'James Holloway';
+  document.getElementById('ep-claim').textContent = 'WC-2026-084431';
+  document.getElementById('ep-channel').innerHTML = '<span class="ch-badge ch-fax">fax</span>';
+  document.getElementById('rv-channel').className = 'ch-badge ch-fax';
+  document.getElementById('rv-channel').textContent = 'fax';
+  document.getElementById('nv-channel').textContent = 'fax';
+  goTo(1);
+}
+
+function startPipeline() {
+  if (!channel) { channel = 'fax'; selectChannel('fax'); }
+  document.getElementById('ep-id').textContent = 'EP-20260501-WC2026084431';
+  document.getElementById('ep-patient').textContent = 'James Holloway';
+  document.getElementById('ep-claim').textContent = 'WC-2026-084431';
+  const chLabel = channel === 'fax' ? 'fax' : 'voice';
+  document.getElementById('ep-channel').innerHTML = `<span class="ch-badge ch-${channel}">${chLabel}</span>`;
+  document.getElementById('rv-channel').className = `ch-badge ch-${channel}`;
+  document.getElementById('rv-channel').textContent = chLabel;
+  document.getElementById('nv-channel').textContent = chLabel;
+  goTo(1);
+}
+
+const voiceScript = [
+  {speaker:'agent', text:'Thank you for calling Intake Coordination. I\'m your intake agent. I\'ll guide you through submitting a referral. May I have the patient\'s full name?', delay:0},
+  {speaker:'cm', text:'Yes — the patient is James Holloway.', delay:3200},
+  {speaker:'agent', text:'Got it — James Holloway. Date of birth?', delay:5800},
+  {speaker:'cm', text:'March 14th, 1978.', delay:8200},
+  {speaker:'agent', text:'1978-03-14. Claim number?', delay:10400},
+  {speaker:'cm', text:'WC-2026-084431.', delay:12800},
+  {speaker:'agent', text:'Insurance carrier?', delay:15000},
+  {speaker:'cm', text:'Coastal Insurance Group.', delay:17200},
+  {speaker:'agent', text:'Equipment Item needed?', delay:19600},
+  {speaker:'cm', text:'A rollator walker, 4-wheel. HCPCS is E0143.', delay:22000},
+  {speaker:'agent', text:'Got it. Authorization reference number?', delay:25400},
+  {speaker:'cm', text:'AUTH-2026-CIG-7741.', delay:28000},
+  {speaker:'agent', text:'Appointment window?', delay:30200},
+  {speaker:'cm', text:'May 5th between 10 and noon.', delay:32600},
+  {speaker:'agent', text:'Transportation needed?', delay:35200},
+  {speaker:'cm', text:'No, he\'ll drive himself.', delay:37400},
+  {speaker:'agent', text:'Primary language and interpreter?', delay:39800},
+  {speaker:'cm', text:'English, no interpreter.', delay:42200},
+  {speaker:'agent', text:'All set. Thank you — referral submitted. We\'ll follow up with a confirmation.', delay:44800},
+];
+
+function runVoiceIntake() {
+  // Show connect panel — user chooses live call or simulation
+  document.getElementById('vapi-connect-panel').style.display = '';
+  document.getElementById('vapi-call-box').style.display = 'none';
+  const msgs = logMsgs[1] && logMsgs[1].voice ? logMsgs[1].voice : [];
+  msgs.forEach((m,i) => setTimeout(() => log(m), i*220));
+}
+
+function startCallTimer() {
+  callSeconds = 0;
+  clearInterval(callTimer);
+  callTimer = setInterval(() => {
+    callSeconds++;
+    const m = String(Math.floor(callSeconds/60)).padStart(2,'0');
+    const s = String(callSeconds%60).padStart(2,'0');
+    document.getElementById('call-timer').textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function onCallComplete() {
+  clearInterval(callTimer);
+  vapiCallActive = false;
+  const badge = document.getElementById('call-badge-live');
+  if (badge) {
+    badge.innerHTML = '<span class="call-dot" style="background:#f59e0b;animation:none"></span> Call complete';
+  }
+  const endBtn = document.getElementById('end-call-btn');
+  if (endBtn) endBtn.style.display = 'none';
+  document.getElementById('sec1-next').style.display = '';
+  document.getElementById('nv-lang').textContent = 'English';
+  document.getElementById('nv-lang').classList.remove('null');
+  document.getElementById('nv-interp').textContent = 'false';
+  document.getElementById('nv-interp').classList.remove('null');
+  document.getElementById('nv-auth').textContent = 'AUTH-2026-CIG-7741';
+  document.getElementById('nv-auth').classList.remove('null');
+  document.getElementById('nv-appt').textContent = '2026-05-05 10:00–12:00';
+  document.getElementById('nv-appt').classList.remove('null');
+  document.getElementById('nv-transport').textContent = 'self';
+  document.getElementById('nv-transport').classList.remove('null');
+}
+
+async function placeOutboundResolutionCall() {
+  const btn = document.getElementById('live-outbound-btn');
+  const status = document.getElementById('live-outbound-status');
+  if (btn) { btn.disabled = true; btn.textContent = 'Calling...'; }
+  if (status) status.textContent = '';
+  try {
+    const res = await fetch('/.netlify/functions/place-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        assistantId: VAPI_ASSISTANT_ID,
+        phoneNumberId: VAPI_PHONE_NUMBER_ID,
+        assistantOverrides: {
+          firstMessage: 'Hi, this is the Intake Coordination Agent calling for the case manager on claim WC-2026-084431 for James Holloway. We sent an email yesterday but haven\'t heard back. Do you have a moment to provide five missing fields?',
+          endCallPhrases: [],
+          maxDurationSeconds: 480,
+          transcriber: { provider: 'deepgram', model: 'nova-2-phonecall', endpointing: 500 },
+          model: { provider: 'openai', model: 'gpt-4o-mini', messages: [{ role: 'system', content: 'You are an outbound intake coordination agent calling a case manager to collect exactly 5 missing fields. You MUST stay on the call and ask ALL 5 questions — do not end the call early under any circumstance until all 5 are answered and confirmed.\n\nPatient: James Holloway. Claim: WC-2026-084431.\n\nCollect in this order, one at a time:\n1. Authorization reference number\n2. Appointment window — preferred date and time\n3. Transportation — will patient self-transport, need a ride, or is it not needed?\n4. Patient primary language — does the patient need an interpreter?\n5. Equipment specification — prescription lists rollator walker but does not specify bariatric. Patient weight is 285 lbs. Confirm bariatric frame (400 lb capacity) is required.\n\nRules:\n- Ask one question at a time. Wait for the full answer before moving on.\n- Confirm each answer by repeating it back before asking the next question.\n- Do NOT hang up or say goodbye until all 5 fields are collected and confirmed.\n- After all 5 are confirmed, give a one-sentence summary and close with: "Thank you, your referral is now complete. Have a great day."' }] }
+        },
+        customer: { number: OUTBOUND_TEST_NUMBER, name: 'Linda Torres — Case Manager' }
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error || !data.id) throw new Error('[' + res.status + '] ' + (data.message || data.error || JSON.stringify(data)));
+    if (btn) { btn.textContent = '📲 Place Live Outbound Call'; btn.disabled = false; }
+    if (status) { status.textContent = '✓ Call placed — your phone is ringing'; status.style.color = 'var(--green)'; }
+    log('📞 Outbound resolution call placed · ID: ' + data.id.slice(0,8) + '…');
+  } catch(e) {
+    if (btn) { btn.textContent = '📲 Place Live Outbound Call'; btn.disabled = false; }
+    if (status) { status.textContent = '⚠ ' + (e.message || e); status.style.color = 'var(--red)'; }
+    console.error('Vapi call error:', e);
+  }
+}
+
+async function startLiveCall() {
+  document.getElementById('vapi-connect-panel').style.display = 'none';
+  document.getElementById('vapi-call-box').style.display = '';
+  document.getElementById('transcript').innerHTML = '';
+  const badge = document.getElementById('call-badge-live');
+  if (badge) badge.innerHTML = '<span class="call-dot"></span> Dialing...';
+  startCallTimer();
+  const t = document.getElementById('transcript');
+  const addLine = (role, label, text) => {
+    const el = document.createElement('div'); el.className = 't-line';
+    el.innerHTML = `<span class="t-speaker ${role}">${label}</span><span class="t-text">${text}</span>`;
+    t.appendChild(el); t.scrollTop = t.scrollHeight;
+  };
+  addLine('agent','SYSTEM','Placing live call to your phone at (609) 216-1820 — answer to speak with the AI intake assistant.');
+  try {
+    const res = await fetch('/.netlify/functions/place-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        assistantId: VAPI_ASSISTANT_ID,
+        phoneNumberId: VAPI_PHONE_NUMBER_ID,
+        assistantOverrides: {
+          firstMessage: 'Thank you for calling Intake Coordination. I am your intake assistant. I will collect the referral details for you today. May I start with the patient full name?',
+          endCallPhrases: [],
+          transcriber: { provider: 'deepgram', model: 'nova-2-phonecall', endpointing: 500 }
+        },
+        customer: { number: OUTBOUND_TEST_NUMBER, name: 'Demo User' }
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error || !data.id) throw new Error('[' + res.status + '] ' + (data.message || data.error || JSON.stringify(data)));
+    if (badge) badge.innerHTML = '<span class="call-dot"></span> LIVE — Answer your phone';
+    const endBtn = document.getElementById('end-call-btn');
+    if (endBtn) endBtn.style.display = '';
+    vapiCallActive = true;
+    addLine('agent','AGENT','Call placed successfully. Your phone is ringing now. Answer to begin the intake conversation.');
+    log('🎙 Outbound call placed · ID: ' + data.id.slice(0,8) + '…');
+  } catch(e) {
+    log('⚠ Call failed (' + (e.message||e) + ') — running simulation');
+    clearInterval(callTimer);
+    document.getElementById('vapi-call-box').style.display = 'none';
+    document.getElementById('vapi-connect-panel').style.display = '';
+    runVoiceSimulation();
+  }
+}
+
+function endLiveCall() {
+  if (vapiClient && vapiCallActive) { vapiClient.stop(); }
+  onCallComplete();
+}
+
+function runVoiceSimulation() {
+  document.getElementById('vapi-connect-panel').style.display = 'none';
+  document.getElementById('vapi-call-box').style.display = '';
+  const t = document.getElementById('transcript');
+  t.innerHTML = '';
+  startCallTimer();
+  const badge = document.getElementById('call-badge-live');
+  if (badge) badge.innerHTML = '<span class="call-dot"></span> Simulated demo';
+  voiceScript.forEach(line => {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 't-line';
+      el.innerHTML = `<span class="t-speaker ${line.speaker}">${line.speaker === 'agent' ? 'AGENT' : 'CM'}</span><span class="t-text">${line.text}</span>`;
+      t.appendChild(el);
+      t.scrollTop = t.scrollHeight;
+    }, line.delay);
+  });
+  setTimeout(() => onCallComplete(), 46000);
+}
+
+function placeOutboundCall(ref) {
+  const d = episodeData[ref];
+  if (!d) return;
+  const btn = document.getElementById('outbound-btn-active');
+  const status = document.getElementById('outbound-status-active');
+  if (btn) { btn.disabled = true; btn.textContent = 'Calling...'; }
+  const missingFields = [];
+  if (d.auth === 'MISSING') missingFields.push('authorization reference number');
+  if (d.appt === 'MISSING') missingFields.push('appointment window (preferred date and time)');
+  if (d.transport === 'MISSING') missingFields.push('transportation confirmation');
+  if (d.language === '—') missingFields.push('patient language and interpreter requirement');
+  const context = missingFields.length > 0
+    ? `You are calling to complete an incomplete Equipment Referral. Patient: ${d.name}. Claim: ${d.claim}. Case Manager: ${d.cm}. Missing fields needed: ${missingFields.join(', ')}. Ask only for these fields. Be concise and professional.`
+    : `You are following up on a completed Equipment Referral for ${d.name}, claim ${d.claim}. Confirm with ${d.cm} that the referral was received and the appointment on ${d.appt} is confirmed.`;
+  fetch('/.netlify/functions/place-call', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      assistantId: VAPI_ASSISTANT_ID,
+      phoneNumberId: VAPI_PHONE_NUMBER_ID,
+      assistantOverrides: { firstMessage: `Hello, this is the Intake Coordination intake agent. May I speak with ${d.cm}?`, endCallPhrases: [], model: { provider: 'openai', model: 'gpt-4o', messages: [{ role: 'system', content: context + ' IMPORTANT: Do NOT say goodbye or end the call until you have collected and confirmed every required field. Only close the call after giving the caller a full summary.' }] } },
+      customer: { number: OUTBOUND_TEST_NUMBER, name: d.cm }
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (btn) { btn.textContent = '📞 Call Case Manager'; btn.disabled = false; }
+    if (status) { status.textContent = res.id ? `✓ Call placed · ID ${res.id.slice(0,8)}…` : (res.message || 'Call initiated'); status.style.color = res.id ? 'var(--green)' : 'var(--red)'; }
+  })
+  .catch(err => {
+    if (btn) { btn.textContent = '📞 Call Case Manager'; btn.disabled = false; }
+    if (status) { status.textContent = '⚠ ' + err.message; status.style.color = 'var(--red)'; }
+  });
+}
+
+// ── ESCALATION MODAL ──
+const escApproved = {1: false, 2: false, 3: false};
+
+function openEscalation() {
+  document.getElementById('esc-modal').classList.add('open');
+  setStatus('ESCALATED','escalated');
+  log('⚠ 3 low-confidence fields flagged — escalated to associate queue');
+}
+
+function approveField(n) {
+  escApproved[n] = true;
+  const field = document.getElementById('esc-f'+n);
+  field.classList.remove('overridden');
+  field.classList.add('approved');
+  const val = document.getElementById('esc-i'+n).value;
+  document.getElementById('esc-l'+n).textContent = '✓ Approved by associate — value confirmed: ' + val;
+  updateEscRemaining();
+}
+
+function overrideField(n) {
+  const val = document.getElementById('esc-i'+n).value.trim();
+  if (!val) return;
+  escApproved[n] = true;
+  const field = document.getElementById('esc-f'+n);
+  field.classList.remove('approved');
+  field.classList.add('overridden');
+  document.getElementById('esc-l'+n).textContent = '✏ Overridden by associate — new value: ' + val;
+  updateEscRemaining();
+}
+
+function updateEscRemaining() {
+  const count = Object.values(escApproved).filter(v => v).length;
+  const remaining = 3 - count;
+  const el = document.getElementById('esc-remaining');
+  el.textContent = remaining > 0 ? remaining + ' field' + (remaining > 1 ? 's' : '') + ' pending review' : '✓ All fields reviewed';
+  el.style.color = remaining === 0 ? 'var(--green)' : 'var(--gray)';
+  const btn = document.getElementById('esc-confirm-btn');
+  btn.disabled = remaining > 0;
+  btn.style.opacity = remaining === 0 ? '1' : '.4';
+  btn.style.cursor = remaining === 0 ? 'pointer' : 'not-allowed';
+}
+
+function confirmEscalation() {
+  document.getElementById('esc-modal').classList.remove('open');
+  setStatus('INCOMPLETE','incomplete');
+  log('✓ Associate review complete — 3 fields confirmed');
+  log('→ Proceeding to completeness check');
+  goTo(4);
+}
+
+function goTo(n) {
+  sections.forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById(sections[n]).classList.add('active');
+
+  for (let i=1; i<=7; i++) {
+    const el = document.getElementById('step-'+i);
+    if (!el) continue;
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+    const num = el.querySelector('.step-num');
+    if (i < n) num.textContent = '✓';
+    else num.textContent = i;
+  }
+
+  document.getElementById('progress').style.width = progress[n] + '%';
+
+  if (n===1 || n===2 || n===3 || n===4) setStatus('INCOMPLETE','incomplete');
+  if (n===5) setStatus('AWAITING EMAIL REPLY','awaiting-email');
+  if (n===6) setStatus('AWAITING CALL BACK','awaiting-call');
+  if (n===7) setStatus('ROUTED','routed');
+
+  const msgs = logMsgs[n];
+  if (msgs) {
+    const list = Array.isArray(msgs) ? msgs : (msgs[channel] || []);
+    list.forEach((m,i) => setTimeout(() => log(m), i*220));
+  }
+
+  if (n===1 && channel==='voice') {
+    document.getElementById('fax-intake').style.display = 'none';
+    document.getElementById('voice-intake').style.display = '';
+    document.getElementById('sec1-next').style.display = 'none';
+    document.getElementById('vapi-connect-panel').style.display = '';
+    document.getElementById('vapi-call-box').style.display = 'none';
+    const msgs = logMsgs[1] && logMsgs[1].voice ? logMsgs[1].voice : [];
+    msgs.forEach((m,i) => setTimeout(() => log(m), i*220));
+  } else if (n===1 && channel==='fax') {
+    document.getElementById('fax-intake').style.display = '';
+    document.getElementById('voice-intake').style.display = 'none';
+    document.getElementById('sec1-next').style.display = '';
+  }
+}
+
+function switchNormTab(idx) {
+  document.querySelectorAll('#sec-2 .tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  for(let i=0;i<=8;i++){
+    const p = document.getElementById('nt-'+i);
+    if(p) p.classList.toggle('active', i===idx);
+  }
+}
+
+// Document list management
+let docIdCounter = 4;
+function addDoc() {
+  const name = document.getElementById('new-doc-name').value.trim();
+  if (!name) return;
+  const type = document.getElementById('new-doc-type').value;
+  const statusVal = document.getElementById('new-doc-status').value;
+  const icons = {'received':'📄','required':'📋','optional':'📎'};
+  const labels = {'received':'✓ Received','required':'⚠ Missing','optional':'○ Optional'};
+  const el = document.createElement('div');
+  el.className = `doc-item ${statusVal}`;
+  el.dataset.id = docIdCounter++;
+  el.innerHTML = `<div class="doc-icon">${icons[statusVal]}</div><div class="doc-name">${name}</div><div class="doc-type-tag">${type}</div><div class="doc-status">${labels[statusVal]}</div>`;
+  document.getElementById('doc-list').appendChild(el);
+  document.getElementById('new-doc-name').value = '';
+}
+
+const docPreviews = {
+  0: {
+    icon:'📄', name:'WC-2026-084431_ReferralForm.pdf', sub:'Fax intake · Received 2026-04-28 · 3 pages',
+    raw:`<div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">COASTAL INSURANCE GROUP</div><div class="rd-title">Equipment Referral / PRIOR AUTHORIZATION REQUEST</div><div style="font-size:10px;margin-top:4px;color:#888">Fax: (714) 555-0190 &nbsp;·&nbsp; Date: 04/28/2026 &nbsp;·&nbsp; Pages: 3</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Claim Information</div>
+        <div class="rd-row"><span class="rd-label">Claim #:</span><span class="rd-val">WC-2026-084431</span></div>
+        <div class="rd-row"><span class="rd-label">Date of Injury:</span><span class="rd-val">03/22/2026</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Patient Information</div>
+        <div class="rd-row"><span class="rd-label">Name:</span><span class="rd-val rd-handwritten">James Holloway</span></div>
+        <div class="rd-row"><span class="rd-label">Date of Birth:</span><span class="rd-val rd-handwritten">03/14/1978</span></div>
+        <div class="rd-row"><span class="rd-label">Address:</span><span class="rd-val">4821 Elmwood Dr, Anaheim CA 92801</span></div>
+        <div class="rd-row"><span class="rd-label">Language:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (not completed)</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Referring Physician</div>
+        <div class="rd-row"><span class="rd-label">Physician:</span><span class="rd-val">Dr. Kevin O'Brien, MD</span></div>
+        <div class="rd-row"><span class="rd-label">NPI:</span><span class="rd-val">1234567890</span></div>
+        <div class="rd-row"><span class="rd-label">Practice:</span><span class="rd-val">Anaheim Sports &amp; Orthopedic</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Adjuster / Case Manager</div>
+        <div class="rd-row"><span class="rd-label">Adjuster:</span><span class="rd-val">Maria Santos &nbsp; 714-555-0192 &nbsp; m.santos@coastalins.com</span></div>
+        <div class="rd-row"><span class="rd-label">Case Manager:</span><span class="rd-val">Linda Torres &nbsp; l.torres@coastalins.com</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Diagnosis</div>
+        <div class="rd-row"><span class="rd-label">ICD-10:</span><span class="rd-val">M23.611</span></div>
+        <div class="rd-row"><span class="rd-label">Description:</span><span class="rd-val">ACL tear, right knee</span></div>
+        <div class="rd-row"><span class="rd-label">Surgery:</span><span class="rd-val">ACL reconstruction 04/10/2026</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Equipment Requested</div>
+        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val">Rollator Walker — 4-wheel</span></div>
+        <div class="rd-row"><span class="rd-label">HCPCS / Qty:</span><span class="rd-val">E0143 &nbsp; / &nbsp; 1 unit</span></div>
+        <div class="rd-row"><span class="rd-label">Justification:</span><span class="rd-val">Post-ACL instability. Mobility support required during recovery.</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Authorization</div>
+        <div class="rd-row"><span class="rd-label">Auth Reference #:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (not completed)</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Scheduling</div>
+        <div class="rd-row"><span class="rd-label">Appt Window:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (not completed)</span></div>
+        <div class="rd-row"><span class="rd-label">Transportation:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (not completed)</span></div>
+      </div>
+    </div>`,
+    sections:[
+      {title:'§1 · Worker Details', rows:[
+        {ok:true,  field:'Patient Name',        val:'James Holloway'},
+        {ok:true,  field:'Date of Birth',       val:'1978-03-14'},
+        {ok:true,  field:'Home Address',        val:'4821 Elmwood Dr, Anaheim CA 92801'},
+        {ok:false, field:'Language / Interpreter', val:'Not found on form'},
+      ]},
+      {title:'§2 · Insurance', rows:[
+        {ok:true,  field:'Carrier',             val:'Coastal Insurance Group'},
+        {ok:true,  field:'Claim Number',        val:'WC-2026-084431'},
+        {ok:false, field:'Auth Reference',      val:'Not found on form'},
+      ]},
+      {title:'§3 · Adjuster & Case Manager', rows:[
+        {ok:true,  field:'Adjuster',            val:'Maria Santos · 714-555-0192'},
+        {ok:true,  field:'Adjuster Email',      val:'m.santos@coastalins.com'},
+        {ok:true,  field:'Case Manager',        val:'Linda Torres · l.torres@coastalins.com'},
+      ]},
+      {title:'§4 · Referring Provider', rows:[
+        {ok:true,  field:'Physician',           val:'Dr. Kevin O\'Brien, MD'},
+        {ok:true,  field:'NPI',                 val:'1234567890'},
+        {ok:true,  field:'Practice',            val:'Anaheim Sports & Orthopedic'},
+      ]},
+      {title:'§5 · Diagnosis', rows:[
+        {ok:true,  field:'ICD-10',              val:'M23.611 — ACL tear, right knee'},
+        {ok:true,  field:'Body Part',           val:'Right knee'},
+        {ok:true,  field:'Surgical History',    val:'ACL reconstruction 2026-04-10'},
+      ]},
+      {title:'§6 · Services Requested', rows:[
+        {ok:true,  field:'Equipment Item',            val:'Rollator Walker — 4-wheel, bariatric'},
+        {ok:true,  field:'HCPCS Code',          val:'E0143'},
+        {ok:true,  field:'Quantity',            val:'1'},
+        {ok:true,  field:'Justification',       val:'Bariatric rating required (285 lbs). Post-ACL instability.'},
+      ]},
+      {title:'§9 · Scheduling', rows:[
+        {ok:false, field:'Appointment Window',  val:'Not provided'},
+        {ok:false, field:'Transportation',      val:'Not provided'},
+      ]},
+    ]
+  },
+  1: {
+    icon:'🩺', name:'WC-2026-084431_ClinicalNotes.pdf', sub:'Physician Notes · Dr. Kevin O\'Brien · 2026-04-27',
+    raw:`<div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">ANAHEIM SPORTS &amp; ORTHOPEDIC</div><div class="rd-title">CLINICAL NOTES — EQUIPMENT JUSTIFICATION</div><div style="font-size:10px;margin-top:4px;color:#888">Patient: James Holloway &nbsp;·&nbsp; DOB: 03/14/1978 &nbsp;·&nbsp; Date: 04/27/2026</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Clinical Narrative</div>
+        <div style="line-height:1.8;color:#222">Patient is 18 days post right ACL reconstruction (04/10/2026). Currently non-weight-bearing on right lower extremity. Requires durable mobility aid for safe ambulation during rehabilitation phase. Standard walker contraindicated due to bariatric status (285 lbs).</div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Functional Status</div>
+        <div class="rd-row"><span class="rd-label">Mobility:</span><span class="rd-val">Non-weight-bearing right leg · Using axillary crutches</span></div>
+        <div class="rd-row"><span class="rd-label">Weight:</span><span class="rd-val">285 lbs — bariatric equipment required</span></div>
+        <div class="rd-row"><span class="rd-label">ADL Impact:</span><span class="rd-val">Unable to perform daily activities independently</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Treatment Plan</div>
+        <div style="line-height:1.8;color:#222">Physical therapy to begin week 3 post-op. Progressive weight-bearing protocol over 8 weeks. equipment re-evaluation at 6-week follow-up appointment (approx. 05/22/2026).</div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Physician Attestation</div>
+        <div class="rd-row"><span class="rd-label">Signed:</span><span class="rd-val rd-handwritten" style="font-size:17px">Dr. Kevin O'Brien, MD &nbsp;·&nbsp; NPI 1234567890</span></div>
+        <div class="rd-row"><span class="rd-label">Date:</span><span class="rd-val rd-handwritten">04/27/2026</span></div>
+      </div>
+    </div>`,
+    sections:[
+      {title:'§8 · Provider Notes', rows:[
+        {ok:true, field:'Clinical Narrative',   val:'Patient 18 days post right ACL reconstruction. Non-weight-bearing. Requires mobility aid for safe ambulation during recovery phase.'},
+        {ok:true, field:'Functional Status',    val:'Non-weight-bearing right leg. Uses crutches. Bariatric (285 lbs) — standard walker insufficient.'},
+        {ok:true, field:'Treatment Plan',       val:'PT begins week 3. Weight-bearing progression over 8 weeks. Re-evaluate equipment at 6-week follow-up.'},
+        {ok:true, field:'Physician Signature',  val:'Dr. Kevin O\'Brien, MD · Signed 2026-04-27'},
+      ]},
+    ]
+  },
+  2: {
+    icon:'🖼️', name:'WC-2026-084431_RxPrescription.jpg', sub:'Scanned Prescription · Signed 2026-04-28',
+    raw:`<div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">ANAHEIM SPORTS &amp; ORTHOPEDIC</div><div class="rd-title">PRESCRIPTION — DURABLE MEDICAL EQUIPMENT</div><div style="font-size:10px;margin-top:4px;color:#888">Dr. Kevin O'Brien, MD &nbsp;·&nbsp; NPI 1234567890 &nbsp;·&nbsp; 04/28/2026</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Patient</div>
+        <div class="rd-row"><span class="rd-label">Name:</span><span class="rd-val">James Holloway</span></div>
+        <div class="rd-row"><span class="rd-label">DOB:</span><span class="rd-val">03/14/1978</span></div>
+        <div class="rd-row"><span class="rd-label">Claim #:</span><span class="rd-val">WC-2026-084431</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Prescribed Item</div>
+        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val rd-handwritten">Rollator Walker — 4-wheel</span></div>
+        <div class="rd-row"><span class="rd-label">Specifications:</span><span class="rd-blank" style="color:#dc2626;font-style:italic">&nbsp;not specified</span></div>
+        <div class="rd-row"><span class="rd-label">HCPCS:</span><span class="rd-val">E0143</span></div>
+        <div class="rd-row"><span class="rd-label">Quantity:</span><span class="rd-val rd-handwritten">1 unit</span></div>
+        <div class="rd-row"><span class="rd-label">No Substitution:</span><span class="rd-val">[ ] Yes &nbsp;&nbsp; [X] No — substitution permitted</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Signature</div>
+        <div class="rd-row"><span class="rd-label">Signed:</span><span class="rd-val rd-handwritten" style="font-size:17px">Kevin O'Brien</span></div>
+        <div class="rd-row"><span class="rd-label">Date:</span><span class="rd-val rd-handwritten">04/28/2026</span></div>
+        <div class="rd-row"><span class="rd-label">License:</span><span class="rd-val">CA-MD-445821</span></div>
+      </div>
+    </div>`,
+    sections:[
+      {title:'§7 · Prescription Details', rows:[
+        {ok:true,  field:'Prescribed Item',     val:'Rollator Walker — 4-wheel'},
+        {ok:false, field:'Specifications',      val:'not specified'},
+        {ok:true,  field:'Signed By',           val:'Dr. Kevin O\'Brien, MD'},
+        {ok:true,  field:'Date Signed',         val:'2026-04-28'},
+        {ok:true,  field:'No Substitution',     val:'false — substitution permitted'},
+        {ok:true,  field:'DEA / NPI',           val:'NPI 1234567890'},
+      ]},
+    ]
+  },
+  3: {
+    icon:'📋', name:'Authorization Document', sub:'⚠ Not received — required before routing',
+    raw:`<div class="raw-doc" style="text-align:center;padding:40px 24px">
+      <div style="font-size:48px;margin-bottom:16px">📭</div>
+      <div style="font-size:15px;font-weight:800;color:#dc2626;margin-bottom:8px">Document Not Received</div>
+      <div style="font-size:12px;color:#666;line-height:1.7">Authorization document was not included in the fax package.<br>This field is required before the referral can be routed.<br><br>Outreach to case manager has been initiated to collect<br>the authorization reference number.</div>
+    </div>`,
+    sections:[
+      {title:'§2 · Required Authorization Fields', rows:[
+        {ok:false, field:'Auth Reference #',    val:'Awaiting from case manager'},
+        {ok:false, field:'Auth Date Range',     val:'Not provided'},
+        {ok:false, field:'Approved Items',      val:'Not confirmed'},
+        {ok:false, field:'Authorized By',       val:'Not provided'},
+      ]},
+    ]
+  }
+};
+
+// Rivera fax documents (indices 10-12)
+Object.assign(docPreviews, {
+  10: {
+    icon:'📄', name:'WC-2026-102847_ReferralForm.pdf', sub:'Fax intake · Received 2026-04-30 · 3 pages',
+    raw:`<div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">PACIFIC MUTUAL INSURANCE</div><div class="rd-title">Equipment Referral / PRIOR AUTHORIZATION REQUEST</div><div style="font-size:10px;margin-top:4px;color:#888">Fax: (415) 555-0140 &nbsp;·&nbsp; Date: 04/30/2026 &nbsp;·&nbsp; Pages: 3</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Claim Information</div>
+        <div class="rd-row"><span class="rd-label">Claim #:</span><span class="rd-val rd-handwritten">WC-2026-102847</span></div>
+        <div class="rd-row"><span class="rd-label">Date of Injury:</span><span class="rd-val rd-handwritten">03/18/2026</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Patient Information</div>
+        <div class="rd-row"><span class="rd-label">Name:</span><span class="rd-val rd-handwritten">Thomas Rivera</span></div>
+        <div class="rd-row"><span class="rd-label">Date of Birth:</span><span class="rd-val rd-handwritten">08/09/1965</span></div>
+        <div class="rd-row"><span class="rd-label">Address:</span><span class="rd-val">445 Market St, San Francisco, CA 94105</span></div>
+        <div class="rd-row"><span class="rd-label">Language:</span><span class="rd-val rd-handwritten">English</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Referring Physician</div>
+        <div class="rd-row"><span class="rd-label">Physician:</span><span class="rd-val">Dr. Sarah Reeves, MD</span></div>
+        <div class="rd-row"><span class="rd-label">NPI:</span><span class="rd-val">5432167890</span></div>
+        <div class="rd-row"><span class="rd-label">Practice:</span><span class="rd-val">SF Orthopedic &amp; Rehab</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Adjuster / Case Manager</div>
+        <div class="rd-row"><span class="rd-label">Adjuster:</span><span class="rd-val">Kevin Park &nbsp; 415-555-0142 &nbsp; k.park@pacificmutual.com</span></div>
+        <div class="rd-row"><span class="rd-label">Case Manager:</span><span class="rd-val">David Chen &nbsp; d.chen@pacificmutual.com</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Diagnosis</div>
+        <div class="rd-row"><span class="rd-label">ICD-10:</span><span class="rd-val">M79.621</span></div>
+        <div class="rd-row"><span class="rd-label">Description:</span><span class="rd-val">Pain in right forearm — post-traumatic occupational injury</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Equipment Requested</div>
+        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val rd-handwritten">Forearm Crutches</span></div>
+        <div class="rd-row"><span class="rd-label">HCPCS / Qty:</span><span class="rd-val">E0110 &nbsp; / &nbsp; 1 unit</span></div>
+        <div class="rd-row"><span class="rd-label">Justification:</span><span class="rd-val">Non-weight-bearing right forearm. Crutches required for safe ambulation.</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Authorization</div>
+        <div class="rd-row"><span class="rd-label">Auth Reference #:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (not completed)</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Scheduling</div>
+        <div class="rd-row"><span class="rd-label">Appt Window:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (not completed)</span></div>
+        <div class="rd-row"><span class="rd-label">Transportation:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (not completed)</span></div>
+      </div>
+    </div>`,
+    sections:[
+      {title:'§1 · Worker Details', rows:[
+        {ok:true,  field:'Patient Name',        val:'Thomas Rivera'},
+        {ok:true,  field:'Date of Birth',       val:'1965-08-09'},
+        {ok:true,  field:'Home Address',        val:'445 Market St, San Francisco, CA 94105'},
+        {ok:true,  field:'Language',            val:'English'},
+      ]},
+      {title:'§2 · Insurance', rows:[
+        {ok:true,  field:'Carrier',             val:'Pacific Mutual Insurance'},
+        {ok:true,  field:'Claim Number',        val:'WC-2026-102847'},
+        {ok:false, field:'Auth Reference',      val:'Not found on form'},
+      ]},
+      {title:'§3 · Adjuster & Case Manager', rows:[
+        {ok:true,  field:'Adjuster',            val:'Kevin Park · 415-555-0142'},
+        {ok:true,  field:'Case Manager',        val:'David Chen · d.chen@pacificmutual.com'},
+      ]},
+      {title:'§4 · Referring Provider', rows:[
+        {ok:true,  field:'Physician',           val:'Dr. Sarah Reeves, MD'},
+        {ok:true,  field:'NPI',                 val:'5432167890'},
+        {ok:true,  field:'Practice',            val:'SF Orthopedic & Rehab'},
+      ]},
+      {title:'§5 · Diagnosis', rows:[
+        {ok:true,  field:'ICD-10',              val:'M79.621 — Pain in right forearm'},
+        {ok:true,  field:'Body Part',           val:'Right forearm'},
+      ]},
+      {title:'§6 · Services Requested', rows:[
+        {ok:true,  field:'Equipment Item',      val:'Forearm Crutches'},
+        {ok:true,  field:'HCPCS Code',          val:'E0110'},
+        {ok:true,  field:'Quantity',            val:'1'},
+      ]},
+      {title:'§9 · Scheduling', rows:[
+        {ok:false, field:'Appointment Window',  val:'Not provided'},
+        {ok:false, field:'Transportation',      val:'Not provided'},
+      ]},
+    ]
+  },
+  11: {
+    icon:'💊', name:'WC-2026-102847_RxPrescription.jpg', sub:'Scanned Prescription · Signed 2026-04-30',
+    raw:`<div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">SF ORTHOPEDIC &amp; REHAB</div><div class="rd-title">PRESCRIPTION — DURABLE MEDICAL EQUIPMENT</div><div style="font-size:10px;margin-top:4px;color:#888">Dr. Sarah Reeves, MD &nbsp;·&nbsp; NPI 5432167890 &nbsp;·&nbsp; 04/30/2026</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Patient</div>
+        <div class="rd-row"><span class="rd-label">Name:</span><span class="rd-val rd-handwritten">Thomas Rivera</span></div>
+        <div class="rd-row"><span class="rd-label">DOB:</span><span class="rd-val rd-handwritten">08/09/1965</span></div>
+        <div class="rd-row"><span class="rd-label">Claim #:</span><span class="rd-val rd-handwritten">WC-2026-102847</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Prescribed Item</div>
+        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val rd-handwritten">Forearm Crutches</span></div>
+        <div class="rd-row"><span class="rd-label">HCPCS:</span><span class="rd-val">E0110</span></div>
+        <div class="rd-row"><span class="rd-label">Quantity:</span><span class="rd-val rd-handwritten">1 pair</span></div>
+        <div class="rd-row"><span class="rd-label">No Substitution:</span><span class="rd-val">[ ] Yes &nbsp;&nbsp; [X] No — substitution permitted</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Signature</div>
+        <div class="rd-row"><span class="rd-label">Signed:</span><span class="rd-val rd-handwritten" style="font-size:17px">Sarah Reeves</span></div>
+        <div class="rd-row"><span class="rd-label">Date:</span><span class="rd-val rd-handwritten">04/30/2026</span></div>
+        <div class="rd-row"><span class="rd-label">License:</span><span class="rd-val">CA-MD-338812</span></div>
+      </div>
+    </div>`,
+    sections:[
+      {title:'§7 · Prescription Details', rows:[
+        {ok:true,  field:'Prescribed Item',     val:'Forearm Crutches'},
+        {ok:true,  field:'HCPCS Code',          val:'E0110'},
+        {ok:true,  field:'Quantity',            val:'1 pair'},
+        {ok:true,  field:'Signed By',           val:'Dr. Sarah Reeves, MD'},
+        {ok:true,  field:'Date Signed',         val:'2026-04-30'},
+      ]},
+    ]
+  },
+  12: {
+    icon:'🩺', name:'ClinicalNotes_Rivera.pdf', sub:'Physician Notes · Dr. Sarah Reeves · 2026-04-29',
+    raw:`<div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">SF ORTHOPEDIC &amp; REHAB</div><div class="rd-title">CLINICAL NOTES — EQUIPMENT JUSTIFICATION</div><div style="font-size:10px;margin-top:4px;color:#888">Patient: Thomas Rivera &nbsp;·&nbsp; DOB: 08/09/1965 &nbsp;·&nbsp; Date: 04/29/2026</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Clinical Narrative</div>
+        <div style="line-height:1.8;color:#222">Patient sustained a post-traumatic occupational injury to the right forearm on 03/18/2026. Currently non-weight-bearing on right upper extremity. Requires forearm crutches for safe ambulation and to offload stress from the injured limb during recovery phase.</div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Functional Status</div>
+        <div class="rd-row"><span class="rd-label">Mobility:</span><span class="rd-val">Ambulatory — right forearm non-weight-bearing</span></div>
+        <div class="rd-row"><span class="rd-label">Weight:</span><span class="rd-val">172 lbs — standard equipment appropriate</span></div>
+        <div class="rd-row"><span class="rd-label">ADL Impact:</span><span class="rd-val">Unable to carry objects or use standard crutch grip</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Treatment Plan</div>
+        <div style="line-height:1.8;color:#222">Forearm immobilization for 6 weeks. Progressive rehab with occupational therapy. Equipment re-evaluation at 6-week follow-up (approx. 05/29/2026).</div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Physician Attestation</div>
+        <div class="rd-row"><span class="rd-label">Signed:</span><span class="rd-val rd-handwritten" style="font-size:17px">Dr. Sarah Reeves, MD &nbsp;·&nbsp; NPI 5432167890</span></div>
+        <div class="rd-row"><span class="rd-label">Date:</span><span class="rd-val rd-handwritten">04/29/2026</span></div>
+      </div>
+    </div>`,
+    sections:[
+      {title:'§8 · Provider Notes', rows:[
+        {ok:true, field:'Clinical Narrative',   val:'Post-traumatic right forearm injury. Non-weight-bearing. Forearm crutches required for safe ambulation.'},
+        {ok:true, field:'Functional Status',    val:'Right forearm NWB. Standard equipment weight-appropriate (172 lbs).'},
+        {ok:true, field:'Treatment Plan',       val:'Immobilization 6 weeks. OT rehab. Re-evaluate at 6-week follow-up.'},
+        {ok:true, field:'Physician Signature',  val:'Dr. Sarah Reeves, MD · Signed 2026-04-29'},
+      ]},
+    ]
+  }
+});
+
+function openDocPreview(id) {
+  const d = docPreviews[id];
+  if (!d) return;
+  document.getElementById('dm-icon').textContent = d.icon;
+  document.getElementById('dm-name').textContent = d.name;
+  document.getElementById('dm-sub').textContent = d.sub;
+  // Raw document pane
+  document.getElementById('dpane-0').innerHTML = d.raw || '<div style="padding:20px;color:var(--gray);text-align:center">No preview available</div>';
+  // Extracted data pane
+  const extracted = d.sections.map(sec => `
+    <div class="cl-section">
+      <div class="cl-title">${sec.title}</div>
+      ${sec.rows.map(r => `
+        <div class="cl-row">
+          <div class="cl-check ${r.ok?'ok':'miss'}">${r.ok?'✓':'✕'}</div>
+          <div class="cl-field">${r.field}</div>
+          <div class="cl-val ${r.ok?'':'missing'}">${r.val}</div>
+        </div>`).join('')}
+    </div>`).join('');
+  document.getElementById('dpane-1').innerHTML = extracted;
+  // Reset to raw tab
+  switchDocTab(0);
+  document.getElementById('doc-modal').classList.add('open');
+}
+
+function switchDocTab(idx) {
+  [0,1].forEach(i => {
+    document.getElementById('dtab-'+i).classList.toggle('active', i===idx);
+    document.getElementById('dpane-'+i).classList.toggle('active', i===idx);
+  });
+}
+
+function closeDocPreview() {
+  document.getElementById('doc-modal').classList.remove('open');
+}
+
+const episodeData = {
+  mendez:{name:'Carlos Mendez',dob:'1979-09-05',claim:'WC-2026-095678',epid:'EP-20260430-WC2026095678',priority:'HIGH 8',pc:'red',channel:'fax',status:'Routed',sc:'routed',address:'2244 Figueroa St, Los Angeles, CA 90007',language:'Spanish',interpreter:'required',carrier:'LA County Workers Comp Fund',auth:'AUTH-2026-LAC-8820',adjuster:'Rosa Alvarez',cm:'Brian Kim',cmEmail:'b.kim@lacwcf.com',physician:'Dr. Marco Reyes',npi:'6549873210',practice:'LA Workers Comp Medical Group',icd:'S83.006A',dx:'Unspecified tear of medial meniscus, right knee',surgery:'Arthroscopic meniscectomy 2026-04-15',item:'Knee Immobilizer',hcpcs:'L1820',qty:1,appt:'2026-05-06 · 11:00–13:00',transport:'arranged (interpreter + transport coordinated)',resolution:'Routed via outbound voice call · 2026-04-30 · Call 2:12 · All fields resolved',rclass:''},
+  rodriguez:{name:'Maria Rodriguez',dob:'1985-07-22',claim:'WC-2026-091205',epid:'EP-20260501-WC2026091205',priority:'MED 6',pc:'yellow',channel:'fax',status:'Awaiting Email Reply',sc:'awaiting-email',address:'312 Sunset Ave, Santa Ana, CA 92701',language:'—',interpreter:'—',carrier:'Pacific Coast Workers Comp',auth:'MISSING',adjuster:'Tom Bradley',cm:'Angela Reyes',cmEmail:'a.reyes@pcwc.com',physician:'Dr. Susan Park',npi:'9876543210',practice:'Orange County Spine & Rehab',icd:'M54.5',dx:'Lumbar disc herniation — L4-L5, post-surgical',surgery:'L4-L5 microdiscectomy 2026-04-10',item:'Power Wheelchair',hcpcs:'K0001',qty:1,appt:'MISSING',transport:'MISSING',resolution:'Email outreach sent 2026-05-01 · Awaiting CM response · Deadline 2026-05-02 09:00',rclass:'pending'},
+  chen:{name:'Robert Chen',dob:'1971-11-03',claim:'WC-2026-077834',epid:'EP-20260430-WC2026077834',priority:'MED 5',pc:'yellow',channel:'fax',status:'Routed',sc:'routed',address:'887 Garden Grove Blvd, Garden Grove, CA 92843',language:'English',interpreter:'false',carrier:'CalComp Insurance',auth:'AUTH-2026-CC-3312',adjuster:'Patricia Lowe',cm:'Derek Moss',cmEmail:'d.moss@calcomp.com',physician:'Dr. Raymond Torres',npi:'4561237890',practice:'South Bay Orthopedics',icd:'S52.501A',dx:'Fracture of lower end of radius, right — post-casting',surgery:'ORIF right distal radius 2026-04-02',item:'CPAP Machine',hcpcs:'E0601',qty:1,appt:'2026-05-03 · 14:00–16:00',transport:'home delivery',resolution:'Routed via email · CM responded 2h 27m after outreach · 2026-04-30',rclass:''},
+  foster:{name:'Diane Foster',dob:'1963-02-17',claim:'WC-2026-083101',epid:'EP-20260430-WC2026083101',priority:'MED 6',pc:'yellow',channel:'fax',status:'Routed',sc:'routed',address:'1490 Lincoln Ave, Pasadena, CA 91103',language:'English',interpreter:'false',carrier:'Western Mutual Workers Comp',auth:'AUTH-2026-WM-5589',adjuster:'James Cortez',cm:'Tina Walsh',cmEmail:'t.walsh@westernmutual.com',physician:'Dr. Lisa Nguyen',npi:'3214569870',practice:'Pasadena Orthopedic Group',icd:'M16.11',dx:'Unilateral primary osteoarthritis, right hip — post total hip replacement',surgery:'Total hip arthroplasty 2026-04-18',item:'Hospital Bed Semi-Electric',hcpcs:'E0260',qty:1,appt:'2026-05-02 · 09:00–11:00',transport:'home delivery',resolution:'Routed via email · CM responded 18h 30m after outreach · 2026-05-01',rclass:''},
+  kim:{name:'Sarah Kim',dob:'1990-04-12',claim:'WC-2026-088944',epid:'EP-20260501-WC2026088944',priority:'LOW 4',pc:'green',channel:'voice',status:'Routed',sc:'routed',address:'5530 Hollywood Blvd, Apt 4B, Los Angeles, CA 90028',language:'English',interpreter:'false',carrier:'State Fund Insurance',auth:'AUTH-2026-SF-2291',adjuster:'Howard Bell',cm:'Nancy Chen',cmEmail:'n.chen@statefund.com',physician:'Dr. Janet Wu',npi:'7891234560',practice:'Hollywood Orthopedic Center',icd:'S42.002A',dx:'Fracture of clavicle, right — post-surgical',surgery:'ORIF right clavicle 2026-04-22',item:'Arm Sling',hcpcs:'A4570',qty:2,appt:'2026-05-02 · 10:00–11:00',transport:'self',resolution:'Complete at intake · Inbound voice (3:41) · CM: Nancy Chen · 2026-05-01',rclass:''},
+  williams:{name:'Marcus Williams',dob:'1968-12-29',claim:'WC-2026-079312',epid:'EP-20260430-WC2026079312',priority:'LOW 3',pc:'green',channel:'voice',status:'Routed',sc:'routed',address:'7741 Long Beach Blvd, Long Beach, CA 90805',language:'English',interpreter:'false',carrier:'SoCal Comp Insurance',auth:'AUTH-2026-SCC-6617',adjuster:'Linda Park',cm:'Greg Simmons',cmEmail:'g.simmons@socalcomp.com',physician:'Dr. Anthony Reed',npi:'2134567891',practice:'Long Beach Spine Institute',icd:'M47.816',dx:'Spondylosis with radiculopathy, lumbar region',surgery:'L3-L4 spinal fusion 2026-04-05',item:'Lumbar Back Brace — Rigid TLSO',hcpcs:'L0631',qty:1,appt:'2026-05-01 · 13:00–15:00',transport:'self',resolution:'Complete at intake · Inbound voice (4:05) · CM: Greg Simmons · 2026-04-30',rclass:''},
+  rivera:{name:'Thomas Rivera',dob:'1965-08-09',claim:'WC-2026-102847',epid:'EP-20260501-WC2026102847',priority:'MED 5',pc:'yellow',channel:'fax',status:'Incomplete — CM Outreach Active',sc:'awaiting-call',address:'445 Market St, San Francisco, CA 94105',language:'English',interpreter:'false',carrier:'Pacific Mutual Insurance',auth:'MISSING',adjuster:'Kevin Park',cm:'David Chen',cmEmail:'d.chen@pacificmutual.com',physician:'Dr. Sarah Reeves',npi:'5432167890',practice:'SF Orthopedic & Rehab',icd:'M79.621',dx:'Pain in right forearm — post-traumatic occupational injury',surgery:'None',item:'Forearm Crutches',hcpcs:'E0110',qty:1,appt:'MISSING',transport:'MISSING',resolution:'Outbound call pending — 3 missing fields: auth ref, appointment window, transportation',rclass:'pending'}
+};
+
+function viewEpisode(ref) {
+  const d = episodeData[ref];
+  if (!d) return;
+  const pCol={red:'var(--red)',yellow:'var(--yellow)',green:'var(--green)'};
+  const pBg={red:'var(--red-l)',yellow:'var(--yellow-l)',green:'var(--green-l)'};
+  document.getElementById('em-name').textContent = d.name;
+  document.getElementById('em-claim').textContent = d.claim + ' · ' + d.epid;
+  document.getElementById('em-priority').innerHTML = `<span style="font-size:11px;font-weight:800;color:${pCol[d.pc]};background:${pBg[d.pc]};padding:2px 9px;border-radius:10px">${d.priority}</span>`;
+  document.getElementById('em-status').innerHTML = `<span class="status-pill ${d.sc}"><span class="status-dot"></span>${d.status}</span>`;
+  const mv = v => v==='MISSING' ? `<span class="ep-value missing">⚠ missing</span>` : `<span class="ep-value">${v}</span>`;
+  document.getElementById('em-body').innerHTML = `
+    <div class="ep-section"><div class="ep-section-title">§1 Worker</div>
+      <div class="ep-row"><span class="ep-label">Name / DOB</span><span class="ep-value">${d.name} · ${d.dob}</span></div>
+      <div class="ep-row"><span class="ep-label">Address</span><span class="ep-value">${d.address}</span></div>
+      <div class="ep-row"><span class="ep-label">Language</span>${mv(d.language)}<span style="margin-left:10px;font-size:11px;color:var(--gray)">Interpreter: ${d.interpreter}</span></div>
+    </div>
+    <div class="ep-section"><div class="ep-section-title">§2 Insurance · §3 Contacts</div>
+      <div class="ep-row"><span class="ep-label">Carrier</span><span class="ep-value">${d.carrier}</span></div>
+      <div class="ep-row"><span class="ep-label">Auth Reference</span>${mv(d.auth)}</div>
+      <div class="ep-row"><span class="ep-label">Adjuster</span><span class="ep-value">${d.adjuster}</span></div>
+      <div class="ep-row"><span class="ep-label">Case Manager</span><span class="ep-value">${d.cm} · ${d.cmEmail}</span></div>
+    </div>
+    <div class="ep-section"><div class="ep-section-title">§4 Provider · §5 Diagnosis</div>
+      <div class="ep-row"><span class="ep-label">Physician</span><span class="ep-value">${d.physician} · NPI ${d.npi}</span></div>
+      <div class="ep-row"><span class="ep-label">Practice</span><span class="ep-value">${d.practice}</span></div>
+      <div class="ep-row"><span class="ep-label">ICD-10</span><span class="ep-value">${d.icd} — ${d.dx}</span></div>
+      <div class="ep-row"><span class="ep-label">Surgery</span><span class="ep-value">${d.surgery}</span></div>
+    </div>
+    <div class="ep-section"><div class="ep-section-title">§6–7 Services &amp; Prescription</div>
+      <div class="ep-row"><span class="ep-label">Equipment Item</span><span class="ep-value">${d.item}</span></div>
+      <div class="ep-row"><span class="ep-label">HCPCS / Qty</span><span class="ep-value">${d.hcpcs} · qty ${d.qty}</span></div>
+    </div>
+    <div class="ep-section"><div class="ep-section-title">§9 Scheduling</div>
+      <div class="ep-row"><span class="ep-label">Appointment</span>${mv(d.appt)}</div>
+      <div class="ep-row"><span class="ep-label">Transportation</span>${mv(d.transport)}</div>
+    </div>
+    <div class="ep-section"><div class="ep-section-title">Resolution</div>
+      <div class="ep-resolution ${d.rclass}">${d.resolution}</div>
+    </div>`;
+  currentEpisodeRef = ref;
+  document.getElementById('outbound-status-active').textContent = '';
+  document.getElementById('outbound-btn-active').disabled = false;
+  document.getElementById('outbound-btn-active').textContent = '📞 Call Case Manager';
+  document.getElementById('ep-modal').classList.add('open');
+}
+
+function closeEpisode() {
+  document.getElementById('ep-modal').classList.remove('open');
+}
+
+function resetDemo() {
+  channel = null;
+  clearInterval(callTimer);
+  callSeconds = 0;
+  document.getElementById('agent-log').innerHTML = '';
+  document.getElementById('ep-id').textContent = '—';
+  document.getElementById('ep-patient').textContent = '—';
+  document.getElementById('ep-claim').textContent = '—';
+  document.getElementById('ep-channel').innerHTML = '—';
+  document.getElementById('ep-status').innerHTML = '';
+  document.getElementById('progress').style.width = '0%';
+  document.getElementById('ch-fax').classList.remove('selected');
+  document.getElementById('ch-voice').classList.remove('selected');
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('doc-package-card').style.display = '';
+  for (let i=1; i<=7; i++) {
+    const el = document.getElementById('step-'+i);
+    if (!el) continue;
+    el.classList.remove('active','done');
+    el.querySelector('.step-num').textContent = i;
+  }
+  // Reset null fields
+  ['nv-lang','nv-interp','nv-auth','nv-appt','nv-transport'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = 'null';
+    el.classList.add('null');
+  });
+  sections.forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('sec-0').classList.add('active');
+}
+
+// ── QUEUE LOAD ──
+let queueLoaded = false;
+function loadQueue() {
+  if (queueLoaded) return;
+  queueLoaded = true;
+  const btn = document.getElementById('queue-load-btn');
+  if (btn) btn.style.display = 'none';
+  const hint = document.getElementById('queue-hint');
+  if (hint) hint.style.display = '';
+  const emptyRow = document.getElementById('queue-empty-row');
+  if (emptyRow) emptyRow.style.display = 'none';
+  const sub = document.getElementById('queue-sub');
+  if (sub) sub.textContent = '7 referrals · 2 voice · 5 fax · Sorted by priority';
+  animateCounter('stat-total',    0, 7, 900);
+  animateCounter('stat-routed',   0, 5, 1100);
+  animateCounter('stat-progress', 0, 2, 800);
+  animateCounter('stat-high',     0, 1, 600);
+  const rows = document.querySelectorAll('.queue-row');
+  rows.forEach((row, i) => setTimeout(() => row.classList.add('visible'), 300 + i * 140));
+  setTimeout(() => startLivePolling(), 1500);
+}
+function animateCounter(id, from, to, duration) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = Date.now();
+  const tick = () => {
+    const p = Math.min((Date.now() - start) / duration, 1);
+    el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// ── AUTO-PLAY ──
+let apTimers = [];
+let apPlaying = false;
+let apPaused = false;
+let apVoiceOn = true;
+
+// ── TTS ──
+let apAgentVoice = null;
+let apCmVoice = null;
+
+function apLoadVoices() {
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  // Prefer a clear female voice for agent, different voice for CM
+  const female = voices.find(v => /samantha|zira|karen|victoria|moira|fiona|susan|aria/i.test(v.name)) || voices.find(v => v.lang === 'en-US') || voices[0];
+  const male = voices.find(v => /david|daniel|alex|mark|ryan|george/i.test(v.name)) || voices.find(v => v.lang === 'en-GB') || voices[1] || female;
+  apAgentVoice = female;
+  apCmVoice = male;
+}
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = apLoadVoices;
+  apLoadVoices();
+}
+
+function apSpeak(text, isAgent = true) {
+  if (!apVoiceOn || !window.speechSynthesis) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = isAgent ? 1.05 : 0.97;
+  u.pitch = isAgent ? 1.1 : 0.95;
+  u.volume = 1;
+  if (isAgent && apAgentVoice) u.voice = apAgentVoice;
+  if (!isAgent && apCmVoice) u.voice = apCmVoice;
+  window.speechSynthesis.speak(u);
+}
+
+function apStopSpeech() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+}
+
+function toggleApVoice() {
+  apVoiceOn = !apVoiceOn;
+  const btn = document.getElementById('ap-voice-btn');
+  if (btn) {
+    btn.textContent = apVoiceOn ? '🔊 Voice On' : '🔇 Voice Off';
+    btn.style.background = apVoiceOn ? 'rgba(34,197,94,.2)' : 'rgba(255,255,255,.08)';
+    btn.style.borderColor = apVoiceOn ? 'rgba(34,197,94,.4)' : 'rgba(255,255,255,.2)';
+  }
+  if (!apVoiceOn) apStopSpeech();
+}
+
+// Call transcript spoken during Step 6
+const apCallScript = [
+  { agent: true,  text: "Hi, this is the Intake Coordination Agent calling for Linda Torres. I'm following up on the referral for James Holloway, claim W-C 2026 dash 084431. Do you have a moment?", delay: 500 },
+  { agent: false, text: "Yes, sorry about that. I've been swamped. Go ahead.", delay: 5000 },
+  { agent: true,  text: "No problem. We just need five things. Do you have the authorization reference number?", delay: 8000 },
+  { agent: false, text: "Yes, it's AUTH 2026 C-I-G 7741.", delay: 11500 },
+  { agent: true,  text: "Got it. What's the preferred appointment window for equipment delivery?", delay: 14500 },
+  { agent: false, text: "Can you do May 5th, between 10 and noon?", delay: 17500 },
+  { agent: true,  text: "Perfect. Will the patient need transportation arranged?", delay: 20500 },
+  { agent: false, text: "No, he'll drive himself.", delay: 23000 },
+  { agent: true,  text: "And the patient's primary language — does he need an interpreter?", delay: 25500 },
+  { agent: false, text: "English only. No interpreter needed.", delay: 28000 },
+  { agent: true,  text: "Last one — the prescription lists a rollator walker but doesn't specify the frame size. Our records show patient weight at 285 pounds, which requires a bariatric frame. Can you confirm bariatric specification?", delay: 31000 },
+  { agent: false, text: "Yes, bariatric — 4-wheel, 400 pound capacity. Sorry that wasn't on the form.", delay: 35000 },
+  { agent: true,  text: "Confirmed — bariatric rollator, 400 pound capacity. All five fields captured. Thank you Linda — your referral is now complete. We'll coordinate delivery and follow up shortly. Have a great day.", delay: 38500 },
+];
+
+const autoPlaySteps = [
+  { t:0,     label:'Loading referral queue…',                     pct:0,   fn:() => loadQueue() },
+  { t:2000,  label:'Step 1 — Fax Intake & Extraction',           pct:0,
+    fn:() => {
+      channel='fax';
+      document.getElementById('ep-id').textContent='EP-20260501-WC2026084431';
+      document.getElementById('ep-patient').textContent='James Holloway';
+      document.getElementById('ep-claim').textContent='WC-2026-084431';
+      document.getElementById('ep-channel').innerHTML='<span class="ch-badge ch-fax">fax</span>';
+      document.getElementById('rv-channel').className='ch-badge ch-fax';
+      document.getElementById('rv-channel').textContent='fax';
+      document.getElementById('nv-channel').textContent='fax';
+      goTo(1);
+      apSpeak("Step 1. Fax referral received for James Holloway, claim W-C 2026 dash 084431. The agent is extracting all fields from the referral package across 3 documents.");
+    }
+  },
+  { t:8000,  label:'Step 2 — Normalization',                     pct:14,
+    fn:() => { goTo(2); apSpeak("Step 2. Normalizing extracted data. Standardizing dates, phone numbers, and H-C-P-C-S codes to match the episode record schema."); }
+  },
+  { t:11000, label:'Step 2 — Insurance Fields',                  pct:18,  fn:() => switchNormTab(1) },
+  { t:13200, label:'Step 2 — Adjuster Fields',                   pct:22,  fn:() => switchNormTab(2) },
+  { t:15400, label:'Step 2 — Provider Fields',                   pct:26,  fn:() => switchNormTab(3) },
+  { t:18000, label:'Step 3 — Intelligence Layer',                pct:43,
+    fn:() => { goTo(3); apSpeak("Step 3. Running the intelligence layer. Validating I-C-D-10 codes, checking H-C-P-C-S to diagnosis match, checking authorization requirements, and scoring this referral by medical urgency and risk."); }
+  },
+  { t:24000, label:'Step 4 — Completeness Check',                pct:57,
+    fn:() => { goTo(4); apSpeak("Step 4. Completeness check. 20 of 25 fields confirmed. 5 fields are missing: authorization reference, appointment window, transportation, language preference, and equipment specification — prescription does not specify bariatric frame. Gap list generated. Initiating outreach."); }
+  },
+  { t:29500, label:'Step 5 — Email Outreach',                    pct:71,
+    fn:() => { goTo(5); apSpeak("Step 5. Outreach email sent to Linda Torres at Coastal Insurance with the 5 missing items. Response window: 24 hours."); }
+  },
+  { t:35500, label:'Step 6 — Voice Resolution Call',             pct:85,
+    fn:() => {
+      goTo(6);
+      apSpeak("Step 6. No email response after 24 hours. The agent is now placing an outbound A-I call to collect the missing fields.");
+      apCallScript.forEach(line => {
+        apTimers.push(setTimeout(() => apSpeak(line.text, line.agent), 35500 + line.delay + 3000));
+      });
+    }
+  },
+  { t:42500, label:'Step 7 — Route Output',                      pct:100,
+    fn:() => { goTo(7); apSpeak("Step 7. All 25 fields confirmed. Episode record locked and dispatched. Referral complete — status: routed."); }
+  },
+  { t:48500, label:'✓ Demo complete — click ↺ Reset to replay',  pct:100,
+    fn:() => {
+      onAutoPlayComplete();
+      apSpeak("Demo complete. The agent processed this referral from incomplete fax to routed episode — autonomously, with human in the loop.");
+    }
+  },
+];
+
+function startAutoPlay() {
+  if (apPlaying) { resetAutoPlay(); return; }
+  apPlaying = true;
+  apPaused = false;
+  apStopSpeech();
+  const bar = document.getElementById('ap-bar');
+  const hbtn = document.getElementById('header-autoplay-btn');
+  if (bar) bar.style.display = 'flex';
+  if (hbtn) { hbtn.textContent = '■ Stop Demo'; hbtn.style.background = '#dc2626'; }
+  const pb = document.getElementById('ap-pause-btn');
+  if (pb) { pb.textContent = '⏸ Pause'; pb.style.display = ''; }
+  apSetLabel('Starting…', 0);
+  apTimers = autoPlaySteps.map(step =>
+    setTimeout(() => { if (!apPaused) { apSetLabel(step.label, step.pct); step.fn(); } }, step.t)
+  );
+}
+
+function apSetLabel(label, pct) {
+  const el = document.getElementById('ap-label');
+  const fill = document.getElementById('ap-fill');
+  if (el) el.textContent = label;
+  if (fill) fill.style.width = pct + '%';
+}
+
+function toggleAutoPlayPause() {
+  if (!apPlaying) return;
+  apPaused = !apPaused;
+  const pb = document.getElementById('ap-pause-btn');
+  if (pb) pb.textContent = apPaused ? '▶ Resume' : '⏸ Pause';
+  if (apPaused) { apStopSpeech(); } else { resetAutoPlay(); startAutoPlay(); }
+}
+
+function resetAutoPlay() {
+  apTimers.forEach(t => clearTimeout(t));
+  apTimers = [];
+  apPlaying = false;
+  apPaused = false;
+  apStopSpeech();
+  const bar = document.getElementById('ap-bar');
+  const hbtn = document.getElementById('header-autoplay-btn');
+  if (bar) bar.style.display = 'none';
+  if (hbtn) { hbtn.textContent = '▶ Auto-Play Demo'; hbtn.style.background = '#15803d'; }
+  apSetLabel('Starting…', 0);
+  sections.forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('sec-0').classList.add('active');
+  for (let i=1; i<=7; i++) {
+    const el = document.getElementById('step-'+i);
+    if (el) { el.classList.remove('active','done'); const n=el.querySelector('.step-num'); if(n) n.textContent=i; }
+  }
+  document.getElementById('progress').style.width = '0%';
+  document.getElementById('agent-log').innerHTML = '';
+  document.getElementById('ep-status').innerHTML = '';
+  document.getElementById('ep-id').textContent = '—';
+  document.getElementById('ep-patient').textContent = '—';
+  document.getElementById('ep-claim').textContent = '—';
+  document.getElementById('ep-channel').textContent = '—';
+  // Reset queue to empty state
+  queueLoaded = false;
+  document.querySelectorAll('.queue-row').forEach(r => r.classList.remove('visible'));
+  const emptyRow = document.getElementById('queue-empty-row');
+  if (emptyRow) emptyRow.style.display = '';
+  const btn = document.getElementById('queue-load-btn');
+  if (btn) btn.style.display = '';
+  const hint = document.getElementById('queue-hint');
+  if (hint) hint.style.display = 'none';
+  const sub = document.getElementById('queue-sub');
+  if (sub) sub.textContent = 'Waiting for referrals — intake agent is listening...';
+  ['stat-total','stat-routed','stat-progress','stat-high'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = '0';
+  });
+}
+
+function onAutoPlayComplete() {
+  apPlaying = false;
+  const pb = document.getElementById('ap-pause-btn');
+  if (pb) pb.style.display = 'none';
+  const hbtn = document.getElementById('header-autoplay-btn');
+  if (hbtn) { hbtn.textContent = '↺ Replay Demo'; hbtn.style.background = '#7c3aed'; }
+}
+
+// ── FAX INTAKE MODAL ──
+let faxDocsReady = [false, false, false];
+const demoDocNames = [
+  'WC-2026-102847_ReferralForm.pdf',
+  'WC-2026-102847_RxPrescription.jpg',
+  'ClinicalNotes_Rivera.pdf'
+];
+
+function openFaxModal() {
+  resetFaxModal();
+  document.getElementById('fax-modal').classList.add('open');
+}
+function closeFaxModal() {
+  document.getElementById('fax-modal').classList.remove('open');
+}
+function resetFaxModal() {
+  faxDocsReady = [false, false, false];
+  [0,1,2].forEach(i => {
+    const zone = document.getElementById('uz-'+i);
+    zone.classList.remove('filled');
+    zone.onclick = () => document.getElementById('fi-'+i).click();
+    document.getElementById('uz-file-'+i).textContent = '';
+  });
+  document.getElementById('process-btn').disabled = true;
+  document.getElementById('fax-upload-section').style.display = '';
+  document.getElementById('fax-processing-section').style.display = 'none';
+  document.getElementById('fax-log').innerHTML = '';
+  document.getElementById('fax-gap-card').style.display = 'none';
+  const btn = document.getElementById('rivera-call-btn');
+  if (btn) { btn.disabled = false; btn.textContent = '📞 Call Case Manager Now'; }
+  document.getElementById('rivera-call-status').textContent = '';
+}
+
+function fileSelected(i, input) {
+  if (!input.files || !input.files[0]) return;
+  markZoneFilled(i, input.files[0].name);
+}
+const faxDocPreviewIds = [10, 11, 12];
+function markZoneFilled(i, name) {
+  faxDocsReady[i] = true;
+  const zone = document.getElementById('uz-'+i);
+  zone.classList.add('filled');
+  zone.onclick = null;
+  document.getElementById('uz-file-'+i).innerHTML =
+    '✓ ' + name +
+    ' <span onclick="openDocPreview('+faxDocPreviewIds[i]+')" ' +
+    'style="color:var(--blue);text-decoration:underline;cursor:pointer;font-size:10px;margin-left:4px">View</span>';
+  if (faxDocsReady.every(Boolean)) document.getElementById('process-btn').disabled = false;
+}
+function loadDemoDocs() {
+  demoDocNames.forEach((name, i) => markZoneFilled(i, name));
+}
+
+const faxSteps = [
+  { text: '📨 Fax package received — 3 documents queued for processing', cls: 'fl-blue', t: 0 },
+  { text: '📄 Extracting: WC-2026-102847_ReferralForm.pdf...', cls: '', t: 700 },
+  { text: '&nbsp;&nbsp;✓ 16 fields extracted — patient, insurance, physician, referral item', cls: 'fl-ok', t: 1400 },
+  { text: '🩺 Extracting: ClinicalNotes_Rivera.pdf...', cls: '', t: 2000 },
+  { text: '&nbsp;&nbsp;✓ 4 fields extracted — ICD-10, clinical justification, weight, occupation', cls: 'fl-ok', t: 2700 },
+  { text: '💊 Extracting: WC-2026-102847_RxPrescription.jpg...', cls: '', t: 3300 },
+  { text: '&nbsp;&nbsp;✓ 5 fields extracted — prescription item, HCPCS, specs, signed by, date', cls: 'fl-ok', t: 4000 },
+  { text: '🧠 Running Intelligence Layer...', cls: 'fl-blue', t: 4700 },
+  { text: '&nbsp;&nbsp;✓ ICD-10 M79.621 valid — pain in right forearm, occupational', cls: 'fl-ok', t: 5300 },
+  { text: '&nbsp;&nbsp;✓ HCPCS E0110 valid — forearm crutches confirmed', cls: 'fl-ok', t: 5800 },
+  { text: '&nbsp;&nbsp;✓ HCPCS ↔ Diagnosis match confirmed', cls: 'fl-ok', t: 6200 },
+  { text: '&nbsp;&nbsp;✓ Prior auth required — Pacific Mutual Insurance + E0110', cls: 'fl-ok', t: 6600 },
+  { text: '&nbsp;&nbsp;✓ Risk score: 3 · Urgency: 3 · Priority: MEDIUM', cls: 'fl-ok', t: 7000 },
+  { text: '📊 Completeness check: 22 / 25 fields present', cls: 'fl-blue', t: 7600 },
+  { text: '⚠&nbsp; 3 fields NULL → gap list generated', cls: 'fl-warn', t: 8200 },
+  { text: '&nbsp;&nbsp;🔑 auth_reference — MISSING', cls: 'fl-warn', t: 8600 },
+  { text: '&nbsp;&nbsp;📅 appointment_window — MISSING', cls: 'fl-warn', t: 8900 },
+  { text: '&nbsp;&nbsp;🚗 transportation — MISSING', cls: 'fl-warn', t: 9200 },
+  { text: '📋 Episode EP-20260501-WC2026102847 created · status: INCOMPLETE', cls: 'fl-blue', t: 9800 },
+  { text: '✅ Referral added to queue · outreach required', cls: 'fl-ok', t: 10400 }
+];
+
+function processIntake() {
+  document.getElementById('fax-upload-section').style.display = 'none';
+  document.getElementById('fax-processing-section').style.display = '';
+  const logEl = document.getElementById('fax-log');
+  logEl.innerHTML = '';
+
+  faxSteps.forEach(s => {
+    setTimeout(() => {
+      const line = document.createElement('div');
+      line.className = s.cls;
+      line.innerHTML = s.text;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }, s.t);
+  });
+
+  // Inject Rivera row into queue
+  setTimeout(() => injectRiveraRow(), 10600);
+  // Show gap card
+  setTimeout(() => {
+    document.getElementById('fax-gap-card').style.display = '';
+  }, 11000);
+}
+
+function injectRiveraRow() {
+  const tbody = document.querySelector('#sec-0 table tbody');
+  if (!tbody || document.getElementById('rivera-queue-row')) return;
+
+  const emptyRow = document.getElementById('queue-empty-row');
+  if (emptyRow) emptyRow.style.display = 'none';
+
+  // Update stats
+  const total = parseInt(document.getElementById('stat-total').textContent || '0');
+  const prog  = parseInt(document.getElementById('stat-progress').textContent || '0');
+  document.getElementById('stat-total').textContent    = total + 1;
+  document.getElementById('stat-progress').textContent = prog + 1;
+
+  const tr = document.createElement('tr');
+  tr.id = 'rivera-queue-row';
+  tr.className = 'queue-row';
+  tr.style.cssText = 'border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s;background:#fffbeb';
+  tr.onmouseover = () => tr.style.background = '#fef3c7';
+  tr.onmouseout  = () => tr.style.background = '#fffbeb';
+  tr.onclick = () => viewEpisode('rivera');
+  tr.innerHTML = `
+    <td style="padding:11px 14px">
+      <div style="font-weight:700;display:flex;align-items:center;gap:7px">Thomas Rivera
+        <span style="font-size:9px;font-weight:800;background:#fbbf24;color:#78350f;padding:1px 7px;border-radius:20px;letter-spacing:.04em">📠 NEW</span>
+      </div>
+      <div style="font-size:10px;color:var(--gray)">DOB: 1965-08-09</div>
+    </td>
+    <td style="padding:11px 8px;color:var(--gray)">WC-2026-102847</td>
+    <td style="padding:11px 8px">Forearm Crutches<div style="font-size:10px;color:var(--gray)">E0110</div></td>
+    <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-fax">fax</span></td>
+    <td style="padding:11px 8px;text-align:center"><span style="font-size:11px;font-weight:800;color:var(--yellow);background:var(--yellow-l);padding:2px 8px;border-radius:10px">MED 5</span></td>
+    <td style="padding:11px 8px;text-align:center"><span class="ch-badge ch-voice">voice call</span></td>
+    <td style="padding:11px 8px;text-align:center"><span class="status-pill incomplete"><span class="status-dot" style="background:var(--yellow)"></span>Incomplete</span></td>
+    <td style="padding:11px 14px;text-align:center">
+      <button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();viewEpisode('rivera')">View</button>
+    </td>`;
+
+  // Insert at top of tbody (before first row)
+  tbody.insertBefore(tr, tbody.firstChild);
+  requestAnimationFrame(() => tr.classList.add('visible'));
+
+  // Update queue subtitle
+  const sub = document.getElementById('queue-sub');
+  if (sub) sub.textContent = (total + 1) + ' referrals · New fax intake added · Sorted by priority';
+
+  // Show toast
+  showNewReferralToast(1);
+}
+
+async function placeRiveraCall() {
+  const btn = document.getElementById('rivera-call-btn');
+  const status = document.getElementById('rivera-call-status');
+  if (btn) { btn.disabled = true; btn.textContent = 'Calling...'; }
+  if (status) status.textContent = '';
+  try {
+    const res = await fetch('/.netlify/functions/place-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        assistantId: VAPI_ASSISTANT_ID,
+        phoneNumberId: VAPI_PHONE_NUMBER_ID,
+        assistantOverrides: {
+          firstMessage: 'Hi, this is the Intake Coordination Agent calling for the case manager on claim WC-2026-102847 for Thomas Rivera. We received a fax referral today but need three pieces of information to complete it. Do you have a moment?',
+          endCallPhrases: [],
+          model: { provider: 'openai', model: 'gpt-4o', messages: [{ role: 'system', content: 'You are placing an outbound call to a case manager to collect exactly 3 missing fields for an incomplete fax referral. Patient: Thomas Rivera. Date of Birth: August 9, 1965. Claim: WC-2026-102847. Insurance: Pacific Mutual Insurance. Case Manager: David Chen. You MUST collect ALL of the following before ending the call: (1) authorization reference number, (2) appointment window — preferred date and time for equipment delivery, (3) transportation — will patient self-transport, need a ride arranged, or is it a home delivery. Ask for one field at a time. Confirm each answer by repeating it back. Do NOT say goodbye or end the call until all 3 fields have been collected and confirmed. Once all 3 are confirmed, give a brief summary and close with: "Thank you David, the referral for Thomas Rivera is now complete. Have a great day."' }] }
+        },
+        customer: { number: OUTBOUND_TEST_NUMBER, name: 'David Chen — Case Manager' }
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error || !data.id) throw new Error('[' + res.status + '] ' + (data.message || data.error || JSON.stringify(data)));
+    if (btn) { btn.textContent = '📞 Call Case Manager Now'; btn.disabled = false; }
+    if (status) { status.textContent = '✓ Call placed — your phone is ringing'; status.style.color = 'var(--green)'; }
+  } catch(e) {
+    if (btn) { btn.textContent = '📞 Call Case Manager Now'; btn.disabled = false; }
+    if (status) { status.textContent = '⚠ ' + (e.message || e); status.style.color = 'var(--red)'; }
+  }
+}
+</script>
+<!-- Document Preview Modal -->
+<div id="doc-modal" class="doc-modal" onclick="if(event.target===this)closeDocPreview()">
+  <div class="doc-panel">
+    <div class="doc-ph">
+      <div class="doc-ph-top">
+        <div id="dm-icon" style="font-size:24px"></div>
+        <div style="flex:1">
+          <div id="dm-name" style="font-size:13px;font-weight:800;color:var(--dark)"></div>
+          <div id="dm-sub" style="font-size:11px;color:var(--gray);margin-top:2px"></div>
+        </div>
+        <button onclick="closeDocPreview()" style="background:none;border:none;font-size:20px;color:var(--gray);cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1">✕</button>
+      </div>
+      <div class="doc-tabs">
+        <button class="doc-tab active" id="dtab-0" onclick="switchDocTab(0)">📄 Original Document</button>
+        <button class="doc-tab" id="dtab-1" onclick="switchDocTab(1)">✦ Extracted Data</button>
+      </div>
+    </div>
+    <div class="doc-tab-body">
+      <div class="doc-tab-pane active" id="dpane-0" id="dm-raw"></div>
+      <div class="doc-tab-pane" id="dpane-1" id="dm-extracted"></div>
+    </div>
+    <div style="padding:12px 22px;border-top:1px solid var(--gray-m);flex-shrink:0;display:flex;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeDocPreview()">Close</button>
+    </div>
+  </div>
+</div>
+<!-- Fax Intake Modal -->
+<div id="fax-modal" class="fax-modal" onclick="if(event.target===this)closeFaxModal()">
+  <div class="fax-panel">
+    <div class="fax-hdr">
+      <div>
+        <div class="fax-hdr-title">📠 New Fax Referral — Intake Processing</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px">Upload 3 documents or use demo package</div>
+      </div>
+      <button onclick="closeFaxModal()" style="background:none;border:none;font-size:20px;color:var(--gray);cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1">✕</button>
+    </div>
+    <div class="fax-body">
+      <!-- Upload zones -->
+      <div id="fax-upload-section">
+        <div class="upload-zones">
+          <div class="upload-zone" id="uz-0" onclick="document.getElementById('fi-0').click()">
+            <input type="file" id="fi-0" accept=".pdf,.jpg,.png" onchange="fileSelected(0,this)" onclick="event.stopPropagation()">
+            <div class="uz-icon">📄</div>
+            <div class="uz-label">Referral Form</div>
+            <div class="uz-sub">PDF or image</div>
+            <div class="uz-file" id="uz-file-0"></div>
+          </div>
+          <div class="upload-zone" id="uz-1" onclick="document.getElementById('fi-1').click()">
+            <input type="file" id="fi-1" accept=".pdf,.jpg,.png" onchange="fileSelected(1,this)" onclick="event.stopPropagation()">
+            <div class="uz-icon">💊</div>
+            <div class="uz-label">Rx Prescription</div>
+            <div class="uz-sub">PDF or image</div>
+            <div class="uz-file" id="uz-file-1"></div>
+          </div>
+          <div class="upload-zone" id="uz-2" onclick="document.getElementById('fi-2').click()">
+            <input type="file" id="fi-2" accept=".pdf,.jpg,.png" onchange="fileSelected(2,this)" onclick="event.stopPropagation()">
+            <div class="uz-icon">🩺</div>
+            <div class="uz-label">Clinical Notes</div>
+            <div class="uz-sub">PDF or image</div>
+            <div class="uz-file" id="uz-file-2"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px">
+          <button class="btn btn-outline" onclick="loadDemoDocs()" style="font-size:12px">📂 Use Demo Docs</button>
+          <button class="btn btn-blue" id="process-btn" onclick="processIntake()" disabled style="font-size:12px">⚡ Process Intake</button>
+        </div>
+      </div>
+      <!-- Processing log -->
+      <div id="fax-processing-section" style="display:none">
+        <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:8px">⚙️ Processing Log</div>
+        <div class="fax-log" id="fax-log"></div>
+        <!-- Gap summary -->
+        <div id="fax-gap-card" class="gap-card" style="display:none">
+          <div class="gap-card-title">🔴 Gap List — 3 Fields Required from Case Manager</div>
+          <div class="gap-items">
+            <div class="gap-item">🔑 §2 insurance.auth_reference — Authorization reference number</div>
+            <div class="gap-item">📅 §9 scheduling.appointment_window — Preferred date + time range</div>
+            <div class="gap-item">🚗 §9 scheduling.transportation — Transportation confirmation</div>
+          </div>
+          <div class="fax-actions">
+            <button class="btn btn-blue" id="rivera-call-btn" onclick="placeRiveraCall()" style="font-size:12px">📞 Call Case Manager Now</button>
+            <button class="btn btn-outline" onclick="closeFaxModal()" style="font-size:12px">✓ Done — View in Queue</button>
+            <span id="rivera-call-status" style="font-size:11px;color:var(--gray);align-self:center"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Episode View Modal -->
+<div id="ep-modal" class="ep-modal" onclick="if(event.target===this)closeEpisode()">
+  <div class="ep-panel">
+    <div class="ep-header">
+      <div style="flex:1">
+        <div class="ep-hname" id="em-name">—</div>
+        <div class="ep-hclaim" id="em-claim">—</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div id="em-priority"></div>
+        <div id="em-status"></div>
+      </div>
+      <button onclick="closeEpisode()" style="margin-left:14px;background:none;border:none;font-size:20px;color:var(--gray);cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1" title="Close">✕</button>
+    </div>
+    <div class="ep-body" id="em-body"></div>
+    <div class="ep-footer" style="justify-content:space-between;align-items:center">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-blue" id="outbound-btn-active" onclick="placeOutboundCall(currentEpisodeRef)" style="font-size:12px;padding:6px 14px">📞 Call Case Manager</button>
+        <span id="outbound-status-active" style="font-size:11px;color:var(--gray)"></span>
+      </div>
+      <button class="btn btn-outline" onclick="closeEpisode()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ESCALATION MODAL ── -->
+<div class="esc-modal" id="esc-modal">
+  <div class="esc-panel">
+    <div class="esc-header">
+      <div class="esc-badge">⚠ Human Review Required</div>
+      <div class="esc-title">AI Confidence Alert — 3 Fields Flagged</div>
+      <div class="esc-sub">AI extracted these fields but confidence is below threshold. Each field requires associate review and approval before the episode can proceed to completeness check.</div>
+      <div class="esc-routing">👤 Escalated to: <b>Intake Associate Queue</b> &nbsp;·&nbsp; Episode WC-2026-084431 &nbsp;·&nbsp; Approve or override each field to continue</div>
+    </div>
+    <div class="esc-body">
+
+      <!-- Field 1: ICD-10 -->
+      <div class="esc-field" id="esc-f1">
+        <div class="esc-field-header">
+          <div class="esc-field-name">ICD-10 Code <span class="esc-field-tag">§5 diagnosis.icd10</span></div>
+          <div class="esc-conf">
+            <div class="esc-conf-bar"><div class="esc-conf-fill low" style="width:67%"></div></div>
+            <span class="esc-conf-pct low">67%</span>
+          </div>
+        </div>
+        <div class="esc-ai-val">AI extracted: <strong>S83.209A</strong></div>
+        <div class="esc-reason">⚠ Handwritten on fax — digit in position 4 partially obscured, may be 2 or 3</div>
+        <div class="esc-input-row">
+          <input class="esc-input" id="esc-i1" value="S83.209A" placeholder="Confirm or enter correct ICD-10 code">
+          <button class="btn btn-green" style="font-size:11px;padding:7px 14px" onclick="approveField(1)">✓ Approve</button>
+          <button class="btn btn-outline" style="font-size:11px;padding:7px 14px" onclick="overrideField(1)">Override</button>
+        </div>
+        <div class="esc-resolved-label" id="esc-l1"></div>
+      </div>
+
+      <!-- Field 2: Physician NPI -->
+      <div class="esc-field" id="esc-f2">
+        <div class="esc-field-header">
+          <div class="esc-field-name">Physician NPI <span class="esc-field-tag">§4 provider.npi</span></div>
+          <div class="esc-conf">
+            <div class="esc-conf-bar"><div class="esc-conf-fill low" style="width:71%"></div></div>
+            <span class="esc-conf-pct low">71%</span>
+          </div>
+        </div>
+        <div class="esc-ai-val">AI extracted: <strong>1234567890</strong></div>
+        <div class="esc-reason">⚠ Fax resolution low — 5th digit unclear, could be 4 or 5</div>
+        <div class="esc-input-row">
+          <input class="esc-input" id="esc-i2" value="1234567890" placeholder="Confirm or enter correct NPI">
+          <button class="btn btn-green" style="font-size:11px;padding:7px 14px" onclick="approveField(2)">✓ Approve</button>
+          <button class="btn btn-outline" style="font-size:11px;padding:7px 14px" onclick="overrideField(2)">Override</button>
+        </div>
+        <div class="esc-resolved-label" id="esc-l2"></div>
+      </div>
+
+      <!-- Field 3: Equipment Description -->
+      <div class="esc-field" id="esc-f3">
+        <div class="esc-field-header">
+          <div class="esc-field-name">Equipment Description <span class="esc-field-tag">§6 services.item</span></div>
+          <div class="esc-conf">
+            <div class="esc-conf-bar"><div class="esc-conf-fill low" style="width:58%"></div></div>
+            <span class="esc-conf-pct low">58%</span>
+          </div>
+        </div>
+        <div class="esc-ai-val">AI extracted: <strong>Rollator Walker</strong></div>
+        <div class="esc-reason">⚠ Prescription text ambiguous — reads "walking aid" in one place and "rollator" in another</div>
+        <div class="esc-input-row">
+          <input class="esc-input" id="esc-i3" value="Rollator Walker" placeholder="Confirm or enter correct description">
+          <button class="btn btn-green" style="font-size:11px;padding:7px 14px" onclick="approveField(3)">✓ Approve</button>
+          <button class="btn btn-outline" style="font-size:11px;padding:7px 14px" onclick="overrideField(3)">Override</button>
+        </div>
+        <div class="esc-resolved-label" id="esc-l3"></div>
+      </div>
+
+    </div>
+    <div class="esc-footer">
+      <div class="esc-remaining" id="esc-remaining">3 fields pending review</div>
+      <button class="btn btn-blue" id="esc-confirm-btn" onclick="confirmEscalation()" disabled style="opacity:.4;cursor:not-allowed">Confirm All &amp; Continue →</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
