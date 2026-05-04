@@ -523,10 +523,12 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px">
-        <div style="font-size:11px;color:var(--gray)" id="queue-hint" style="display:none">Click any row to run pipeline</div>
+        <div style="font-size:11px;color:var(--gray)" id="queue-hint">Click any row to view episode</div>
         <div style="font-size:10px;color:var(--gray)" id="last-poll-label"></div>
-        <button class="btn btn-outline" onclick="openFaxModal()" style="font-size:11px;padding:5px 14px">📠 New Fax</button>
-        <button class="btn btn-blue" id="queue-load-btn" onclick="loadQueue()" style="font-size:11px;padding:5px 14px">▶ Load Referral Queue</button>
+        <button class="btn btn-blue" id="new-fax-btn" onclick="loadReferral('holloway')" style="font-size:11px;padding:5px 14px;position:relative">
+          📠 New Fax
+          <span id="new-fax-badge" style="position:absolute;top:-7px;right:-7px;background:#dc2626;color:white;font-size:9px;font-weight:900;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center">1</span>
+        </button>
       </div>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:12px">
@@ -551,7 +553,7 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
           </td>
         </tr>
         <!-- ROW 1 — HIGH priority, fax, voice resolution -->
-        <tr class="queue-row" style="border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="loadReferral('holloway')">
+        <tr id="holloway-queue-row" class="queue-row" style="border-bottom:1px solid var(--gray-m);cursor:pointer;transition:background .15s;display:none" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="startWalkthrough()">
           <td style="padding:11px 14px"><div style="font-weight:700">James Holloway</div><div style="font-size:10px;color:var(--gray)">DOB: 1978-03-14</div></td>
           <td style="padding:11px 8px;color:var(--gray)">WC-2026-084431</td>
           <td style="padding:11px 8px">Rollator Walker<div style="font-size:10px;color:var(--gray)">E0143</div></td>
@@ -633,7 +635,7 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
 
   <div class="alert alert-blue" style="margin-top:4px">
     <div class="alert-icon">ℹ️</div>
-    <div>Click <b>▶ Demo</b> on James Holloway to walk through the full intake pipeline. Click <b>View</b> on any referral to see its episode record and place an outbound call. Live inbound line: <b>(201) 897-3854</b>.</div>
+    <div>Click <b>📠 New Fax (1)</b> to watch the AI process an incoming fax referral live — documents are read, fields extracted, and the episode appears in this queue. Live inbound line: <b>(201) 897-3854</b>.</div>
   </div>
 
   <!-- Channel selector -->
@@ -1647,26 +1649,31 @@ function getLpDocHtml(idx) {
 }
 
 function afterLiveProcessing() {
-  // Mark Holloway as incomplete/gaps in dashboard, then show dashboard
+  // Update Holloway row to show incomplete/gaps state
   const sc = document.getElementById('holloway-status-cell');
   const ac = document.getElementById('holloway-action-cell');
   if (sc) sc.innerHTML = '<span class="status-pill incomplete"><span class="status-dot"></span>5 Gaps · Outreach Pending</span>';
   if (ac) ac.innerHTML = '<button class="btn btn-blue" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();startWalkthrough()">▶ Walk Through</button>';
-  // Update queue stats
-  document.getElementById('stat-total').textContent = '7';
-  document.getElementById('stat-progress').textContent = '1';
-  document.getElementById('queue-sub').textContent = 'Live — 7 referrals · James Holloway processing now';
+  // Hide new fax badge
+  const badge = document.getElementById('new-fax-badge');
+  if (badge) badge.style.display = 'none';
+  const faxBtn = document.getElementById('new-fax-btn');
+  if (faxBtn) { faxBtn.textContent = '📠 New Fax'; faxBtn.className = 'btn btn-outline'; faxBtn.style.fontSize='11px'; faxBtn.style.padding='5px 14px'; }
+  // Update stats
+  animateCounter('stat-total', 6, 7, 600);
+  animateCounter('stat-progress', 1, 2, 600);
+  document.getElementById('queue-sub').textContent = '7 referrals · James Holloway just arrived — 5 gaps detected';
   // Show dashboard
   sections.forEach(id => document.getElementById(id).classList.remove('active'));
   document.getElementById('sec-live').classList.remove('active');
   document.getElementById('sec-0').classList.add('active');
-  // Make all rows visible
-  loadQueue();
-  // Scroll Holloway row into view briefly
-  setTimeout(() => {
-    const row = document.querySelector('tr[onclick*="holloway"]');
-    if (row) { row.style.background='#fffbeb'; setTimeout(()=>row.style.background='',1800); }
-  }, 400);
+  // Slide Holloway row in at the top with highlight
+  const row = document.getElementById('holloway-queue-row');
+  if (row) {
+    row.classList.add('visible');
+    row.style.background = '#fffbeb';
+    setTimeout(() => row.style.background = '', 2000);
+  }
 }
 
 function startWalkthrough() {
@@ -2460,22 +2467,19 @@ function resetDemo() {
 
 // ── QUEUE LOAD ──
 let queueLoaded = false;
+document.addEventListener('DOMContentLoaded', () => loadQueue());
 function loadQueue() {
   if (queueLoaded) return;
   queueLoaded = true;
-  const btn = document.getElementById('queue-load-btn');
-  if (btn) btn.style.display = 'none';
-  const hint = document.getElementById('queue-hint');
-  if (hint) hint.style.display = '';
   const emptyRow = document.getElementById('queue-empty-row');
   if (emptyRow) emptyRow.style.display = 'none';
   const sub = document.getElementById('queue-sub');
-  if (sub) sub.textContent = '7 referrals · 2 voice · 5 fax · Sorted by priority';
-  animateCounter('stat-total',    0, 7, 900);
-  animateCounter('stat-routed',   0, 5, 1100);
-  animateCounter('stat-progress', 0, 2, 800);
+  if (sub) sub.textContent = '6 referrals · 2 voice · 4 fax · Sorted by priority';
+  animateCounter('stat-total',    0, 6, 900);
+  animateCounter('stat-routed',   0, 4, 1100);
+  animateCounter('stat-progress', 0, 1, 800);
   animateCounter('stat-high',     0, 1, 600);
-  const rows = document.querySelectorAll('.queue-row');
+  const rows = document.querySelectorAll('.queue-row:not(#holloway-queue-row)');
   rows.forEach((row, i) => setTimeout(() => row.classList.add('visible'), 300 + i * 140));
   setTimeout(() => startLivePolling(), 1500);
 }
