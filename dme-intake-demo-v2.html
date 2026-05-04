@@ -761,7 +761,7 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
       <div class="lds warn"><div class="n">3</div><div class="l">Low Confidence</div></div>
       <div class="lds pri"><div class="n">7 · HIGH</div><div class="l">Priority Score</div></div>
     </div>
-    <button class="btn btn-blue" onclick="goTo(1)">View Extraction Results →</button>
+    <button class="btn btn-blue" onclick="afterLiveProcessing()">→ Show in Dashboard</button>
   </div>
 </div>
 
@@ -1646,11 +1646,41 @@ function getLpDocHtml(idx) {
   return '<div style="color:#94a3b8;padding:20px;font-size:10px">No preview available</div>';
 }
 
+function afterLiveProcessing() {
+  // Mark Holloway as incomplete/gaps in dashboard, then show dashboard
+  const sc = document.getElementById('holloway-status-cell');
+  const ac = document.getElementById('holloway-action-cell');
+  if (sc) sc.innerHTML = '<span class="status-pill incomplete"><span class="status-dot"></span>5 Gaps · Outreach Pending</span>';
+  if (ac) ac.innerHTML = '<button class="btn btn-blue" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();startWalkthrough()">▶ Walk Through</button>';
+  // Update queue stats
+  document.getElementById('stat-total').textContent = '7';
+  document.getElementById('stat-progress').textContent = '1';
+  document.getElementById('queue-sub').textContent = 'Live — 7 referrals · James Holloway processing now';
+  // Show dashboard
+  sections.forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('sec-live').classList.remove('active');
+  document.getElementById('sec-0').classList.add('active');
+  // Make all rows visible
+  loadQueue();
+  // Scroll Holloway row into view briefly
+  setTimeout(() => {
+    const row = document.querySelector('tr[onclick*="holloway"]');
+    if (row) { row.style.background='#fffbeb'; setTimeout(()=>row.style.background='',1800); }
+  }, 400);
+}
+
+function startWalkthrough() {
+  goTo(1);
+}
+
 function updateHollowayDashboard() {
   const sc = document.getElementById('holloway-status-cell');
   const ac = document.getElementById('holloway-action-cell');
   if (sc) sc.innerHTML = '<span class="status-pill routed"><span class="status-dot"></span>Routed</span>';
   if (ac) ac.innerHTML = '<button class="btn btn-outline" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();viewEpisode(\'holloway\')">View</button>';
+  document.getElementById('stat-routed').textContent = '5';
+  document.getElementById('stat-progress').textContent = '0';
+  document.getElementById('stat-high').textContent = '1';
 }
 
 function loadReferral(ref) {
