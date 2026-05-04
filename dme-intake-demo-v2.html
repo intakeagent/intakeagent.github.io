@@ -1756,9 +1756,10 @@ function afterLiveProcessing() {
   // Slide Holloway row in at the top with highlight
   const row = document.getElementById('holloway-queue-row');
   if (row) {
-    row.classList.add('visible');
+    row.style.display = 'table-row';
     row.style.background = '#fffbeb';
-    setTimeout(() => row.style.background = '', 2000);
+    row.style.animation = 'rowFadeIn .4s ease forwards';
+    setTimeout(() => row.style.background = '', 2200);
   }
 }
 
