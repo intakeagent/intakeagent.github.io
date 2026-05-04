@@ -1022,6 +1022,31 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
     </div>
   </div>
 
+  <!-- AI Self-Correction -->
+  <div class="card" style="border:2px solid #6366f1;background:#f5f3ff">
+    <div class="card-title" style="color:#4f46e5">🧠 AI Self-Correction — ICD-10 Discrepancy Detected &amp; Resolved</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:white;border:1px solid #e0e7ff;font-size:12px">
+        <span style="font-size:15px">📄</span>
+        <div><b>Referral Form</b> — ICD-10: <code style="background:#fee2e2;color:#dc2626;padding:1px 5px;border-radius:4px">M23.611</code> &nbsp;Tear of ACL, right knee <span style="color:var(--gray)">(pre-surgical)</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:white;border:1px solid #e0e7ff;font-size:12px">
+        <span style="font-size:15px">🩺</span>
+        <div><b>Clinical Notes</b> — ICD-10: <code style="background:#dcfce7;color:#16a34a;padding:1px 5px;border-radius:4px">S83.209A</code> &nbsp;Post-ACL reconstruction, right knee <span style="color:var(--gray)">(post-surgical)</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:white;border:1px solid #e0e7ff;font-size:12px">
+        <span style="font-size:15px">💊</span>
+        <div><b>Rx Prescription</b> — ICD-10: <code style="background:#dcfce7;color:#16a34a;padding:1px 5px;border-radius:4px">S83.209A</code> &nbsp;Post-ACL reconstruction, right knee <span style="color:var(--gray)">(post-surgical)</span></div>
+      </div>
+    </div>
+    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:8px;padding:10px 13px;font-size:12px;color:#4c1d95;line-height:1.6;margin-bottom:10px">
+      <b>AI Reasoning:</b> 2 of 3 documents agree on <b>S83.209A</b>. Surgical history confirms ACL reconstruction on 2026-03-28 — making S83.209A the correct post-surgical code. M23.611 is a pre-surgical code carried forward on the referral form in error. Cross-reference confidence: <b>94%</b>.
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#dcfce7;border:1px solid #86efac;border-radius:7px;font-size:12px;font-weight:700;color:#166534">
+      ✅ Auto-corrected to S83.209A — no human review required &nbsp;·&nbsp; Referral form code M23.611 flagged as stale
+    </div>
+  </div>
+
   <!-- Service Clarification -->
   <div class="card">
     <div class="card-title">🔧 Service Clarification</div>
@@ -1097,48 +1122,84 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
 
 <!-- ── SEC 3: Completeness ── -->
 <div class="section" id="sec-3">
-  <div class="page-title">Step 3 — Completeness Check</div>
-  <div class="page-sub">Episode Record compared against required fields</div>
+  <div class="page-title">Step 4 — Completeness &amp; Gap Triage</div>
+  <div class="page-sub">AI classifies each gap by routing criticality — only hard blocks hold the episode</div>
 
-  <div class="alert alert-yellow">
-    <div class="alert-icon">⚠️</div>
-    <div><b>4 required fields are null.</b> Package incomplete — proceeding to digital outreach.</div>
+  <div class="alert alert-blue">
+    <div class="alert-icon">🧠</div>
+    <div><b>5 gaps detected — classified by criticality.</b> Episode partially routed to scheduling queue. Hard blocks trigger outreach. Non-blocking gaps collected in parallel — no delay to scheduling.</div>
   </div>
 
+  <!-- Present fields -->
   <div class="card">
-    <div class="card-title">✅ Present (20 / 25 required fields)</div>
+    <div class="card-title">✅ Present — 20 / 25 required fields</div>
     <div style="display:flex;flex-wrap:wrap;gap:6px">
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §1 worker.name</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §1 worker.dob</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §1 worker.address</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §2 insurance.carrier</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §2 insurance.claim_number</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §3 adjuster.name + email</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §3 case_manager.name + email</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §4 provider.name + npi</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §5 diagnosis.icd10_codes</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §5 diagnosis.description</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §6 services.item + hcpcs</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §6 services.clinical_justification</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §7 prescription.item</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §7 prescription.signed_by + date</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ §8 provider_notes.clinical_narrative</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ worker.name · dob · address</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ insurance.carrier · claim#</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ adjuster + case_manager</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ provider.name · npi · practice</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ diagnosis.icd10 · description</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ services.item · hcpcs · justification</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ prescription · signature · date</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ provider_notes.clinical_narrative</span>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">🔴 Gap List — 5 Fields Required from Case Manager</div>
-    <ul class="gap-list">
-      <li>🔑 §2 insurance.auth_reference — Authorization reference number</li>
-      <li>🌐 §1 worker.language / worker.interpreter — Primary language</li>
-      <li>📅 §9 scheduling.appointment_window — Preferred date + time range</li>
-      <li>🚗 §9 scheduling.transportation — Transportation confirmation</li>
-      <li>⚖️ §6 item.specification — Equipment spec not confirmed for patient context (weight 285 lbs — bariatric required)</li>
-    </ul>
+  <!-- HARD BLOCKS -->
+  <div class="card" style="border-left:4px solid var(--red);padding-left:16px">
+    <div class="card-title" style="color:var(--red)">🔴 Hard Blocks — 2 gaps &nbsp;·&nbsp; Vendor dispatch blocked until resolved</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:10px 12px;background:var(--red-l);border:1px solid var(--red-m);border-radius:8px;font-size:12px">
+        <div><b>🔑 Auth Reference</b><div style="font-size:10px;color:var(--gray);margin-top:2px">insurance.auth_reference</div></div>
+        <div style="color:#991b1b">Payer will not process or pay without prior auth number. Routing is blocked until confirmed.</div>
+        <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#dc2626;color:white;padding:3px 9px;border-radius:10px">📧→📞 OUTREACH SENT</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:10px 12px;background:var(--red-l);border:1px solid var(--red-m);border-radius:8px;font-size:12px">
+        <div><b>⚖️ Equipment Spec</b><div style="font-size:10px;color:var(--gray);margin-top:2px">prescription.specifications</div></div>
+        <div style="color:#991b1b">Patient weight 285 lbs — standard rollator contraindicated. Bariatric spec required. Wrong item = patient safety risk and clinical rejection.</div>
+        <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#dc2626;color:white;padding:3px 9px;border-radius:10px">📧→📞 OUTREACH SENT</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOFT BLOCK -->
+  <div class="card" style="border-left:4px solid var(--yellow);padding-left:16px">
+    <div class="card-title" style="color:var(--yellow)">🟡 Soft Block — 1 gap &nbsp;·&nbsp; Route to scheduling hold, resolve in parallel</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:10px 12px;background:var(--yellow-l);border:1px solid var(--yellow-m);border-radius:8px;font-size:12px">
+      <div><b>📅 Appointment Window</b><div style="font-size:10px;color:var(--gray);margin-top:2px">scheduling.appointment_window</div></div>
+      <div style="color:#92400e">Needed for vendor scheduling but does not block episode creation. Scheduling queue holds slot pending confirmation.</div>
+      <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#d97706;color:white;padding:3px 9px;border-radius:10px">📅 SCHED. HOLD</span></div>
+    </div>
+  </div>
+
+  <!-- NON-BLOCKING -->
+  <div class="card" style="border-left:4px solid var(--green);padding-left:16px">
+    <div class="card-title" style="color:var(--green)">🟢 Non-Blocking — 2 gaps &nbsp;·&nbsp; Routing proceeds, collected in parallel</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:10px 12px;background:var(--green-l);border:1px solid var(--green-m);border-radius:8px;font-size:12px">
+        <div><b>🌐 Language / Interpreter</b><div style="font-size:10px;color:var(--gray);margin-top:2px">worker.language</div></div>
+        <div style="color:#166534">Operational preference only. Coordinator collects during first contact. No impact on routing or payer submission.</div>
+        <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#16a34a;color:white;padding:3px 9px;border-radius:10px">✓ ROUTING AHEAD</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:10px 12px;background:var(--green-l);border:1px solid var(--green-m);border-radius:8px;font-size:12px">
+        <div><b>🚗 Transportation</b><div style="font-size:10px;color:var(--gray);margin-top:2px">scheduling.transportation</div></div>
+        <div style="color:#166534">Day-before confirmation is standard. Does not affect equipment dispatch or auth. Coordinator confirms during scheduling call.</div>
+        <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#16a34a;color:white;padding:3px 9px;border-radius:10px">✓ ROUTING AHEAD</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Routing decision -->
+  <div style="background:#f5f3ff;border:2px solid var(--purple-m);border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px">
+    <div style="font-size:20px">🎯</div>
+    <div>
+      <div style="font-size:13px;font-weight:800;color:var(--purple);margin-bottom:4px">Routing Decision</div>
+      <div style="font-size:12px;color:#4c1d95;line-height:1.6">Episode <b>partially routed to scheduling queue</b> — vendor on standby. Outreach dispatched on 2 hard blocks via email, escalating to voice call after 24 hrs. SLA clock started. Non-blocking gaps collected in parallel during coordination — zero delay to scheduling.</div>
+    </div>
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-blue" onclick="goTo(5)">→ Send Digital Outreach</button>
+    <button class="btn btn-blue" onclick="goTo(5)">→ Send Targeted Outreach — Hard Blocks Only</button>
   </div>
 </div>
 
@@ -1247,7 +1308,32 @@ Intake Coordination Agent</div>
 
   <div class="alert alert-green">
     <div class="alert-icon">✅</div>
-    <div>All required fields confirmed across both channels. Saved to <b>output/dme-intake-WC-2026-084431-20260501.md</b></div>
+    <div>All hard blocks resolved via outreach. Non-blocking gaps collected in parallel. Episode fully routed. Saved to <b>output/dme-intake-WC-2026-084431-20260501.md</b></div>
+  </div>
+
+  <!-- Routing Intelligence Summary -->
+  <div class="card" style="border-left:4px solid var(--purple);margin-bottom:14px">
+    <div class="card-title">🎯 Gap Resolution Summary</div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+      <div style="display:grid;grid-template-columns:28px 1fr 140px 160px;gap:8px;align-items:center;padding:7px 10px;background:var(--red-l);border-radius:7px">
+        <span>🔑</span><div><b>Auth Reference</b> — insurance.auth_reference</div><span style="color:var(--red);font-weight:700">🔴 Hard Block</span><span style="color:var(--green);font-weight:700">✓ Resolved via voice call</span>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 1fr 140px 160px;gap:8px;align-items:center;padding:7px 10px;background:var(--red-l);border-radius:7px">
+        <span>⚖️</span><div><b>Equipment Spec</b> — bariatric 400lb confirmed</div><span style="color:var(--red);font-weight:700">🔴 Hard Block</span><span style="color:var(--green);font-weight:700">✓ Resolved via voice call</span>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 1fr 140px 160px;gap:8px;align-items:center;padding:7px 10px;background:var(--yellow-l);border-radius:7px">
+        <span>📅</span><div><b>Appointment Window</b> — May 5, 10:00–12:00</div><span style="color:var(--yellow);font-weight:700">🟡 Soft Block</span><span style="color:var(--green);font-weight:700">✓ Resolved via voice call</span>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 1fr 140px 160px;gap:8px;align-items:center;padding:7px 10px;background:var(--green-l);border-radius:7px">
+        <span>🌐</span><div><b>Language</b> — English, no interpreter</div><span style="color:var(--green);font-weight:700">🟢 Non-Blocking</span><span style="color:var(--green);font-weight:700">✓ Collected in parallel</span>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 1fr 140px 160px;gap:8px;align-items:center;padding:7px 10px;background:var(--green-l);border-radius:7px">
+        <span>🚗</span><div><b>Transportation</b> — self, no ride needed</div><span style="color:var(--green);font-weight:700">🟢 Non-Blocking</span><span style="color:var(--green);font-weight:700">✓ Collected in parallel</span>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 1fr 140px 160px;gap:8px;align-items:center;padding:7px 10px;background:#f5f3ff;border-radius:7px">
+        <span>🧠</span><div><b>ICD-10</b> — M23.611→S83.209A self-corrected</div><span style="color:#6366f1;font-weight:700">🔵 AI Corrected</span><span style="color:#6366f1;font-weight:700">✓ No human required</span>
+      </div>
+    </div>
   </div>
 
   <div class="route-card fade-in">
