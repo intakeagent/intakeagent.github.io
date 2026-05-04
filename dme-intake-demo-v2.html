@@ -1047,6 +1047,33 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
     </div>
   </div>
 
+  <!-- Low-confidence ICD — cannot self-correct -->
+  <div class="card" style="border:2px solid var(--red);background:#fef2f2">
+    <div style="display:inline-flex;align-items:center;gap:6px;background:#dc2626;color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⚠ Escalated to Manual Review Queue</div>
+    <div class="card-title" style="color:var(--red)">🚨 Reference Case — Low-Confidence ICD Conflict · AI Cannot Self-Correct</div>
+    <div style="font-size:11px;color:#991b1b;margin-bottom:10px">When document evidence is split and clinical context is ambiguous, AI flags the conflict and routes to a human specialist rather than guessing.</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:white;border:1px solid #fecaca;font-size:12px">
+        <span style="font-size:15px">📄</span>
+        <div><b>Referral Form</b> — ICD-10: <code style="background:#fee2e2;color:#dc2626;padding:1px 5px;border-radius:4px">M54.5</code> &nbsp;Low back pain (non-specific)</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:white;border:1px solid #fecaca;font-size:12px">
+        <span style="font-size:15px">🩺</span>
+        <div><b>Clinical Notes</b> — ICD-10: <code style="background:#fef9c3;color:#92400e;padding:1px 5px;border-radius:4px">M51.16</code> &nbsp;L4-L5 disc herniation confirmed on MRI <span style="color:var(--gray)">(more specific)</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:white;border:1px solid #fecaca;font-size:12px">
+        <span style="font-size:15px">💊</span>
+        <div><b>Rx Prescription</b> — ICD-10: <code style="background:#fee2e2;color:#dc2626;padding:1px 5px;border-radius:4px">M54.5</code> &nbsp;Low back pain (non-specific)</div>
+      </div>
+    </div>
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 13px;font-size:12px;color:#92400e;line-height:1.6;margin-bottom:10px">
+      <b>AI Reasoning:</b> Numeric vote 2/3 favors M54.5, but clinical notes document L4-L5 disc herniation on MRI — a more specific and clinically significant finding that directly supports M51.16. Evidence quality conflicts with evidence count. <b>Confidence: 51%</b> — below self-correction threshold of 80%. AI cannot determine correct code without clinician input.
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fee2e2;border:1px solid #fca5a5;border-radius:7px;font-size:12px;font-weight:700;color:#991b1b">
+      🚨 Routed to manual review queue — clinical specialist required · SLA: 2 business hours
+    </div>
+  </div>
+
   <!-- Service Clarification -->
   <div class="card">
     <div class="card-title">🔧 Service Clarification</div>
@@ -1205,11 +1232,17 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
 
 <!-- ── SEC 4: Email Outreach ── -->
 <div class="section" id="sec-4">
-  <div class="page-title">Step 4 — Digital Outreach</div>
-  <div class="page-sub">Agent emails case manager requesting only the 5 missing fields</div>
+  <div class="page-title">Step 5 — Digital Outreach</div>
+  <div class="page-sub">Agent routes outreach to the right party — case manager for clinical gaps, payer for auth</div>
 
+  <div class="alert alert-blue">
+    <div class="alert-icon">🧠</div>
+    <div><b>AI routes all gaps to the case manager</b> — CM is responsible for auth # whether they are from a TPA or the insurer directly. Auth # confirmed via email. Voice follow-up covers only what's practical to confirm on a call.</div>
+  </div>
+
+  <!-- Email to CM -->
   <div class="card">
-    <div class="card-title">📧 Outreach Email — Sent</div>
+    <div class="card-title">📧 Outreach Email — Case Manager · All 5 Gaps</div>
     <div class="email-box">
       <div class="email-hdr">
         <div class="email-row"><span class="ek">To:</span><span>Linda Torres &lt;l.torres@coastalins.com&gt;</span></div>
@@ -1220,15 +1253,15 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
 
 Thank you for the referral for <span class="hl">James Holloway</span> (DOB: 1978-03-14, Claim: <span class="hl">WC-2026-084431</span>).
 
-To complete coordination, we still need:
+To complete coordination, we need:
 
-  <span class="hl">🔑 Authorization reference number</span>
+  <span class="hl">🔑 Authorization reference number</span> — please reply with the auth ref # for this claim
   <span class="hl">📅 Appointment window</span> — preferred date and time range
   <span class="hl">🚗 Transportation</span> — will the patient need a ride arranged?
   <span class="hl">🌐 Language / interpreter</span> — patient's primary language?
   <span class="hl">⚖️ Equipment specification</span> — confirm bariatric spec for patient weight (285 lbs)
 
-Please reply within <b>24 business hours</b>. If we don't hear back, our coordination agent will follow up by phone.
+Please reply within <b>24 business hours</b>. If we don't hear back, our coordination agent will follow up by phone for the scheduling items.
 
 Thank you,
 Intake Coordination Agent</div>
@@ -1237,7 +1270,7 @@ Intake Coordination Agent</div>
 
   <div class="alert alert-yellow">
     <div class="alert-icon">⏱</div>
-    <div>No response received after <b>24 business hours</b>. Escalating to outbound voice call.</div>
+    <div>No response from case manager after <b>24 business hours</b>. Escalating to outbound voice call for scheduling gaps. Auth # confirmed separately by payer.</div>
   </div>
 
   <div class="btn-row">
@@ -1250,9 +1283,15 @@ Intake Coordination Agent</div>
   <div class="page-title">Step 5 — Voice Outreach</div>
   <div class="page-sub">No email response — agent places outbound AI call to case manager</div>
 
-  <div class="alert alert-blue">
-    <div class="alert-icon">📞</div>
-    <div>Calling <b>Linda Torres</b> at <b>+1 (609) 216-1820</b> · Outreach attempt #2</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div class="alert alert-blue" style="margin:0">
+      <div class="alert-icon">📞</div>
+      <div>Calling <b>Linda Torres</b> at <b>+1 (609) 216-1820</b> · Outreach attempt #2 · <b>4 scheduling &amp; clinical items</b></div>
+    </div>
+    <div class="alert alert-green" style="margin:0">
+      <div class="alert-icon">🔑</div>
+      <div>Auth # <b>AUTH-2026-CIG-7741</b> confirmed via email reply — not asked on call. Reference numbers are better confirmed in writing.</div>
+    </div>
   </div>
 
   <div class="card">
@@ -1260,31 +1299,29 @@ Intake Coordination Agent</div>
     <div class="call-box">
       <div class="call-status-row">
         <div class="call-badge"><span class="call-dot" style="background:#f59e0b"></span> Call complete</div>
-        <div class="call-timer">01:48</div>
+        <div class="call-timer">01:24</div>
       </div>
       <div class="transcript">
-        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Hi, this is the Intake Coordination Agent calling for Linda Torres. I'm following up on the referral for James Holloway, claim WC-2026-084431. We sent an email yesterday but haven't heard back. Do you have a moment?</span></div>
-        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes, sorry about that — I've been swamped. Go ahead.</span></div>
-        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">No problem at all. We just need five things. First — do you have the authorization reference number for this claim?</span></div>
-        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes it's <span class="captured">AUTH-2026-CIG-7741</span>.</span></div>
-        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Got it — AUTH-2026-CIG-7741. Next, what's the preferred appointment window for the equipment delivery?</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Hi, this is the Intake Coordination Agent calling for Linda Torres. I'm following up on the referral for James Holloway, claim WC-2026-084431. We just need four quick scheduling confirmations — do you have a moment?</span></div>
+        <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes, go ahead.</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Great. What's the preferred appointment window for the equipment delivery?</span></div>
         <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Can you do <span class="captured">May 5th, between 10 and noon</span>?</span></div>
         <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Perfect — May 5th, 10 AM to 12 PM. Will the patient need transportation arranged?</span></div>
         <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">No, <span class="captured">he'll drive himself</span>.</span></div>
-        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Confirmed — patient self-transports. What's the patient's primary language and does he need an interpreter?</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Confirmed. What's the patient's primary language — does he need an interpreter?</span></div>
         <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">English, no interpreter needed</span>.</span></div>
-        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Got it. Last one — the prescription lists a rollator walker but doesn't specify bariatric. Our records show patient weight at 285 lbs, which requires a bariatric frame. Can you confirm <span class="captured">bariatric specification</span> is correct?</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Got it. Last one — the prescription lists a rollator walker but doesn't specify bariatric. Patient weight is 285 lbs, which requires a bariatric frame. Can you confirm <span class="captured">bariatric specification</span>?</span></div>
         <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes, <span class="captured">bariatric — 4-wheel, 400 lb capacity</span>. Sorry that wasn't on the form.</span></div>
-        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Confirmed — bariatric rollator, 4-wheel, 400 lb capacity. To recap: auth AUTH-2026-CIG-7741, May 5th 10–noon, self-transport, English no interpreter, bariatric spec confirmed. All correct?</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Confirmed — bariatric rollator, 4-wheel, 400 lb capacity. To recap: May 5th 10–noon, self-transport, English no interpreter, bariatric spec confirmed. All correct?</span></div>
         <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes that's right.</span></div>
-        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Thank you Linda. Your referral is now complete. We'll coordinate the delivery and follow up with a confirmation. Have a great day!</span></div>
+        <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Thank you Linda. All scheduling items confirmed. Your referral is now complete — we'll coordinate delivery and send a confirmation. Have a great day!</span></div>
       </div>
     </div>
   </div>
 
   <div class="alert alert-green">
     <div class="alert-icon">✅</div>
-    <div>All 5 missing fields captured from call. Episode Record updated. Running completeness check.</div>
+    <div>4 scheduling &amp; clinical fields confirmed via call. Auth # already captured via email. All 5 gaps resolved — Episode Record updated.</div>
   </div>
 
   <div class="card" style="background:#f8fafc;border:1.5px dashed var(--gray-m)">
