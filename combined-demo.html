@@ -510,7 +510,67 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
   <!-- ── WТ-1: Intake ── -->
   <div class="section active" id="wt-1">
     <div class="page-title">Step 1 — Channel Intake</div>
-    <div class="page-sub">Extracting structured fields from 3 documents · 5 pages</div>
+    <div class="page-sub">Multi-channel intake — fax, voice, portal · AI extracts structured fields from every source</div>
+
+    <!-- Voice Intake Card -->
+    <div class="card" style="border:2px solid rgba(34,197,94,.4);background:linear-gradient(135deg,#f0fdf4 0%,#fff 100%)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-title" style="color:#15803d;margin-bottom:0">📞 Voice Channel — Inbound Call · Live Intake Line</div>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.04em"><span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;animation:pulse 1.2s infinite"></span>(201) 897-3854 · AI answers 24/7</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 220px;gap:12px">
+        <!-- Transcript -->
+        <div class="call-box" style="margin:0">
+          <div class="call-status-row">
+            <div class="call-badge"><span class="call-dot" style="background:#f59e0b;animation:none"></span> Call complete · Referral captured</div>
+            <div class="call-timer">01:47</div>
+          </div>
+          <div class="transcript">
+            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Thank you for calling the Intake Coordination line — I'm the AI intake agent. I'll collect your referral and get the episode into the system. What's the worker's full name?</span></div>
+            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">Teresa Nguyen</span>.</span></div>
+            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Date of birth?</span></div>
+            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">April 12th, 1981</span>.</span></div>
+            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Claim number and carrier?</span></div>
+            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">WC-2026-081923</span>, carrier is <span class="captured">Pacific Mutual</span>.</span></div>
+            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">What equipment is being requested?</span></div>
+            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Knee brace — medial meniscus tear, she had surgery last week.</span></div>
+            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">HCPCS <span class="captured">L1820</span> — knee orthosis, post-surgical. Do you have an authorization reference?</span></div>
+            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Not yet — still processing with the adjuster.</span></div>
+            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Noted — flagged as a gap. Preferred appointment window?</span></div>
+            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">May 8th, any time afternoon</span>.</span></div>
+            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Transportation needed?</span></div>
+            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">No, <span class="captured">she'll drive herself</span>.</span></div>
+            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Your name and callback?</span></div>
+            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Rachel Kim, <span class="captured">310-555-0244</span>.</span></div>
+            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Thank you Rachel — <span class="captured">14 fields captured</span>, 1 gap flagged: authorization reference. Episode is in the system. Confirmation email sent to address on file.</span></div>
+          </div>
+        </div>
+        <!-- Extracted fields + queue entry -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:10px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Fields Captured — Live</div>
+          <div class="norm-grid" style="grid-template-columns:1fr;gap:4px">
+            <div class="norm-field" style="padding:4px 8px"><div class="nl">worker.name</div><div class="nv" style="font-size:11px">Teresa Nguyen</div></div>
+            <div class="norm-field" style="padding:4px 8px"><div class="nl">worker.dob</div><div class="nv" style="font-size:11px">1981-04-12</div></div>
+            <div class="norm-field" style="padding:4px 8px"><div class="nl">insurance.claim_number</div><div class="nv" style="font-size:11px">WC-2026-081923</div></div>
+            <div class="norm-field" style="padding:4px 8px"><div class="nl">insurance.carrier</div><div class="nv" style="font-size:11px">Pacific Mutual</div></div>
+            <div class="norm-field" style="padding:4px 8px"><div class="nl">services.hcpcs</div><div class="nv" style="font-size:11px">L1820 · Knee Brace</div></div>
+            <div class="norm-field" style="padding:4px 8px"><div class="nl">insurance.auth_reference</div><div class="nv null" style="font-size:11px">null — flagged</div></div>
+            <div class="norm-field" style="padding:4px 8px"><div class="nl">scheduling.appointment_window</div><div class="nv" style="font-size:11px">2026-05-08 · PM</div></div>
+            <div class="norm-field" style="padding:4px 8px"><div class="nl">scheduling.transportation</div><div class="nv" style="font-size:11px">self</div></div>
+            <div class="norm-field" style="padding:4px 8px"><div class="nl">case_manager.name</div><div class="nv" style="font-size:11px">Rachel Kim</div></div>
+          </div>
+          <div style="margin-top:4px;background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:8px 10px;font-size:11px;color:#166534;font-weight:700;text-align:center">
+            ✅ Episode entered queue<br><span style="font-weight:400;font-size:10px">WC-2026-081923 · 14 fields · 1 gap</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin:4px 0 2px;font-size:10px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">
+      <div style="flex:1;height:1px;background:var(--gray-m)"></div>
+      <span>Holloway's referral — came via fax</span>
+      <div style="flex:1;height:1px;background:var(--gray-m)"></div>
+    </div>
 
     <div class="card">
       <div class="card-title">📂 Referral Package — James Holloway · WC-2026-084431</div>
