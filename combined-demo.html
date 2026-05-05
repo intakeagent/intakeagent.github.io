@@ -136,6 +136,7 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
 .pri-badge{font-size:10px;font-weight:800;padding:2px 6px;border-radius:7px}
 .pri-HIGH{background:var(--red-l);color:var(--red)}.pri-MED{background:var(--yellow-l);color:var(--yellow)}.pri-LOW{background:var(--green-l);color:var(--green)}
 .ch-fax{font-size:9px;font-weight:700;background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:7px}
+.ch-voice{font-size:9px;font-weight:700;background:#dcfce7;color:#15803d;border:1px solid #86efac;padding:1px 5px;border-radius:7px}
 .ch-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
 .ch-voice{background:#dcfce7;color:#15803d}
 .ch-email{background:#fef9c3;color:#92400e}
@@ -1166,6 +1167,17 @@ function renderQueue(){
     <td style="width:65px;text-align:center" id="qg-0">—</td>
     <td style="width:100px;text-align:center" id="qo-0">—</td>
   </tr>`;
+  const voiceRows=VOICE_CASES.map(vc=>`
+    <tr id="qr-${vc.vid}">
+      <td style="width:150px"><div style="font-weight:700;font-size:11px">${vc.name}</div><div style="font-size:9.5px;color:var(--gray)">DOB: ${vc.dob}</div></td>
+      <td style="width:120px;color:var(--gray);font-size:10.5px">${vc.claim}</td>
+      <td style="width:150px"><div style="font-size:11px;font-weight:600">${vc.item}</div><div style="font-size:9.5px;color:var(--gray)">${vc.hcpcs}</div></td>
+      <td style="width:55px;text-align:center"><span class="ch-voice">📞 voice</span></td>
+      <td style="width:70px;text-align:center" id="qp-${vc.vid}">—</td>
+      <td style="width:130px;text-align:center" id="qs-${vc.vid}"><span class="s-queued">⏳ Queued</span></td>
+      <td style="width:65px;text-align:center" id="qg-${vc.vid}">—</td>
+      <td style="width:100px;text-align:center" id="qo-${vc.vid}">—</td>
+    </tr>`).join('');
   const otherRows=referrals.map(r=>`
     <tr id="qr-${r.id}">
       <td style="width:150px"><div style="font-weight:700;font-size:11px">${r.name}</div><div style="font-size:9.5px;color:var(--gray)">DOB: ${r.dob}</div></td>
@@ -1177,7 +1189,7 @@ function renderQueue(){
       <td style="width:65px;text-align:center" id="qg-${r.id}">—</td>
       <td style="width:100px;text-align:center" id="qo-${r.id}">—</td>
     </tr>`).join('');
-  tbody.innerHTML=holRow+otherRows;
+  tbody.innerHTML=holRow+voiceRows+otherRows;
 }
 renderQueue();
 
@@ -1223,6 +1235,42 @@ function startProcessing(){
     document.getElementById('sbs-gaps').textContent=totalGapsAll;
     document.getElementById('sb-proc').textContent=0;
   },HOL_DURATION);
+
+  // Process 3 voice rows right after Holloway (quick — transcription)
+  VOICE_CASES.forEach((vc,i)=>{
+    const tStart=HOL_DURATION+i*450;
+    const tDone=tStart+380;
+    setTimeout(()=>{
+      const vrow=document.getElementById('qr-'+vc.vid);
+      if(!vrow)return;
+      vrow.classList.add('processing');
+      document.getElementById('qs-'+vc.vid).innerHTML='<span class="s-reading" style="color:#15803d;background:#f0fdf4;border-color:#86efac">Transcribing…</span>';
+      document.getElementById('sb-proc').textContent=1;
+      pagesRead+=1;
+      document.getElementById('sb-pages').textContent=pagesRead;
+      document.getElementById('sbs-pages').textContent=pagesRead;
+      updateProgress((tStart/25000)*90,'Transcribing '+vc.name+' — '+vc.item);
+      vrow.scrollIntoView({block:'nearest',behavior:'smooth'});
+    },tStart);
+    setTimeout(()=>{
+      const vrow=document.getElementById('qr-'+vc.vid);
+      if(!vrow)return;
+      vrow.classList.remove('processing');
+      document.getElementById('qp-'+vc.vid).innerHTML='<span class="pri-badge pri-'+vc.pri+'">'+vc.pri+'</span>';
+      if(vc.gaps===0){
+        vrow.classList.add('done-routed');
+        document.getElementById('qs-'+vc.vid).innerHTML='<span class="s-routed">✅ Routed</span>';
+        document.getElementById('qg-'+vc.vid).innerHTML='<span class="gap-badge zero">0</span>';
+        routedCount++;document.getElementById('sb-routed').textContent=routedCount;document.getElementById('sbs-routed').textContent=routedCount;
+      }else{
+        vrow.classList.add('done-gaps');
+        document.getElementById('qs-'+vc.vid).innerHTML='<span class="s-gaps">⚠ '+vc.gaps+' Gap'+(vc.gaps>1?'s':'')+'</span>';
+        document.getElementById('qg-'+vc.vid).innerHTML='<span class="gap-badge">'+vc.gaps+'</span>';
+        totalGapsAll+=vc.gaps;document.getElementById('sb-gaps').textContent=totalGapsAll;document.getElementById('sbs-gaps').textContent=totalGapsAll;
+      }
+      document.getElementById('sb-proc').textContent=0;
+    },tDone);
+  });
 
   // Process other 74
   referrals.forEach((r,i)=>{
@@ -1279,6 +1327,17 @@ function sendOutreach(STEP){
     document.getElementById('sbs-outreach').textContent=outreachCount;
   },0);
 
+  // Voice row outreach
+  VOICE_CASES.filter(vc=>vc.gaps>0).forEach((vc,i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById('qo-'+vc.vid);
+      if(el)el.innerHTML='<span class="outreach-badge">📧 Sent</span>';
+      document.getElementById('qr-'+vc.vid).classList.remove('done-gaps');
+      document.getElementById('qr-'+vc.vid).classList.add('outreach-sent');
+      outreachCount++;document.getElementById('sb-outreach').textContent=outreachCount;document.getElementById('sbs-outreach').textContent=outreachCount;
+    },i*200+150);
+  });
+
   const gapRefs=referrals.filter(r=>r.gaps>0);
   const outreachDuration=4000;
   const outStep=outreachDuration/gapRefs.length;
@@ -1320,7 +1379,8 @@ function enableHolloway(){
   document.getElementById('holloway-hint').style.display='block';
   // Show scale callout in main
   document.getElementById('scale-callout').classList.add('visible');
-  // Enable 4 featured rows for deep dive
+  // Enable voice rows and 4 featured rows for deep dive
+  enableVoiceRows();
   enableFeaturedCases();
 }
 
@@ -1357,6 +1417,7 @@ function resetDemo(){
   document.getElementById('scale-callout').classList.remove('visible');
   document.getElementById('scale-card').style.display='none';
   document.getElementById('holloway-hint').style.display='none';
+  currentCaseType='holloway';
   renderQueue();
 }
 
@@ -1439,6 +1500,103 @@ function switchNormTab(n){
   tabs.forEach((t,i)=>t.classList.toggle('active',i===n));
 }
 
+// ── VOICE INTAKE CASES ──
+const VOICE_CASES=[
+  {vid:'v1',name:'Teresa Nguyen',dob:'1981-04-12',claim:'WC-2026-081923',item:'Knee Brace',hcpcs:'L1820',pri:'MED',gaps:1,gapList:['Auth Ref'],
+   carrier:'Pacific Mutual WC',cm:{name:'Rachel Kim',email:'r.kim@pacmutual.com',phone:'310-555-0244'},
+   prov:{name:'Aisha Patel, MD',npi:'8765432109',practice:'South Bay Orthopedics'},
+   icd:{code:'M23.201',desc:'Derangement of medial meniscus, right knee'},
+   duration:'1:47',
+   transcript:[
+    {spk:'agent',text:'Thank you for calling the Intake Coordination line — I\'m the AI intake agent. I\'ll collect your referral details and get the episode into the system. What\'s the worker\'s full name?'},
+    {spk:'cm',text:'Teresa Nguyen.',cap:true},
+    {spk:'agent',text:'Date of birth?'},
+    {spk:'cm',text:'April 12th, 1981.',cap:true},
+    {spk:'agent',text:'Claim number and carrier?'},
+    {spk:'cm',text:'WC-2026-081923 — carrier is Pacific Mutual.',cap:true},
+    {spk:'agent',text:'What equipment is being requested?'},
+    {spk:'cm',text:'Knee brace — medial meniscus tear, she had surgery last week.'},
+    {spk:'agent',text:'HCPCS L1820 — knee orthosis, post-surgical. Do you have an authorization reference?'},
+    {spk:'cm',text:'Not yet — still processing with the adjuster.'},
+    {spk:'agent',text:'Flagged as a gap. Preferred appointment window?'},
+    {spk:'cm',text:'May 8th, any time afternoon.',cap:true},
+    {spk:'agent',text:'Transportation needed?'},
+    {spk:'cm',text:'No, she\'ll drive herself.',cap:true},
+    {spk:'agent',text:'Your name and callback?'},
+    {spk:'cm',text:'Rachel Kim, 310-555-0244.',cap:true},
+    {spk:'agent',text:'14 fields captured, 1 gap flagged: authorization reference. Episode is in the system. Confirmation email sent to address on file.'},
+   ],
+   fields:[
+    {l:'worker.name',v:'Teresa Nguyen'},{l:'worker.dob',v:'1981-04-12'},
+    {l:'insurance.claim_number',v:'WC-2026-081923'},{l:'insurance.carrier',v:'Pacific Mutual WC'},
+    {l:'services.hcpcs',v:'L1820 · Knee Brace'},{l:'insurance.auth_reference',v:'null — flagged',null:true},
+    {l:'scheduling.appointment_window',v:'2026-05-08 · PM'},{l:'scheduling.transportation',v:'self'},
+    {l:'case_manager.name',v:'Rachel Kim'},
+   ]},
+  {vid:'v2',name:'Carlos Rivera',dob:'1969-07-22',claim:'WC-2026-088742',item:'Back Brace',hcpcs:'L0631',pri:'HIGH',gaps:2,gapList:['Auth Ref','Appt Window'],
+   carrier:'Liberty Mutual WC',cm:{name:'Jennifer Walsh',email:'j.walsh@libertymutual.com',phone:'818-555-0317'},
+   prov:{name:'Robert Chen, MD',npi:'7654321098',practice:'Spine & Rehab Center'},
+   icd:{code:'M51.16',desc:'L4-L5 intervertebral disc herniation'},
+   duration:'2:03',
+   transcript:[
+    {spk:'agent',text:'Intake Coordination line — AI intake agent. Worker\'s full name?'},
+    {spk:'cm',text:'Carlos Rivera.',cap:true},
+    {spk:'agent',text:'Date of birth?'},
+    {spk:'cm',text:'July 22nd, 1969.',cap:true},
+    {spk:'agent',text:'Claim number and carrier?'},
+    {spk:'cm',text:'WC-2026-088742 — Liberty Mutual.',cap:true},
+    {spk:'agent',text:'What equipment is needed?'},
+    {spk:'cm',text:'Lumbar back brace — he has a herniated disc at L4-L5, confirmed on MRI.'},
+    {spk:'agent',text:'HCPCS L0631 — lumbar-sacral orthosis. Authorization reference?'},
+    {spk:'cm',text:'No, I\'m still waiting on that from the adjuster.'},
+    {spk:'agent',text:'Flagged as a hard block. Preferred appointment window?'},
+    {spk:'cm',text:'I don\'t have that yet — I\'ll need to check with him.'},
+    {spk:'agent',text:'Flagged as a soft block. Delivery address?'},
+    {spk:'cm',text:'3817 Ventura Blvd, Encino, CA 91436.',cap:true},
+    {spk:'agent',text:'Your name and callback?'},
+    {spk:'cm',text:'Jennifer Walsh, 818-555-0317.',cap:true},
+    {spk:'agent',text:'13 fields captured, 2 gaps flagged: authorization reference and appointment window. Episode is in the system.'},
+   ],
+   fields:[
+    {l:'worker.name',v:'Carlos Rivera'},{l:'worker.dob',v:'1969-07-22'},
+    {l:'insurance.claim_number',v:'WC-2026-088742'},{l:'insurance.carrier',v:'Liberty Mutual WC'},
+    {l:'services.hcpcs',v:'L0631 · Back Brace'},{l:'insurance.auth_reference',v:'null — flagged',null:true},
+    {l:'scheduling.appointment_window',v:'null — flagged',null:true},
+    {l:'worker.address',v:'3817 Ventura Blvd, Encino CA 91436'},{l:'case_manager.name',v:'Jennifer Walsh'},
+   ]},
+  {vid:'v3',name:'Sandra Mitchell',dob:'1974-11-08',claim:'WC-2026-092156',item:'CPAP Machine',hcpcs:'E0601',pri:'MED',gaps:3,gapList:['Auth Ref','Equip Spec','Language'],
+   carrier:'State Compensation Fund',cm:{name:'David Park',email:'d.park@statecomp.com',phone:'213-555-0489'},
+   prov:{name:'Maria Torres, MD',npi:'6543210987',practice:'Westside Sleep Medicine'},
+   icd:{code:'G47.33',desc:'Obstructive sleep apnea (adult)'},
+   duration:'2:18',
+   transcript:[
+    {spk:'agent',text:'Intake Coordination line. Worker\'s name?'},
+    {spk:'cm',text:'Sandra Mitchell.',cap:true},
+    {spk:'agent',text:'Date of birth?'},
+    {spk:'cm',text:'November 8, 1974.',cap:true},
+    {spk:'agent',text:'Claim number and carrier?'},
+    {spk:'cm',text:'WC-2026-092156 — State Compensation Fund.',cap:true},
+    {spk:'agent',text:'Equipment being requested?'},
+    {spk:'cm',text:'CPAP machine — she has sleep apnea confirmed by sleep study.'},
+    {spk:'agent',text:'HCPCS E0601 — CPAP. What pressure setting and mask type has the physician specified?'},
+    {spk:'cm',text:'I don\'t have that on the form — the sleep study results have it.'},
+    {spk:'agent',text:'Flagged as a gap — equipment specification missing. Authorization reference?'},
+    {spk:'cm',text:'No, not yet.'},
+    {spk:'agent',text:'Flagged. Does the patient need a Spanish interpreter?'},
+    {spk:'cm',text:'Actually yes — she prefers Spanish.',cap:true},
+    {spk:'agent',text:'Noted — language flagged as Spanish, interpreter required. Your name and callback?'},
+    {spk:'cm',text:'David Park, 213-555-0489.',cap:true},
+    {spk:'agent',text:'12 fields captured, 3 gaps flagged: auth reference, equipment specification, and language confirmed Spanish. Episode is in the system.'},
+   ],
+   fields:[
+    {l:'worker.name',v:'Sandra Mitchell'},{l:'worker.dob',v:'1974-11-08'},
+    {l:'insurance.claim_number',v:'WC-2026-092156'},{l:'insurance.carrier',v:'State Compensation Fund'},
+    {l:'services.hcpcs',v:'E0601 · CPAP Machine'},{l:'insurance.auth_reference',v:'null — flagged',null:true},
+    {l:'prescription.specifications',v:'null — flagged',null:true},
+    {l:'worker.language',v:'Spanish · interpreter needed',highlight:true},{l:'case_manager.name',v:'David Park'},
+   ]},
+];
+
 // ── FEATURED CASES — 4 clickable deep-dive rows ──
 const CARRIERS_D=['Pacific Mutual WC','National Indemnity','State Compensation Fund','Liberty Mutual WC','Zenith Insurance','ICW Group'];
 const ADJUSTERS_D=[
@@ -1497,7 +1655,95 @@ let currentCaseType='holloway';
 let currentFeaturedRef=null;
 
 function navigateStep(n){
-  if(currentCaseType==='featured')goToD(n);else goTo(n);
+  if(currentCaseType==='featured'||currentCaseType==='voice')goToD(n);else goTo(n);
+}
+
+function enableVoiceRows(){
+  VOICE_CASES.forEach(vc=>{
+    const row=document.getElementById('qr-'+vc.vid);
+    if(!row)return;
+    row.style.cursor='pointer';
+    row.title='Click to explore voice intake pipeline';
+    row.onclick=(()=>{const v=vc.vid;return()=>openVoiceCase(v);})();
+    const sc=document.getElementById('qs-'+vc.vid);
+    if(sc)sc.innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#15803d;background:#f0fdf4;border:1px solid #86efac;padding:2px 7px;border-radius:20px">📞 '+vc.gaps+' Gap'+(vc.gaps>1?'s':'')+' · Open</span>';
+  });
+}
+
+function openVoiceCase(vid){
+  const vc=VOICE_CASES.find(x=>x.vid===vid);
+  if(!vc)return;
+  currentCaseType='voice';
+  const vidN=parseInt(vid.replace('v',''));
+  currentFeaturedRef={id:vid,name:vc.name,claim:vc.claim,item:vc.item,hcpcs:vc.hcpcs,gaps:vc.gaps,dob:vc.dob,pri:vc.pri,gapList:vc.gapList};
+
+  document.getElementById('view-batch').style.display='none';
+  document.getElementById('view-walkthrough').style.display='block';
+  document.getElementById('sb-batch-mode').style.display='none';
+  document.getElementById('sb-walkthrough-mode').style.display='block';
+
+  ['wt-1','wt-2','wt-iq','wt-3','wt-4','wt-5','wt-6'].forEach(sid=>{const el=document.getElementById(sid);if(el)el.style.display='none';});
+  const dyn=document.getElementById('wt-dynamic');
+  dyn.innerHTML=buildVoiceHTML(vc);
+  dyn.style.display='block';
+
+  document.getElementById('wt-ep-name').textContent=vc.name;
+  document.getElementById('wt-ep-claim').textContent=vc.claim;
+  document.getElementById('wt-ep-item').textContent=vc.item+' · '+vc.hcpcs;
+  document.getElementById('wt-ep-status').innerHTML='<div class="status-pill incomplete"><span class="status-dot"></span>'+vc.gaps+' Gap'+(vc.gaps>1?'s':'')+' · Voice intake</div>';
+
+  goToD(1);
+  log('Opening voice intake — '+vc.name+' · '+vc.claim);
+}
+
+function buildVoiceStep1HTML(vc){
+  const tLines=vc.transcript.map(t=>{
+    const txt=t.cap?'<span class="captured">'+t.text+'</span>':t.text;
+    return '<div class="t-line"><span class="t-speaker '+(t.spk==='agent'?'agent':'cm')+'">'+(t.spk==='agent'?'AGENT':'CM')+'</span><span class="t-text">'+txt+'</span></div>';
+  }).join('');
+  const fRows=vc.fields.map(f=>'<div class="norm-field" style="padding:4px 8px"><div class="nl">'+f.l+'</div><div class="nv'+(f.null?' null':'')+(f.highlight?' style="color:var(--purple);font-weight:800"':'')+'" style="font-size:11px'+(f.highlight?';color:var(--purple);font-weight:800':'')+'">'+f.v+'</div></div>').join('');
+  return `<div class="dyn-section section active" id="dyn-1">
+  <div class="page-title">Step 1 — Voice Intake</div>
+  <div class="page-sub">Inbound call on (201) 897-3854 · AI agent answered · ${vc.fields.length} fields captured · ${vc.gaps} gap${vc.gaps>1?'s':''} flagged in real time</div>
+  <div class="card" style="border:2px solid rgba(34,197,94,.4);background:linear-gradient(135deg,#f0fdf4 0%,#fff 100%)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="card-title" style="color:#15803d;margin-bottom:0">📞 Voice Channel — Inbound Call</div>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.04em"><span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block"></span>(201) 897-3854 · AI answers 24/7</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 220px;gap:12px">
+      <div class="call-box" style="margin:0">
+        <div class="call-status-row">
+          <div class="call-badge"><span class="call-dot" style="background:#f59e0b;animation:none"></span> Call complete · Referral captured</div>
+          <div class="call-timer">${vc.duration}</div>
+        </div>
+        <div class="transcript">${tLines}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:10px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Fields Captured — Live</div>
+        <div class="norm-grid" style="grid-template-columns:1fr;gap:4px">${fRows}</div>
+        <div style="margin-top:4px;background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:8px 10px;font-size:11px;color:#166534;font-weight:700;text-align:center">
+          ✅ Episode entered queue<br><span style="font-weight:400;font-size:10px">${vc.claim} · ${vc.fields.length} fields · ${vc.gaps} gap${vc.gaps>1?'s':''} flagged</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button></div>
+</div>`;
+}
+
+function buildVoiceHTML(vc){
+  const vidN=parseInt(vc.vid.replace('v',''));
+  const r={id:74+vidN,name:vc.name,dob:vc.dob,claim:vc.claim,item:vc.item,hcpcs:vc.hcpcs,pri:vc.pri,gaps:vc.gaps,gapList:vc.gapList};
+  const gapDetails=vc.gapList.map(g=>({...(GAP_DEFS[g]||{icon:'❓',field:g,sev:'hard',label:g,reason:'Review required.'}),key:g}));
+  const hardBlocks=gapDetails.filter(g=>g.sev==='hard');
+  const softBlocks=gapDetails.filter(g=>g.sev==='soft');
+  const nonBlocking=gapDetails.filter(g=>g.sev==='green');
+  const authNum='AUTH-2026-'+vc.carrier.replace(/[^A-Z]/g,'').substring(0,3)+'-'+String(5000+vidN*311).padStart(4,'0');
+  const apptDate=vc.gapList.includes('Appt Window')?'2026-05-12':'2026-05-08';
+  const allSteps=buildDynamicHTML({r,carrier:vc.carrier,adj:ADJUSTERS_D[vidN%ADJUSTERS_D.length],cm:vc.cm,prov:vc.prov,icd:vc.icd,authNum,apptDate,gapDetails,hardBlocks,softBlocks,nonBlocking});
+  const dyn2idx=allSteps.indexOf('<div class="dyn-section section" id="dyn-2">');
+  const steps2to7=dyn2idx>=0?allSteps.slice(dyn2idx):'';
+  return buildVoiceStep1HTML(vc)+'\n'+steps2to7;
 }
 
 function enableFeaturedCases(){
