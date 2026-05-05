@@ -246,6 +246,31 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .fade-in{animation:fadeIn .3s ease}
 
+/* Doc viewer modal */
+.doc-modal{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.doc-modal.open{opacity:1;pointer-events:all}
+.doc-panel{background:#fff;border-radius:14px;width:100%;max-width:660px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(14px);transition:transform .2s}
+.doc-modal.open .doc-panel{transform:translateY(0)}
+.doc-panel-hdr{padding:14px 20px;border-bottom:1px solid var(--gray-m);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.doc-panel-title{font-size:14px;font-weight:800}
+.doc-panel-close{width:28px;height:28px;border-radius:7px;background:var(--gray-l);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.doc-panel-close:hover{background:var(--gray-m)}
+.doc-panel-body{flex:1;overflow-y:auto;padding:18px 22px}
+
+/* Doc list */
+.doc-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.doc-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;border:1px solid var(--gray-m);background:white;font-size:12px;cursor:pointer;transition:all .15s}
+.doc-item:hover{border-color:var(--blue);background:var(--blue-l)}
+.doc-item.missing-doc{background:var(--red-l);border-color:var(--red-m)}
+.doc-item.missing-doc:hover{border-color:var(--red)}
+.doc-item .di-icon{font-size:18px;flex-shrink:0}
+.doc-item .di-name{flex:1;font-weight:600}
+.doc-item .di-tag{font-size:10px;color:var(--gray);background:var(--gray-m);padding:2px 7px;border-radius:10px}
+.doc-item .di-status{font-size:10px;font-weight:700}
+.doc-item.received .di-status{color:var(--green)}
+.doc-item.missing-doc .di-status{color:var(--red)}
+.doc-item .di-view{font-size:11px;color:var(--blue);margin-left:4px}
+
 /* Raw doc */
 .raw-doc{background:#fafaf8;border:1px solid #e2e0d8;border-radius:8px;padding:14px 18px;font-size:11px;line-height:1.7;font-family:'Courier New',monospace;color:#2d2d2d}
 .raw-doc .rd-header{text-align:center;border-bottom:2px solid #2d2d2d;padding-bottom:8px;margin-bottom:12px}
@@ -393,6 +418,10 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
           <button class="btn-reset" id="reset-btn" onclick="resetDemo()">↺ Reset</button>
           <span id="live-status-text" style="font-size:11px;color:rgba(255,255,255,.55)">Queue loaded — 75 referrals waiting</span>
         </div>
+        <div style="margin-top:12px;display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:7px 14px">
+          <span style="font-size:13px">📞</span>
+          <div><div style="font-size:12px;font-weight:800;color:#4ade80;letter-spacing:.04em">(201) 897-3854</div><div style="font-size:10px;color:rgba(255,255,255,.5)">Live AI intake line · 24/7 · case managers call to submit referrals</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -481,6 +510,40 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
   <div class="section active" id="wt-1">
     <div class="page-title">Step 1 — Channel Intake</div>
     <div class="page-sub">Extracting structured fields from 3 documents · 5 pages</div>
+
+    <div class="card">
+      <div class="card-title">📂 Referral Package — James Holloway · WC-2026-084431</div>
+      <div class="doc-list">
+        <div class="doc-item received" onclick="openDoc(0)">
+          <div class="di-icon">📄</div>
+          <div class="di-name">WC-2026-084431_ReferralForm.pdf</div>
+          <div class="di-tag">Fax · Image PDF · 2 pages</div>
+          <div class="di-status">✓ Received</div>
+          <div class="di-view">View ›</div>
+        </div>
+        <div class="doc-item received" onclick="openDoc(1)">
+          <div class="di-icon">🩺</div>
+          <div class="di-name">WC-2026-084431_ClinicalNotes.pdf</div>
+          <div class="di-tag">Physician Notes · 2 pages</div>
+          <div class="di-status">✓ Received</div>
+          <div class="di-view">View ›</div>
+        </div>
+        <div class="doc-item received" onclick="openDoc(2)">
+          <div class="di-icon">💊</div>
+          <div class="di-name">WC-2026-084431_RxPrescription.jpg</div>
+          <div class="di-tag">Scanned Rx · 1 page</div>
+          <div class="di-status">✓ Received</div>
+          <div class="di-view">View ›</div>
+        </div>
+        <div class="doc-item missing-doc" onclick="openDoc(3)">
+          <div class="di-icon">📋</div>
+          <div class="di-name">Authorization Document</div>
+          <div class="di-tag">Auth / Insurance</div>
+          <div class="di-status">⚠ Missing / Blank</div>
+          <div class="di-view" style="color:var(--red)">View ›</div>
+        </div>
+      </div>
+    </div>
 
     <div class="card">
       <div class="card-title">🔍 Extraction Results — All Documents</div>
@@ -977,6 +1040,17 @@ Intake Coordination Agent</div>
 </main>
 </div><!-- /layout -->
 
+<!-- Doc viewer modal -->
+<div class="doc-modal" id="doc-modal" onclick="if(event.target===this)closeDoc()">
+  <div class="doc-panel">
+    <div class="doc-panel-hdr">
+      <div class="doc-panel-title" id="doc-modal-title">Document</div>
+      <button class="doc-panel-close" onclick="closeDoc()">✕</button>
+    </div>
+    <div class="doc-panel-body" id="doc-modal-body"></div>
+  </div>
+</div>
+
 <script>
 // ── DATA ──
 const NAMES_M = ['James','Carlos','Robert','Marcus','David','Michael','Kevin','Thomas','John','William','Richard','Edward','George','Kenneth','Steven','Anthony','Donald','Mark','Paul','Andrew'];
@@ -1283,6 +1357,119 @@ function switchNormTab(n){
   const tabs=document.querySelectorAll('#wt-2 .tab');
   tabs.forEach((t,i)=>t.classList.toggle('active',i===n));
 }
+
+// ── DOCUMENT VIEWER ──
+const docDefs = [
+  { title: '📄 Referral Form — WC-2026-084431_ReferralForm.pdf', html: `
+    <div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">COASTAL INSURANCE GROUP</div><div class="rd-title">WORKERS' COMPENSATION — DME REFERRAL FORM</div><div style="font-size:10px;margin-top:4px;color:#888">Date: 04/28/2026 &nbsp;·&nbsp; Fax: (201) 555-8821 &nbsp;·&nbsp; Claim: WC-2026-084431</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Patient Information</div>
+        <div class="rd-row"><span class="rd-label">Patient Name:</span><span class="rd-val rd-handwritten">James Holloway</span></div>
+        <div class="rd-row"><span class="rd-label">Date of Birth:</span><span class="rd-val rd-handwritten">03/14/1978</span></div>
+        <div class="rd-row"><span class="rd-label">Address:</span><span class="rd-val rd-handwritten">4821 Elmwood Dr, Anaheim CA 92801</span></div>
+        <div class="rd-row"><span class="rd-label">Language:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Insurance / Authorization</div>
+        <div class="rd-row"><span class="rd-label">Carrier:</span><span class="rd-val">Coastal Insurance Group</span></div>
+        <div class="rd-row"><span class="rd-label">Claim #:</span><span class="rd-val">WC-2026-084431</span></div>
+        <div class="rd-row"><span class="rd-label">Auth Reference #:</span><span class="rd-blank" style="color:#dc2626;font-style:italic">&nbsp;NOT PROVIDED</span></div>
+        <div class="rd-row"><span class="rd-label">Adjuster:</span><span class="rd-val">Maria Santos &nbsp;·&nbsp; 714-555-0192</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Equipment Ordered</div>
+        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val rd-handwritten">Rollator Walker, 4-Wheel</span></div>
+        <div class="rd-row"><span class="rd-label">HCPCS Code:</span><span class="rd-val">e0143</span></div>
+        <div class="rd-row"><span class="rd-label">Specifications:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+        <div class="rd-row"><span class="rd-label">Delivery Address:</span><span class="rd-val rd-handwritten">4821 Elmwood Dr, Anaheim CA</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Diagnosis</div>
+        <div class="rd-row"><span class="rd-label">ICD-10:</span><span class="rd-val" style="color:#dc2626">M23.611</span><span style="font-size:10px;color:#888;margin-left:8px">Tear of ACL, right knee</span></div>
+        <div class="rd-row"><span class="rd-label">Appointment:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+        <div class="rd-row"><span class="rd-label">Transportation:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+      </div>
+      <div style="margin-top:10px;padding:8px;background:#fef9c3;border:1px solid #fde68a;border-radius:6px;font-size:10px;color:#92400e">
+        ⚠ AI note: ICD-10 M23.611 on this form conflicts with clinical notes (S83.209A). Auth reference #, appointment window, transportation, language, and equipment specifications are blank.
+      </div>
+    </div>` },
+  { title: '🩺 Clinical Notes — WC-2026-084431_ClinicalNotes.pdf', html: `
+    <div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">PACIFIC ORTHOPEDIC ASSOCIATES</div><div class="rd-title">CLINICAL NOTES — WORKERS' COMPENSATION</div><div style="font-size:10px;margin-top:4px;color:#888">Provider: Kevin Marsh, MD &nbsp;·&nbsp; NPI: 1234567890 &nbsp;·&nbsp; Date: 04/25/2026</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Patient</div>
+        <div class="rd-row"><span class="rd-label">Name:</span><span class="rd-val">James Holloway</span></div>
+        <div class="rd-row"><span class="rd-label">DOB:</span><span class="rd-val">1978-03-14</span></div>
+        <div class="rd-row"><span class="rd-label">Claim #:</span><span class="rd-val">WC-2026-084431</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Diagnosis</div>
+        <div class="rd-row"><span class="rd-label">ICD-10:</span><span class="rd-val" style="color:#16a34a">S83.209A</span><span style="font-size:10px;color:#888;margin-left:8px">Post-ACL reconstruction, right knee</span></div>
+        <div class="rd-row"><span class="rd-label">Surgical History:</span><span class="rd-val">ACL reconstruction 2026-03-28</span></div>
+        <div class="rd-row"><span class="rd-label">Body Part:</span><span class="rd-val">Right knee</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Clinical Narrative</div>
+        <div style="font-size:11px;line-height:1.7;color:#333;margin:4px 0 8px">Patient is 4 weeks post-op ACL repair. Limited weight-bearing. ROM 0–65°. Ambulatory with assistance. <b>Fall risk documented.</b> Patient weight: <b>285 lbs</b> — bariatric rating required for all assistive devices.</div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Treatment Plan</div>
+        <div class="rd-row"><span class="rd-label">PT:</span><span class="rd-val">3x/week</span></div>
+        <div class="rd-row"><span class="rd-label">Follow-up:</span><span class="rd-val">2026-05-28 (6-week post-op)</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Equipment Recommendation</div>
+        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val">Rollator Walker, 4-wheel — <b>bariatric spec required</b> (285 lbs)</span></div>
+        <div class="rd-row"><span class="rd-label">HCPCS:</span><span class="rd-val">E0143</span></div>
+        <div class="rd-row"><span class="rd-label">Justification:</span><span class="rd-val">Post-ACL instability. Bariatric rating req. Fall risk.</span></div>
+      </div>
+      <div style="margin-top:10px;padding:8px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;font-size:10px;color:#15803d">
+        ✓ AI note: ICD-10 S83.209A confirmed here and on prescription. Clinical notes also flag bariatric specification requirement (285 lbs) not present on referral form.
+      </div>
+    </div>` },
+  { title: '💊 Rx Prescription — WC-2026-084431_RxPrescription.jpg', html: `
+    <div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">PACIFIC ORTHOPEDIC ASSOCIATES</div><div class="rd-title">PRESCRIPTION — DURABLE MEDICAL EQUIPMENT</div><div style="font-size:10px;margin-top:4px;color:#888">Kevin Marsh, MD &nbsp;·&nbsp; NPI: 1234567890 &nbsp;·&nbsp; Date Signed: 04/25/2026</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Patient</div>
+        <div class="rd-row"><span class="rd-label">Name:</span><span class="rd-val rd-handwritten">James Holloway</span></div>
+        <div class="rd-row"><span class="rd-label">DOB:</span><span class="rd-val">1978-03-14</span></div>
+        <div class="rd-row"><span class="rd-label">Diagnosis ICD-10:</span><span class="rd-val" style="color:#16a34a">S83.209A</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Equipment Prescribed</div>
+        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val rd-handwritten">Rollator Walker, 4-Wheel</span></div>
+        <div class="rd-row"><span class="rd-label">HCPCS:</span><span class="rd-val">E0143</span></div>
+        <div class="rd-row"><span class="rd-label">Specifications:</span><span class="rd-blank" style="color:#dc2626;font-style:italic">&nbsp;NOT SPECIFIED</span></div>
+        <div class="rd-row"><span class="rd-label">Qty / Duration:</span><span class="rd-val">1 / 90 days</span></div>
+        <div class="rd-row"><span class="rd-label">No Substitution:</span><span class="rd-val">☑ YES</span></div>
+      </div>
+      <div class="rd-section"><div class="rd-sec-title">Physician Signature</div>
+        <div class="rd-row"><span class="rd-label">Signed:</span><span class="rd-val rd-handwritten" style="font-size:18px">Kevin Marsh</span></div>
+        <div class="rd-row"><span class="rd-label">Date:</span><span class="rd-val">04/25/2026</span></div>
+        <div class="rd-row"><span class="rd-label">License / NPI:</span><span class="rd-val">1234567890</span></div>
+      </div>
+      <div style="margin-top:10px;padding:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:10px;color:#dc2626">
+        ⚠ AI note: Specifications field is blank. Clinical notes document patient weight 285 lbs — standard rollator is contraindicated. Bariatric specification (400 lb capacity) added to gap list as hard block.
+      </div>
+    </div>` },
+  { title: '📋 Authorization Document — Missing / Blank', html: `
+    <div class="raw-doc">
+      <div class="rd-header"><div class="rd-org">COASTAL INSURANCE GROUP</div><div class="rd-title">PRIOR AUTHORIZATION — ATTACHMENT</div><div style="font-size:10px;margin-top:4px;color:#888">Claim: WC-2026-084431 &nbsp;·&nbsp; Date: 04/28/2026</div></div>
+      <div class="rd-section"><div class="rd-sec-title">Authorization Details</div>
+        <div class="rd-row"><span class="rd-label">Auth Reference #:</span><span class="rd-blank" style="color:#dc2626;font-style:italic">&nbsp;BLANK — not completed</span></div>
+        <div class="rd-row"><span class="rd-label">Approved Items:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+        <div class="rd-row"><span class="rd-label">Effective Date:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+        <div class="rd-row"><span class="rd-label">Expiry Date:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+      </div>
+      <div style="margin-top:12px;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:10px;color:#dc2626;font-weight:700">
+        ⚠ Authorization reference number not present on this page or any other document in the package. Added to gap list as hard block — routing cannot proceed until resolved. CM has been contacted to provide auth ref #.
+      </div>
+    </div>` }
+];
+
+function openDoc(idx) {
+  const def = docDefs[idx];
+  document.getElementById('doc-modal-title').textContent = def.title;
+  document.getElementById('doc-modal-body').innerHTML = def.html;
+  document.getElementById('doc-modal').classList.add('open');
+}
+
+function closeDoc() {
+  document.getElementById('doc-modal').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDoc(); });
 
 function log(text){
   const box=document.getElementById('agent-log');
