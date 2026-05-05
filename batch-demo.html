@@ -217,25 +217,20 @@ header{background:#1e3a5f;padding:0 32px;display:flex;align-items:center;justify
 </div>
 
 <script>
-// ── DATA GENERATION ──
+const IS_SCALE = new URLSearchParams(window.location.search).get('mode') === 'scale';
+
+// ── DATA ──
 const NAMES_M = ['James','Carlos','Robert','Marcus','David','Michael','Kevin','Thomas','John','William','Richard','Edward','George','Kenneth','Steven','Anthony','Donald','Mark','Paul','Andrew'];
 const NAMES_F = ['Maria','Jennifer','Patricia','Susan','Linda','Angela','Michelle','Sharon','Christine','Rebecca','Sandra','Laura','Cynthia','Diane','Helen','Barbara','Nancy','Betty','Dorothy','Carol'];
 const LAST_NAMES = ['Rodriguez','Mendez','Foster','Chen','Kim','Williams','Martinez','Johnson','Anderson','Thompson','White','Harris','Clark','Lewis','Lee','Walker','Hall','Allen','Young','Scott','Green','Adams','Baker','Gonzalez','Nelson','Carter','Mitchell','Perez','Roberts','Turner','Phillips','Campbell','Parker','Evans','Edwards','Collins','Stewart','Sanchez','Morris','Rogers','Reed','Cook','Bailey','Bell','Cooper','Richardson','Cox','Howard','Ward','Torres'];
 const DME_ITEMS = [
-  {item:'Rollator Walker', hcpcs:'E0143'},
-  {item:'Hospital Bed', hcpcs:'E0260'},
-  {item:'CPAP Machine', hcpcs:'E0601'},
-  {item:'Power Wheelchair', hcpcs:'K0001'},
-  {item:'Knee Brace', hcpcs:'L1820'},
-  {item:'Back Brace', hcpcs:'L0631'},
-  {item:'Arm Sling', hcpcs:'A4570'},
-  {item:'Shower Chair', hcpcs:'E0240'},
-  {item:'Cervical Collar', hcpcs:'L0120'},
-  {item:'Ankle Brace', hcpcs:'L1902'},
-  {item:'Nebulizer', hcpcs:'E0570'},
-  {item:'Compression Stocking', hcpcs:'A6531'},
-  {item:'Crutches', hcpcs:'A4570'},
-  {item:'Transfer Bench', hcpcs:'E0244'},
+  {item:'Rollator Walker', hcpcs:'E0143'},{item:'Hospital Bed', hcpcs:'E0260'},
+  {item:'CPAP Machine', hcpcs:'E0601'},{item:'Power Wheelchair', hcpcs:'K0001'},
+  {item:'Knee Brace', hcpcs:'L1820'},{item:'Back Brace', hcpcs:'L0631'},
+  {item:'Arm Sling', hcpcs:'A4570'},{item:'Shower Chair', hcpcs:'E0240'},
+  {item:'Cervical Collar', hcpcs:'L0120'},{item:'Ankle Brace', hcpcs:'L1902'},
+  {item:'Nebulizer', hcpcs:'E0570'},{item:'Compression Stocking', hcpcs:'A6531'},
+  {item:'Crutches', hcpcs:'A4570'},{item:'Transfer Bench', hcpcs:'E0244'},
   {item:'Oxygen Concentrator', hcpcs:'E1390'},
 ];
 const GAP_TYPES = ['Auth Ref','Appt Window','Transport','Language','Equip Spec','Physician NPI','ICD Code'];
@@ -244,32 +239,103 @@ let _seed = 12345;
 function rng() { _seed = (_seed * 1664525 + 1013904223) >>> 0; return _seed / 4294967296; }
 function ri(n) { return Math.floor(rng() * n); }
 
-const referrals = Array.from({length:75}, (_, i) => {
+function makeReferral(i) {
   const isMale = rng() > 0.45;
   const fn = isMale ? NAMES_M[ri(NAMES_M.length)] : NAMES_F[ri(NAMES_F.length)];
   const ln = LAST_NAMES[ri(LAST_NAMES.length)];
   const dme = DME_ITEMS[ri(DME_ITEMS.length)];
-  const claim = 'WC-2026-0' + String(80000 + ri(19999)).padStart(5,'0');
+  const claim = 'WC-2026-' + String(80000 + i).padStart(6,'0');
   const p = rng();
   const pri = p > 0.78 ? 'HIGH' : p > 0.45 ? 'MED' : 'LOW';
   const hasGaps = rng() < 0.82;
-  let gapCount = 0, gapList = [];
-  if (hasGaps) {
-    gapCount = 1 + ri(4);
-    const avail = [...GAP_TYPES];
-    for (let g = 0; g < gapCount; g++) {
-      const idx = ri(avail.length);
-      gapList.push(avail.splice(idx,1)[0]);
-    }
-  }
+  let gapCount = 0;
+  if (hasGaps) { gapCount = 1 + ri(4); const avail=[...GAP_TYPES]; for(let g=0;g<gapCount;g++){ri(avail.length);} }
   const dob = (1955+ri(45))+'-'+String(1+ri(12)).padStart(2,'0')+'-'+String(1+ri(27)).padStart(2,'0');
-  return {id:i, name:fn+' '+ln, dob, claim, item:dme.item, hcpcs:dme.hcpcs, pri, gaps:gapCount, gapList};
-});
+  return {id:i, name:fn+' '+ln, dob, claim, item:dme.item, hcpcs:dme.hcpcs, pri, gaps:gapCount};
+}
+
+// Generate data set
+const TOTAL_COUNT = IS_SCALE ? 10000 : 75;
+const DISPLAY_LIMIT = IS_SCALE ? 500 : 75;
+const referrals = Array.from({length: TOTAL_COUNT}, (_, i) => makeReferral(i));
+
+// ── SCALE MODE INIT ──
+if (IS_SCALE) {
+  // Update page title and hero
+  document.title = 'Scale Processing — 10,000 Referrals · Intake Agent';
+
+  // Compute exact stats across all 10,000
+  let scRoutedCount = 0, scGapsTotal = 0, scOutreachCount = 0;
+  referrals.forEach(r => {
+    if (r.gaps === 0) { scRoutedCount++; } else { scGapsTotal += r.gaps; scOutreachCount++; }
+  });
+  const scPages = TOTAL_COUNT * 3;
+
+  // Patch hero content
+  document.addEventListener('DOMContentLoaded', () => {
+    const heroTitle = document.querySelector('.hero-title');
+    const heroSub = document.querySelector('.hero-sub');
+    const heroStats = document.querySelector('.hero-stats');
+    const runBtn = document.getElementById('run-btn');
+    const liveStatus = document.getElementById('live-status');
+
+    if (heroTitle) heroTitle.textContent = '10,000 Referral Scale Processing';
+    if (heroSub) heroSub.textContent = 'Pre-run Monday morning queue at production scale — 3M+ referrals / year · Results loaded instantly, no animation required.';
+    if (heroStats) heroStats.innerHTML = `
+      <div class="hs-item"><div class="hs-n">10,000</div><div class="hs-l">Referrals</div></div>
+      <div class="hs-item"><div class="hs-n">30,000</div><div class="hs-l">Pages Read</div></div>
+      <div class="hs-item"><div class="hs-n">25</div><div class="hs-l">Fields Each</div></div>
+      <div class="hs-item"><div class="hs-n">~56 min</div><div class="hs-l">Total Time</div></div>
+      <div class="hs-item"><div class="hs-n">0</div><div class="hs-l">Staff Hours</div></div>`;
+    if (runBtn) runBtn.style.display = 'none';
+    if (liveStatus) liveStatus.innerHTML = '<span style="background:rgba(34,197,94,.2);border:1px solid rgba(34,197,94,.4);color:#4ade80;padding:5px 14px;border-radius:20px;font-weight:700;font-size:12px">✅ Pre-Run Complete — 10,000 referrals processed</span>';
+
+    // Update stats bar
+    document.getElementById('sb-queued').textContent = '0';
+    document.getElementById('sb-proc').textContent = '0';
+    document.getElementById('sb-pages').textContent = scPages.toLocaleString();
+    document.getElementById('sb-routed').textContent = scRoutedCount.toLocaleString();
+    document.getElementById('sb-gaps').textContent = scGapsTotal.toLocaleString();
+    document.getElementById('sb-outreach').textContent = scOutreachCount.toLocaleString();
+
+    // Progress bar full
+    document.getElementById('prog-fill').style.width = '100%';
+    document.getElementById('prog-pct').textContent = '100%';
+    document.getElementById('prog-label').textContent = `✅ 10,000 referrals processed · ${scOutreachCount.toLocaleString()} outreach emails dispatched`;
+
+    // Render first 500 rows pre-processed
+    renderScaleQueue(scRoutedCount, scGapsTotal, scOutreachCount);
+
+    // Show summary immediately
+    const el = document.getElementById('outreach-summary');
+    if (el) {
+      el.style.display = 'block';
+      document.getElementById('os-total').textContent = (10000).toLocaleString();
+      document.getElementById('os-routed').textContent = scRoutedCount.toLocaleString();
+      document.getElementById('os-sent').textContent = scOutreachCount.toLocaleString();
+      document.getElementById('os-gaps-total').textContent = scGapsTotal.toLocaleString();
+      document.getElementById('os-timestamp').textContent = 'Processed overnight · Ready at 08:00';
+    }
+
+    // Show scale context note
+    const note = document.createElement('div');
+    note.style.cssText = 'background:#1e3a5f;border-radius:12px;padding:16px 20px;margin-top:14px;color:white;font-size:12px;line-height:1.7';
+    note.innerHTML = `<div style="font-size:10px;font-weight:800;color:#93c5fd;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">⚡ Production Context</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:10px">
+        <div style="text-align:center"><div style="font-size:22px;font-weight:900;color:#fff">3M+</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em">Referrals / Year</div></div>
+        <div style="text-align:center"><div style="font-size:22px;font-weight:900;color:#fff">~12,000</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em">Per Working Day</div></div>
+        <div style="text-align:center"><div style="font-size:22px;font-weight:900;color:#93c5fd">${Math.round(scOutreachCount/100*10)/10}K</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em">Outreach (this batch)</div></div>
+        <div style="text-align:center"><div style="font-size:22px;font-weight:900;color:#4ade80">0</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em">Staff Hours</div></div>
+      </div>
+      <div style="color:rgba(255,255,255,.5);font-size:11px">This batch represents one morning queue. The same AI engine processes each referral identically — extracting 25 fields, triaging gaps, dispatching targeted outreach, and generating a clean route state. Every one of the ${scOutreachCount.toLocaleString()} case managers received an email listing only their specific missing fields.</div>`;
+    document.querySelector('.main').appendChild(note);
+  });
+}
 
 // ── RENDER QUEUE ──
 function renderQueue() {
   const tbody = document.getElementById('queue-tbody');
-  tbody.innerHTML = referrals.map(r => `
+  tbody.innerHTML = referrals.slice(0, DISPLAY_LIMIT).map(r => `
     <tr id="qr-${r.id}">
       <td style="width:160px"><div style="font-weight:700;font-size:11px">${r.name}</div><div style="font-size:9.5px;color:var(--gray)">DOB: ${r.dob}</div></td>
       <td style="width:130px;color:var(--gray);font-size:10.5px">${r.claim}</td>
@@ -282,27 +348,57 @@ function renderQueue() {
     </tr>
   `).join('');
 }
-renderQueue();
 
-// ── PROCESSING ──
+function renderScaleQueue() {
+  const tbody = document.getElementById('queue-tbody');
+  // Note row at top
+  const noteRow = `<tr style="background:#eff6ff"><td colspan="8" style="padding:8px 12px;font-size:11px;color:#1d4ed8;font-weight:700;text-align:center">
+    Displaying 500 of 10,000 referrals processed · All results shown below reflect the complete run
+  </td></tr>`;
+  tbody.innerHTML = noteRow + referrals.slice(0, 500).map(r => {
+    const isRouted = r.gaps === 0;
+    const rowClass = isRouted ? 'done-routed' : 'outreach-sent';
+    const statusHtml = isRouted
+      ? '<span class="s-routed">✅ Routed</span>'
+      : '<span class="s-gaps">⚠ Gaps Found</span>';
+    const gapHtml = isRouted
+      ? '<span class="gap-badge zero">0</span>'
+      : `<span class="gap-badge">${r.gaps}</span>`;
+    const outreachHtml = isRouted
+      ? '<span style="font-size:10px;color:var(--green);font-weight:700">—</span>'
+      : '<span class="outreach-badge">📧 Sent</span>';
+    return `<tr class="${rowClass}">
+      <td style="width:160px"><div style="font-weight:700;font-size:11px">${r.name}</div><div style="font-size:9.5px;color:var(--gray)">DOB: ${r.dob}</div></td>
+      <td style="width:130px;color:var(--gray);font-size:10.5px">${r.claim}</td>
+      <td style="width:160px"><div style="font-size:11px;font-weight:600">${r.item}</div><div style="font-size:9.5px;color:var(--gray)">${r.hcpcs}</div></td>
+      <td class="channel-cell"><span class="ch-fax">fax</span></td>
+      <td class="priority-cell"><span class="pri-badge pri-${r.pri}">${r.pri}</span></td>
+      <td class="status-cell">${statusHtml}</td>
+      <td class="gaps-cell">${gapHtml}</td>
+      <td class="outreach-cell">${outreachHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+if (!IS_SCALE) renderQueue();
+
+// ── PROCESSING (live mode only) ──
 let processing = false;
 let totalGapsAll = 0, routedCount = 0, outreachCount = 0, pagesRead = 0;
 
 function startProcessing() {
-  if (processing) return;
+  if (processing || IS_SCALE) return;
   processing = true;
   document.getElementById('run-btn').disabled = true;
   document.getElementById('reset-btn').style.display = 'inline-block';
   document.getElementById('live-status').textContent = 'AI reading referral packages...';
 
   const TOTAL = 75;
-  const DURATION = 50000; // 50 seconds
+  const DURATION = 50000;
   const STEP = DURATION / TOTAL;
 
   referrals.forEach((r, i) => {
     const t = i * STEP;
-
-    // Mark as processing
     setTimeout(() => {
       const row = document.getElementById('qr-' + r.id);
       row.classList.add('processing');
@@ -313,15 +409,11 @@ function startProcessing() {
       document.getElementById('sb-pages').textContent = pagesRead;
       updateProgress(i / TOTAL * 90);
       document.getElementById('prog-label').textContent = `Reading ${r.name} — ${r.item}`;
-      // Scroll into view
       row.scrollIntoView({block:'nearest', behavior:'smooth'});
     }, t);
-
-    // Mark as done
     setTimeout(() => {
       const row = document.getElementById('qr-' + r.id);
       row.classList.remove('processing');
-
       if (r.gaps === 0) {
         row.classList.add('done-routed');
         document.getElementById('qs-' + r.id).innerHTML = '<span class="s-routed">✅ Routed</span>';
@@ -340,7 +432,6 @@ function startProcessing() {
     }, t + STEP * 0.85);
   });
 
-  // After all processed — trigger outreach
   setTimeout(() => {
     document.getElementById('prog-label').textContent = 'Processing complete — dispatching digital outreach...';
     updateProgress(95);
@@ -353,7 +444,6 @@ function sendOutreach(STEP) {
   const gapRefs = referrals.filter(r => r.gaps > 0);
   const outreachDuration = 4000;
   const outreachStep = outreachDuration / gapRefs.length;
-
   gapRefs.forEach((r, i) => {
     setTimeout(() => {
       document.getElementById('qo-' + r.id).innerHTML = '<span class="outreach-badge">📧 Sent</span>';
@@ -363,7 +453,6 @@ function sendOutreach(STEP) {
       document.getElementById('sb-outreach').textContent = outreachCount;
     }, i * outreachStep);
   });
-
   setTimeout(() => {
     updateProgress(100);
     document.getElementById('prog-label').textContent = '✅ All 75 referrals processed · Outreach dispatched';
@@ -388,6 +477,7 @@ function updateProgress(pct) {
 }
 
 function resetDemo() {
+  if (IS_SCALE) return;
   processing = false;
   totalGapsAll = 0; routedCount = 0; outreachCount = 0; pagesRead = 0;
   _seed = 12345;
