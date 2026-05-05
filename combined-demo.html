@@ -1097,7 +1097,7 @@ function renderQueue(){
     <td style="width:120px;color:var(--gray);font-size:10.5px">WC-2026-084431</td>
     <td style="width:150px"><div style="font-size:11px;font-weight:600">Rollator Walker</div><div style="font-size:9.5px;color:var(--gray)">E0143</div></td>
     <td style="width:55px;text-align:center"><span class="ch-fax">fax</span></td>
-    <td style="width:70px;text-align:center"><span class="pri-badge pri-HIGH">HIGH</span></td>
+    <td style="width:70px;text-align:center" id="qp-0">—</td>
     <td style="width:130px;text-align:center" id="qs-0"><span class="s-queued">⏳ Queued</span></td>
     <td style="width:65px;text-align:center" id="qg-0">—</td>
     <td style="width:100px;text-align:center" id="qo-0">—</td>
@@ -1108,7 +1108,7 @@ function renderQueue(){
       <td style="width:120px;color:var(--gray);font-size:10.5px">${r.claim}</td>
       <td style="width:150px"><div style="font-size:11px;font-weight:600">${r.item}</div><div style="font-size:9.5px;color:var(--gray)">${r.hcpcs}</div></td>
       <td style="width:55px;text-align:center"><span class="ch-fax">fax</span></td>
-      <td style="width:70px;text-align:center"><span class="pri-badge pri-${r.pri}">${r.pri}</span></td>
+      <td style="width:70px;text-align:center" id="qp-${r.id}">—</td>
       <td style="width:130px;text-align:center" id="qs-${r.id}"><span class="s-queued">⏳ Queued</span></td>
       <td style="width:65px;text-align:center" id="qg-${r.id}">—</td>
       <td style="width:100px;text-align:center" id="qo-${r.id}">—</td>
@@ -1151,6 +1151,7 @@ function startProcessing(){
   setTimeout(()=>{
     holRow.classList.remove('processing');
     holRow.classList.add('done-gaps');
+    document.getElementById('qp-0').innerHTML='<span class="pri-badge pri-HIGH">HIGH</span>';
     document.getElementById('qs-0').innerHTML='<span class="s-gaps">⚠ 5 Gaps</span>';
     document.getElementById('qg-0').innerHTML='<span class="gap-badge">5</span>';
     totalGapsAll+=5;
@@ -1177,6 +1178,7 @@ function startProcessing(){
     setTimeout(()=>{
       const row=document.getElementById('qr-'+r.id);
       row.classList.remove('processing');
+      document.getElementById('qp-'+r.id).innerHTML='<span class="pri-badge pri-'+r.pri+'">'+r.pri+'</span>';
       if(r.gaps===0){
         row.classList.add('done-routed');
         document.getElementById('qs-'+r.id).innerHTML='<span class="s-routed">✅ Routed</span>';
