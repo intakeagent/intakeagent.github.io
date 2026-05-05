@@ -349,31 +349,31 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
       <button onclick="returnToBatch()" style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:5px 10px;border-radius:7px;cursor:pointer;width:100%">← Back to Queue</button>
     </div>
     <div class="sidebar-label">Pipeline</div>
-    <div class="step" id="step-1" onclick="goTo(1)">
+    <div class="step" id="step-1" onclick="navigateStep(1)">
       <div class="step-num">1</div>
       <div><div class="step-title">Channel Intake</div><div class="step-sub">Fax extraction</div></div>
     </div>
-    <div class="step" id="step-2" onclick="goTo(2)">
+    <div class="step" id="step-2" onclick="navigateStep(2)">
       <div class="step-num">2</div>
       <div><div class="step-title">Normalization</div><div class="step-sub">Episode record</div></div>
     </div>
-    <div class="step" id="step-iq" onclick="goTo(3)">
+    <div class="step" id="step-iq" onclick="navigateStep(3)">
       <div class="step-num">3</div>
       <div><div class="step-title">Intelligence Layer</div><div class="step-sub">Validate, score, fix codes</div></div>
     </div>
-    <div class="step" id="step-3" onclick="goTo(4)">
+    <div class="step" id="step-3" onclick="navigateStep(4)">
       <div class="step-num">4</div>
       <div><div class="step-title">Completeness Check</div><div class="step-sub">Gap triage</div></div>
     </div>
-    <div class="step" id="step-4" onclick="goTo(5)">
+    <div class="step" id="step-4" onclick="navigateStep(5)">
       <div class="step-num">5</div>
       <div><div class="step-title">Digital Outreach</div><div class="step-sub">Email case manager</div></div>
     </div>
-    <div class="step" id="step-5" onclick="goTo(6)">
+    <div class="step" id="step-5" onclick="navigateStep(6)">
       <div class="step-num">6</div>
       <div><div class="step-title">Voice Outreach</div><div class="step-sub">Outbound AI call</div></div>
     </div>
-    <div class="step" id="step-6" onclick="goTo(7)">
+    <div class="step" id="step-6" onclick="navigateStep(7)">
       <div class="step-num">7</div>
       <div><div class="step-title">Route Output</div><div class="step-sub">Finalize &amp; dispatch</div></div>
     </div>
@@ -381,8 +381,9 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
     <div class="divider"></div>
     <div class="sidebar-label">Episode</div>
     <div class="ep-card">
-      <div class="ep-label">Patient</div><div class="ep-val">James Holloway</div>
-      <div class="ep-label">Claim</div><div class="ep-val">WC-2026-084431</div>
+      <div class="ep-label">Patient</div><div class="ep-val" id="wt-ep-name">James Holloway</div>
+      <div class="ep-label">Claim</div><div class="ep-val" id="wt-ep-claim">WC-2026-084431</div>
+      <div class="ep-label">Equipment</div><div class="ep-val" id="wt-ep-item">Rollator Walker · E0143</div>
       <div class="ep-label">Status</div>
       <div id="wt-ep-status" style="margin-top:2px"><div class="status-pill incomplete"><span class="status-dot"></span>5 Gaps · Outreach</div></div>
     </div>
@@ -596,7 +597,7 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-blue" onclick="goTo(2)">→ Normalize Data</button>
+      <button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button>
     </div>
   </div>
 
@@ -659,7 +660,7 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
       </div></div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-blue" onclick="goTo(3)">→ Run Intelligence Layer</button>
+      <button class="btn btn-blue" onclick="navigateStep(3)">→ Run Intelligence Layer</button>
     </div>
   </div>
 
@@ -753,7 +754,7 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-blue" onclick="goTo(4)">→ Run Completeness Check</button>
+      <button class="btn btn-blue" onclick="navigateStep(4)">→ Run Completeness Check</button>
     </div>
   </div>
 
@@ -830,7 +831,7 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-blue" onclick="goTo(5)">→ Send Digital Outreach</button>
+      <button class="btn btn-blue" onclick="navigateStep(5)">→ Send Digital Outreach</button>
     </div>
   </div>
 
@@ -877,7 +878,7 @@ Intake Coordination Agent</div>
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-blue" onclick="goTo(6)">→ Place Outbound Call</button>
+      <button class="btn btn-blue" onclick="navigateStep(6)">→ Place Outbound Call</button>
     </div>
   </div>
 
@@ -928,7 +929,7 @@ Intake Coordination Agent</div>
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-blue" onclick="goTo(7)">→ Generate Route Output</button>
+      <button class="btn btn-blue" onclick="navigateStep(7)">→ Generate Route Output</button>
     </div>
   </div>
 
@@ -1034,6 +1035,9 @@ Intake Coordination Agent</div>
       <button class="btn btn-outline" onclick="returnToBatch()">← Back to Queue</button>
     </div>
   </div>
+
+  <!-- ── Dynamic case walkthrough (generated for non-Holloway featured rows) ── -->
+  <div id="wt-dynamic" style="display:none"></div>
 
 </div><!-- /view-walkthrough -->
 
@@ -1256,6 +1260,8 @@ function enableHolloway(){
   document.getElementById('holloway-hint').style.display='block';
   // Show scale callout in main
   document.getElementById('scale-callout').classList.add('visible');
+  // Enable 4 featured rows for deep dive
+  enableFeaturedCases();
 }
 
 function showSummary(){
@@ -1301,6 +1307,15 @@ const wtProgress=[0,17,34,51,68,85,100];
 let currentStep=0;
 
 function openHolloway(){
+  currentCaseType='holloway';
+  // Restore Holloway sections, hide dynamic
+  ['wt-1','wt-2','wt-iq','wt-3','wt-4','wt-5','wt-6'].forEach(sid=>{const el=document.getElementById(sid);if(el)el.style.display='';});
+  document.getElementById('wt-dynamic').style.display='none';
+  // Reset sidebar episode card
+  document.getElementById('wt-ep-name').textContent='James Holloway';
+  document.getElementById('wt-ep-claim').textContent='WC-2026-084431';
+  document.getElementById('wt-ep-item').textContent='Rollator Walker · E0143';
+  document.getElementById('wt-ep-status').innerHTML='<div class="status-pill incomplete"><span class="status-dot"></span>5 Gaps · Outreach</div>';
   document.getElementById('view-batch').style.display='none';
   document.getElementById('view-walkthrough').style.display='block';
   document.getElementById('sb-batch-mode').style.display='none';
@@ -1310,6 +1325,10 @@ function openHolloway(){
 }
 
 function returnToBatch(){
+  // Restore Holloway sections visibility for next open
+  ['wt-1','wt-2','wt-iq','wt-3','wt-4','wt-5','wt-6'].forEach(sid=>{const el=document.getElementById(sid);if(el)el.style.display='';});
+  document.getElementById('wt-dynamic').style.display='none';
+  currentCaseType='holloway';
   document.getElementById('view-walkthrough').style.display='none';
   document.getElementById('view-batch').style.display='block';
   document.getElementById('sb-walkthrough-mode').style.display='none';
@@ -1358,6 +1377,360 @@ function switchNormTab(n){
   }
   const tabs=document.querySelectorAll('#wt-2 .tab');
   tabs.forEach((t,i)=>t.classList.toggle('active',i===n));
+}
+
+// ── FEATURED CASES — 4 clickable deep-dive rows ──
+const CARRIERS_D=['Pacific Mutual WC','National Indemnity','State Compensation Fund','Liberty Mutual WC','Zenith Insurance','ICW Group'];
+const ADJUSTERS_D=[
+  {name:'Robert Kim',email:'r.kim@pacmutual.com',phone:'310-555-0143'},
+  {name:'Patricia Holmes',email:'p.holmes@natindemnity.com',phone:'213-555-0187'},
+  {name:'David Wilson',email:'d.wilson@statecomp.com',phone:'415-555-0221'},
+  {name:'Nancy Lee',email:'n.lee@libertymutual.com',phone:'818-555-0164'},
+  {name:'Gary Torres',email:'g.torres@zenithins.com',phone:'714-555-0199'},
+  {name:'Sharon Patel',email:'s.patel@icwgroup.com',phone:'626-555-0118'},
+];
+const CMS_D=[
+  {name:'Sandra Park',email:'s.park@pacmutual.com'},
+  {name:'Kevin Brown',email:'k.brown@natindemnity.com'},
+  {name:'Helen Roberts',email:'h.roberts@statecomp.com'},
+  {name:'Anthony Reed',email:'a.reed@libertymutual.com'},
+  {name:'Christine Vega',email:'c.vega@zenithins.com'},
+  {name:'Laura Kim',email:'l.kim@icwgroup.com'},
+];
+const PROVS_D=[
+  {name:'James Alvarez, MD',npi:'9876543210',practice:'Valley Physical Medicine'},
+  {name:'Susan Chen, MD',npi:'2345678901',practice:'Coastal Spine Center'},
+  {name:'Thomas Garcia, MD',npi:'3456789012',practice:'Westside Rehabilitation'},
+  {name:'Michael Evans, MD',npi:'4567890123',practice:'SportsMed Partners'},
+  {name:'Diana Moss, MD',npi:'5678901234',practice:'Regional Orthopaedics'},
+  {name:'Carlos Reyes, MD',npi:'6789012345',practice:'Pacific Medical Group'},
+];
+const ICD_MAP={
+  'Rollator Walker':{code:'M79.3',desc:'Regional pain syndrome, right knee'},
+  'Hospital Bed':{code:'S32.001A',desc:'Burst fracture L1 vertebra'},
+  'CPAP Machine':{code:'G47.33',desc:'Obstructive sleep apnea (adult)'},
+  'Power Wheelchair':{code:'G35',desc:'Multiple sclerosis'},
+  'Knee Brace':{code:'M23.501',desc:'Chronic instability of right knee'},
+  'Back Brace':{code:'M51.16',desc:'L4-L5 intervertebral disc herniation'},
+  'Arm Sling':{code:'S42.201A',desc:'Fracture of upper end of humerus'},
+  'Shower Chair':{code:'Z87.39',desc:'Post-operative mobility limitation'},
+  'Cervical Collar':{code:'S13.4XXA',desc:'Sprain of cervical spine ligaments'},
+  'Ankle Brace':{code:'S93.401A',desc:'Sprain of right ankle ligaments'},
+  'Nebulizer':{code:'J45.41',desc:'Moderate persistent asthma'},
+  'Compression Stocking':{code:'I87.2',desc:'Chronic venous insufficiency'},
+  'Crutches':{code:'S82.001A',desc:'Fracture of right patella'},
+  'Transfer Bench':{code:'M54.5',desc:'Low back pain'},
+  'Oxygen Concentrator':{code:'J44.1',desc:'COPD with acute exacerbation'},
+};
+const GAP_DEFS={
+  'Auth Ref':{icon:'🔑',field:'insurance.auth_reference',sev:'hard',label:'Auth Reference',reason:'Payer requires prior auth number before equipment dispatch.'},
+  'Appt Window':{icon:'📅',field:'scheduling.appointment_window',sev:'soft',label:'Appointment Window',reason:'Needed for scheduling; does not block episode creation.'},
+  'Transport':{icon:'🚗',field:'scheduling.transportation',sev:'green',label:'Transportation',reason:'Day-before confirmation standard; no dispatch impact.'},
+  'Language':{icon:'🌐',field:'worker.language',sev:'green',label:'Language / Interpreter',reason:'Operational preference; collected on first contact.'},
+  'Equip Spec':{icon:'⚖️',field:'prescription.specifications',sev:'hard',label:'Equipment Specification',reason:'Equipment cannot be ordered without confirmed specifications.'},
+  'Physician NPI':{icon:'🩺',field:'provider.npi',sev:'hard',label:'Physician NPI',reason:'NPI required for payer authorization submission.'},
+  'ICD Code':{icon:'🧬',field:'diagnosis.icd10_codes',sev:'hard',label:'ICD-10 Conflict',reason:'Conflicting codes across documents; requires clinical validation.'},
+};
+
+let featuredRowIds=[];
+let currentCaseType='holloway';
+let currentFeaturedRef=null;
+
+function navigateStep(n){
+  if(currentCaseType==='featured')goToD(n);else goTo(n);
+}
+
+function enableFeaturedCases(){
+  featuredRowIds=referrals.filter(r=>r.gaps>0).slice(0,4).map(r=>r.id);
+  featuredRowIds.forEach(fid=>{
+    const row=document.getElementById('qr-'+fid);
+    if(!row)return;
+    row.style.cursor='pointer';
+    row.title='Click to explore full pipeline';
+    const sc=document.getElementById('qs-'+fid);
+    if(sc){
+      const ref=referrals.find(x=>x.id===fid);
+      const gaps=ref?ref.gaps:0;
+      sc.innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:2px 7px;border-radius:20px">⚡ '+gaps+' Gaps · Open</span>';
+    }
+    row.onclick=(()=>{const id=fid;return ()=>openFeaturedCase(id);})();
+  });
+}
+
+function openFeaturedCase(id){
+  const r=referrals.find(x=>x.id===id);
+  if(!r)return;
+  currentCaseType='featured';
+  currentFeaturedRef=r;
+
+  const ci=r.id%CARRIERS_D.length;
+  const carrier=CARRIERS_D[ci];
+  const adj=ADJUSTERS_D[ci%ADJUSTERS_D.length];
+  const cm=CMS_D[ci%CMS_D.length];
+  const prov=PROVS_D[ci%PROVS_D.length];
+  const icd=ICD_MAP[r.item]||{code:'M79.3',desc:'Regional pain syndrome'};
+  const authNum='AUTH-2026-'+carrier.replace(/[^A-Z]/g,'').substring(0,3)+'-'+String(4100+r.id*41).padStart(4,'0');
+  const apptDate='2026-05-'+String(6+r.id%18).padStart(2,'0');
+  const gapDetails=r.gapList.map(g=>({...(GAP_DEFS[g]||{icon:'❓',field:g,sev:'hard',label:g,reason:'Review required.'}),key:g}));
+  const hardBlocks=gapDetails.filter(g=>g.sev==='hard');
+  const softBlocks=gapDetails.filter(g=>g.sev==='soft');
+  const nonBlocking=gapDetails.filter(g=>g.sev==='green');
+
+  // Switch views
+  document.getElementById('view-batch').style.display='none';
+  document.getElementById('view-walkthrough').style.display='block';
+  document.getElementById('sb-batch-mode').style.display='none';
+  document.getElementById('sb-walkthrough-mode').style.display='block';
+
+  // Hide Holloway sections, show dynamic
+  ['wt-1','wt-2','wt-iq','wt-3','wt-4','wt-5','wt-6'].forEach(sid=>{
+    const el=document.getElementById(sid);if(el)el.style.display='none';
+  });
+  const dyn=document.getElementById('wt-dynamic');
+  dyn.innerHTML=buildDynamicHTML({r,carrier,adj,cm,prov,icd,authNum,apptDate,gapDetails,hardBlocks,softBlocks,nonBlocking});
+  dyn.style.display='block';
+
+  // Sidebar episode card
+  document.getElementById('wt-ep-name').textContent=r.name;
+  document.getElementById('wt-ep-claim').textContent=r.claim;
+  document.getElementById('wt-ep-item').textContent=r.item+' · '+r.hcpcs;
+  document.getElementById('wt-ep-status').innerHTML='<div class="status-pill incomplete"><span class="status-dot"></span>'+r.gaps+' Gaps · Outreach</div>';
+
+  goToD(1);
+  log('Opening pipeline — '+r.name+' · '+r.claim);
+}
+
+function goToD(n){
+  currentStep=n;
+  const dyn=document.getElementById('wt-dynamic');
+  dyn.querySelectorAll('.dyn-section').forEach((el,i)=>el.classList.toggle('active',i===n-1));
+  document.getElementById('wt-progress').style.width=(wtProgress[n-1]||0)+'%';
+  wtStepIds.forEach((sid,i)=>{
+    const el=document.getElementById(sid);
+    if(!el)return;
+    el.className=i===n-1?'step active':i<n-1?'step done':'step';
+    const numEl=el.querySelector('.step-num');
+    if(numEl)numEl.textContent=i<n-1?'✓':(i+1);
+  });
+  if(n===7)document.getElementById('wt-ep-status').innerHTML='<div class="status-pill routed"><span class="status-dot"></span>ROUTED</div>';
+  const gapN=currentFeaturedRef?currentFeaturedRef.gaps:0;
+  const msgs=['Channel intake loaded','Normalization complete','Intelligence layer running','Completeness check — '+gapN+' gaps','Digital outreach dispatched','Resolution complete','Route output generated — ROUTED'];
+  log(msgs[n-1]||'Step '+n);
+  document.querySelector('.main').scrollTop=0;
+}
+
+function buildDynamicHTML(d){
+  const {r,carrier,adj,cm,prov,icd,authNum,apptDate,gapDetails,hardBlocks,softBlocks,nonBlocking}=d;
+  const presentFields=25-r.gaps;
+  const priColor=r.pri==='HIGH'?'var(--red)':r.pri==='MED'?'var(--yellow)':'var(--green)';
+  const priScore=r.pri==='HIGH'?8:r.pri==='MED'?5:3;
+  const clinRisk=r.pri==='HIGH'?4:r.pri==='MED'?3:2;
+  const sevColor=sev=>sev==='hard'?'red':sev==='soft'?'yellow':'green';
+  const sevBadge=sev=>sev==='hard'?'📧 OUTREACH SENT':sev==='soft'?'📅 SCHED. HOLD':'✓ ROUTING AHEAD';
+  const sevBadgeBg=sev=>sev==='hard'?'#dc2626':sev==='soft'?'#d97706':'#16a34a';
+  const sevTextColor=sev=>sev==='hard'?'#991b1b':sev==='soft'?'#92400e':'#166534';
+
+  function gapRow(g){
+    const sc=sevColor(g.sev);
+    return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:9px 11px;background:var(--${sc}-l);border:1px solid var(--${sc}-m);border-radius:8px;font-size:12px">
+      <div><b>${g.icon} ${g.label}</b><div style="font-size:10px;color:var(--gray);margin-top:1px">${g.field}</div></div>
+      <div style="color:${sevTextColor(g.sev)}">${g.reason}</div>
+      <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:${sevBadgeBg(g.sev)};color:white;padding:3px 9px;border-radius:10px">${sevBadge(g.sev)}</span></div>
+    </div>`;
+  }
+
+  const missingFieldRows=gapDetails.map(g=>`<div class="field missing"><div class="f-label">${g.field}</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>`).join('');
+  const gapEmailLines=gapDetails.map(g=>`  <span class="hl">${g.icon} ${g.label}</span>`).join('\n');
+  const hasVoice=hardBlocks.length>1;
+  const callItems=gapDetails.filter(g=>g.key!=='Auth Ref');
+
+  return `
+<div class="dyn-section section active" id="dyn-1">
+  <div class="page-title">Step 1 — Channel Intake</div>
+  <div class="page-sub">Extracting structured fields from 3 documents · 4 pages</div>
+  <div class="card">
+    <div class="card-title">📂 Referral Package — ${r.name} · ${r.claim}</div>
+    <div class="doc-list">
+      <div class="doc-item received"><div class="di-icon">📄</div><div class="di-name">${r.claim}_ReferralForm.pdf</div><div class="di-tag">Fax · Image PDF · 2 pages</div><div class="di-status">✓ Received</div></div>
+      <div class="doc-item received"><div class="di-icon">🩺</div><div class="di-name">${r.claim}_ClinicalNotes.pdf</div><div class="di-tag">Physician Notes · 1 page</div><div class="di-status">✓ Received</div></div>
+      <div class="doc-item received"><div class="di-icon">💊</div><div class="di-name">${r.claim}_RxPrescription.pdf</div><div class="di-tag">Prescription · 1 page</div><div class="di-status">✓ Received</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔍 Extraction Results</div>
+    <div class="field-grid">
+      <div class="field present"><div class="f-label">worker.name</div><div class="f-val">${r.name}</div><span class="f-badge fb-src">Referral Form</span></div>
+      <div class="field present"><div class="f-label">worker.dob</div><div class="f-val">${r.dob}</div><span class="f-badge fb-src">Referral Form</span></div>
+      <div class="field present"><div class="f-label">insurance.carrier</div><div class="f-val">${carrier}</div><span class="f-badge fb-src">Referral Form</span></div>
+      <div class="field present"><div class="f-label">insurance.claim_number</div><div class="f-val">${r.claim}</div><span class="f-badge fb-src">Referral Form</span></div>
+      <div class="field present"><div class="f-label">case_manager.name / email</div><div class="f-val">${cm.name} · ${cm.email}</div><span class="f-badge fb-src">Fax Cover</span></div>
+      <div class="field present"><div class="f-label">services.item / hcpcs</div><div class="f-val">${r.item} · ${r.hcpcs}</div><span class="f-badge fb-src">Referral Form</span></div>
+      <div class="field present"><div class="f-label">diagnosis.icd10</div><div class="f-val">${icd.code} — ${icd.desc}</div><span class="f-badge fb-src">Clinical Notes</span></div>
+      <div class="field present"><div class="f-label">provider.name</div><div class="f-val">${prov.name} · ${prov.practice}</div><span class="f-badge fb-src">Clinical Notes</span></div>
+      ${missingFieldRows}
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button></div>
+</div>
+
+<div class="dyn-section section" id="dyn-2">
+  <div class="page-title">Step 2 — Normalization</div>
+  <div class="page-sub">Raw extracted data mapped to standard Episode Record format</div>
+  <div class="card">
+    <div class="card-title">📋 Episode Record — Normalized</div>
+    <div class="norm-grid">
+      <div class="norm-field"><div class="nl">worker.name</div><div class="nv">${r.name}</div></div>
+      <div class="norm-field"><div class="nl">worker.dob</div><div class="nv">${r.dob}</div></div>
+      <div class="norm-field"><div class="nl">insurance.carrier</div><div class="nv">${carrier}</div></div>
+      <div class="norm-field"><div class="nl">insurance.claim_number</div><div class="nv">${r.claim}</div></div>
+      <div class="norm-field"><div class="nl">insurance.auth_reference</div><div class="nv ${gapDetails.find(g=>g.key==='Auth Ref')?'null':''}">${gapDetails.find(g=>g.key==='Auth Ref')?'null':'(present)'}</div></div>
+      <div class="norm-field"><div class="nl">case_manager.name</div><div class="nv">${cm.name}</div></div>
+      <div class="norm-field"><div class="nl">case_manager.email</div><div class="nv">${cm.email}</div></div>
+      <div class="norm-field"><div class="nl">provider.name / npi</div><div class="nv">${prov.name} / ${gapDetails.find(g=>g.key==='Physician NPI')?'<span class="null">null</span>':prov.npi}</div></div>
+      <div class="norm-field"><div class="nl">diagnosis.icd10_codes</div><div class="nv">${icd.code}</div></div>
+      <div class="norm-field"><div class="nl">diagnosis.description</div><div class="nv">${icd.desc}</div></div>
+      <div class="norm-field"><div class="nl">services.item / hcpcs</div><div class="nv">${r.item} / ${r.hcpcs}</div></div>
+      <div class="norm-field"><div class="nl">scheduling.appointment_window</div><div class="nv ${gapDetails.find(g=>g.key==='Appt Window')?'null':''}">${gapDetails.find(g=>g.key==='Appt Window')?'null':'(present)'}</div></div>
+      <div class="norm-field"><div class="nl">episode.status</div><div class="nv" style="color:var(--red)">incomplete</div></div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(3)">→ Run Intelligence Layer</button></div>
+</div>
+
+<div class="dyn-section section" id="dyn-3">
+  <div class="page-title">Step 3 — Intelligence Layer</div>
+  <div class="page-sub">Validate, score, fix codes, check duplicates, and determine authorization</div>
+  <div class="card">
+    <div class="card-title">🔁 Duplicate Detection</div>
+    <div class="alert alert-green" style="margin-bottom:0"><div class="alert-icon">✅</div><div>No duplicate episode found. Checked against claim <b>${r.claim}</b> and patient <b>${r.name} / ${r.dob}</b> — no existing open or routed episode matches.</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">✅ Compliance Validation</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px"><span>✅</span><div><b>ICD-10 ${icd.code}</b> — Active code, valid format, matches injury description</div></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px"><span>✅</span><div><b>HCPCS ${r.hcpcs}</b> — Active code, valid, appropriate for diagnosis</div></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px"><span>✅</span><div><b>HCPCS ↔ Diagnosis match</b> — ${r.hcpcs} clinically appropriate for ${icd.code}</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔑 Authorization Determination</div>
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 11px;border-radius:7px;background:var(--red-l);border:1px solid var(--red-m);font-size:12px">
+      <span>🔑</span><div><b>Prior authorization REQUIRED</b> — ${carrier} requires prior auth for HCPCS ${r.hcpcs}.${gapDetails.find(g=>g.key==='Auth Ref')?' <b>insurance.auth_reference is null</b> → added as priority gap.':' Auth reference present.'}</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Risk &amp; Urgency Score</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div style="text-align:center;padding:12px;background:var(--${r.pri==='HIGH'?'red':'yellow'}-l);border-radius:8px;border:1px solid var(--${r.pri==='HIGH'?'red':'yellow'}-m)"><div style="font-size:26px;font-weight:900;color:${priColor}">${clinRisk}</div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-top:2px">CLINICAL RISK</div></div>
+      <div style="text-align:center;padding:12px;background:var(--yellow-l);border-radius:8px;border:1px solid var(--yellow-m)"><div style="font-size:26px;font-weight:900;color:var(--yellow)">${r.gaps}</div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-top:2px">GAP COUNT</div></div>
+      <div style="text-align:center;padding:12px;background:#fdf4ff;border-radius:8px;border:1px solid var(--purple-m)"><div style="font-size:26px;font-weight:900;color:var(--purple)">${priScore}</div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-top:2px">PRIORITY SCORE</div><div style="font-size:10px;color:var(--purple);font-weight:700">${r.pri}</div></div>
+    </div>
+  </div>
+  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(4)">→ Run Completeness Check</button></div>
+</div>
+
+<div class="dyn-section section" id="dyn-4">
+  <div class="page-title">Step 4 — Completeness &amp; Gap Triage</div>
+  <div class="page-sub">AI classifies each gap by routing criticality</div>
+  <div class="alert alert-blue"><div class="alert-icon">🧠</div><div><b>${r.gaps} gap${r.gaps>1?'s':''} detected — classified by criticality.</b> ${hardBlocks.length} hard block${hardBlocks.length!==1?'s':''}, ${softBlocks.length} soft, ${nonBlocking.length} non-blocking.</div></div>
+  <div class="card">
+    <div class="card-title">✅ Present — ${presentFields} / 25 required fields</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px">
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ worker.name · dob · address</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ insurance.carrier · claim#</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ case_manager · adjuster</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ services.item · hcpcs</span>
+      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ diagnosis.icd10 · description</span>
+    </div>
+  </div>
+  ${hardBlocks.length?`<div class="card" style="border-left:4px solid var(--red);padding-left:14px"><div class="card-title" style="color:var(--red)">🔴 Hard Block${hardBlocks.length>1?'s':''} — ${hardBlocks.length} gap${hardBlocks.length>1?'s':''} · Vendor dispatch blocked</div><div style="display:flex;flex-direction:column;gap:7px">${hardBlocks.map(g=>gapRow(g)).join('')}</div></div>`:''}
+  ${softBlocks.length?`<div class="card" style="border-left:4px solid var(--yellow);padding-left:14px"><div class="card-title" style="color:var(--yellow)">🟡 Soft Block${softBlocks.length>1?'s':''} — ${softBlocks.length} gap${softBlocks.length>1?'s':''} · Scheduling hold</div><div style="display:flex;flex-direction:column;gap:7px">${softBlocks.map(g=>gapRow(g)).join('')}</div></div>`:''}
+  ${nonBlocking.length?`<div class="card" style="border-left:4px solid var(--green);padding-left:14px"><div class="card-title" style="color:var(--green)">🟢 Non-Blocking — ${nonBlocking.length} gap${nonBlocking.length>1?'s':''} · Routing proceeds</div><div style="display:flex;flex-direction:column;gap:7px">${nonBlocking.map(g=>gapRow(g)).join('')}</div></div>`:''}
+  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(5)">→ Send Digital Outreach</button></div>
+</div>
+
+<div class="dyn-section section" id="dyn-5">
+  <div class="page-title">Step 5 — Digital Outreach</div>
+  <div class="page-sub">Agent routes outreach to the case manager for all gaps</div>
+  <div class="card">
+    <div class="card-title">📧 Outreach Email — Case Manager · ${r.gaps} Gap${r.gaps>1?'s':''}</div>
+    <div class="email-box">
+      <div class="email-hdr">
+        <div class="email-row"><span class="ek">To:</span><span>${cm.name} &lt;${cm.email}&gt;</span></div>
+        <div class="email-row"><span class="ek">Subj:</span><span><b>Action Required — Missing Info · Referral [${r.claim}]</b></span></div>
+        <div class="email-row"><span class="ek">Sent:</span><span>2026-05-01 09:15 · via email</span></div>
+      </div>
+      <div class="email-body">Hi ${cm.name.split(' ')[0]},
+
+Thank you for the referral for <span class="hl">${r.name}</span> (DOB: ${r.dob}, Claim: <span class="hl">${r.claim}</span>).
+
+To complete coordination, we need:
+
+${gapEmailLines}
+
+Please reply within <b>24 business hours</b>. If we don't hear back, our coordination agent will follow up by phone.
+
+Thank you,
+Intake Coordination Agent</div>
+    </div>
+  </div>
+  <div class="alert alert-${hasVoice?'yellow':'green'}">
+    <div class="alert-icon">${hasVoice?'⏱':'✅'}</div>
+    <div>${hasVoice?'No response after <b>24 business hours</b>. Escalating to outbound voice call for remaining gaps.':'<b>Auth reference confirmed via email reply</b> — '+authNum+'. All gaps resolved digitally.'}</div>
+  </div>
+  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(6)">→ ${hasVoice?'Place Outbound Call':'View Resolution'}</button></div>
+</div>
+
+<div class="dyn-section section" id="dyn-6">
+  <div class="page-title">Step 6 — ${hasVoice?'Voice Outreach':'Resolution'}</div>
+  <div class="page-sub">${hasVoice?'No email response — agent places outbound AI call':'All gaps resolved digitally — no voice call required'}</div>
+  ${hasVoice?`<div class="card"><div class="card-title">📞 Outbound Call — ${cm.name} · ${adj.phone}</div><div class="call-box"><div class="call-status-row"><div class="call-badge"><span class="call-dot" style="background:#f59e0b;animation:none"></span> Call complete</div><div class="call-timer">01:${String(12+r.id%20).padStart(2,'0')}</div></div><div class="transcript"><div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Hi, this is the Intake Coordination Agent calling for ${cm.name}. Following up on the referral for ${r.name}, claim ${r.claim}. Just need a couple of quick confirmations — do you have a moment?</span></div><div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes, go ahead.</span></div>${callItems.map(g=>`<div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Can you confirm the ${g.label.toLowerCase()} for this referral?</span></div><div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">${g.key==='Appt Window'?apptDate+', 10:00–12:00':g.key==='Transport'?'No transport needed, patient will self-transport':g.key==='Language'?'English, no interpreter needed':g.key==='Equip Spec'?'Standard specification confirmed':g.key==='Physician NPI'?prov.npi:'Confirmed.'}</span></span></div>`).join('')}<div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">All confirmed — thank you. Your referral is now complete. We'll coordinate delivery and send a confirmation shortly.</span></div></div></div></div>`:`<div class="alert alert-green"><div class="alert-icon">✅</div><div>Auth <b>${authNum}</b> confirmed via email reply. All gaps resolved digitally — fastest resolution path, no voice call required.</div></div>`}
+  <div class="alert alert-green"><div class="alert-icon">✅</div><div>All ${r.gaps} gap${r.gaps>1?'s':''} resolved. Episode Record updated and complete.</div></div>
+  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(7)">→ Generate Route Output</button></div>
+</div>
+
+<div class="dyn-section section" id="dyn-7">
+  <div class="page-title">Step 7 — Route State Output</div>
+  <div class="page-sub">Episode complete. Normalized record locked and dispatched.</div>
+  <div class="alert alert-green"><div class="alert-icon">✅</div><div>All gaps resolved. Episode fully routed. Saved to <b>output/dme-intake-${r.claim}-20260501.md</b></div></div>
+  <div class="route-card fade-in">
+    <div class="route-hdr">
+      <div><div class="route-title">Referral — Route State</div><div class="route-ts">EP-20260501-${r.claim.replace(/-/g,'')} · Completed: 2026-05-01 ${String(10+r.id%3).padStart(2,'0')}:${String(10+r.id%45).padStart(2,'0')}</div></div>
+      <div class="status-pill routed"><span class="status-dot"></span>ROUTED</div>
+    </div>
+    <div class="route-section"><div class="route-section-title">§1 · Worker</div><div class="route-grid">
+      <div class="route-field"><div class="rl">worker.name</div><div class="rv">${r.name}</div></div>
+      <div class="route-field"><div class="rl">worker.dob</div><div class="rv">${r.dob}</div></div>
+    </div></div>
+    <div class="route-section"><div class="route-section-title">§2 · Insurance</div><div class="route-grid">
+      <div class="route-field"><div class="rl">insurance.carrier</div><div class="rv">${carrier}</div></div>
+      <div class="route-field"><div class="rl">insurance.claim_number</div><div class="rv">${r.claim}</div></div>
+      <div class="route-field"><div class="rl">insurance.auth_reference</div><div class="rv" style="color:var(--purple);font-weight:800">${authNum} ✦ via email</div></div>
+    </div></div>
+    <div class="route-section"><div class="route-section-title">§3 · Case Manager</div><div class="route-grid">
+      <div class="route-field"><div class="rl">case_manager</div><div class="rv">${cm.name} · ${cm.email}</div></div>
+    </div></div>
+    <div class="route-section"><div class="route-section-title">§4 · Provider</div><div class="route-grid">
+      <div class="route-field"><div class="rl">provider.name / npi</div><div class="rv">${prov.name} / ${prov.npi}</div></div>
+      <div class="route-field"><div class="rl">provider.practice</div><div class="rv">${prov.practice}</div></div>
+    </div></div>
+    <div class="route-section"><div class="route-section-title">§5 · Diagnosis</div><div class="route-grid">
+      <div class="route-field"><div class="rl">diagnosis.icd10_codes</div><div class="rv">${icd.code}</div></div>
+      <div class="route-field"><div class="rl">diagnosis.description</div><div class="rv">${icd.desc}</div></div>
+    </div></div>
+    <div class="route-section"><div class="route-section-title">§6 · Services</div><div class="route-grid">
+      <div class="route-field"><div class="rl">services.item / hcpcs</div><div class="rv">${r.item} / ${r.hcpcs}</div></div>
+    </div></div>
+    <div class="route-section"><div class="route-section-title">§9 · Scheduling</div><div class="route-grid">
+      <div class="route-field"><div class="rl">scheduling.appointment_window</div><div class="rv" style="color:var(--purple);font-weight:800">${apptDate} · 10:00–12:00 ✦ confirmed</div></div>
+      <div class="route-field"><div class="rl">scheduling.transportation</div><div class="rv" style="color:var(--purple);font-weight:800">self ✦ confirmed</div></div>
+    </div></div>
+  </div>
+  <div class="btn-row" style="margin-top:14px">
+    <button class="btn btn-outline" onclick="returnToBatch()">← Back to Queue</button>
+  </div>
+</div>
+`;
 }
 
 // ── DOCUMENT VIEWER ──
