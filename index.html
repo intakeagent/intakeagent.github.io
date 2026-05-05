@@ -340,7 +340,7 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
     </div>
 
     <div style="margin-top:10px;padding:8px;background:#fffbeb;border:1px solid var(--yellow-m);border-radius:8px;font-size:11px;color:#92400e;display:none" id="holloway-hint">
-      <b>James Holloway</b> is at the top — click his row to explore the full pipeline
+      Click any highlighted row at the top to explore the full pipeline
     </div>
   </div>
 
@@ -382,11 +382,11 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
     <div class="divider"></div>
     <div class="sidebar-label">Episode</div>
     <div class="ep-card">
-      <div class="ep-label">Patient</div><div class="ep-val" id="wt-ep-name">James Holloway</div>
-      <div class="ep-label">Claim</div><div class="ep-val" id="wt-ep-claim">WC-2026-084431</div>
-      <div class="ep-label">Equipment</div><div class="ep-val" id="wt-ep-item">Rollator Walker · E0143</div>
+      <div class="ep-label">Patient</div><div class="ep-val" id="wt-ep-name">—</div>
+      <div class="ep-label">Claim</div><div class="ep-val" id="wt-ep-claim">—</div>
+      <div class="ep-label">Equipment</div><div class="ep-val" id="wt-ep-item">—</div>
       <div class="ep-label">Status</div>
-      <div id="wt-ep-status" style="margin-top:2px"><div class="status-pill incomplete"><span class="status-dot"></span>5 Gaps · Outreach</div></div>
+      <div id="wt-ep-status" style="margin-top:2px"><div class="status-pill incomplete"><span class="status-dot"></span>—</div></div>
     </div>
     <div class="divider"></div>
     <div class="sidebar-label">Agent Log</div>
@@ -1751,7 +1751,7 @@ function buildVoiceStep1HTML(vc){
       </div>
     </div>
   </div>
-  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button></div>
+  <div class="btn-row"><button class="btn btn-outline" onclick="returnToBatch()">← Back to Queue</button><button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button></div>
 </div>`;
 }
 
