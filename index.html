@@ -1318,7 +1318,6 @@ let totalGapsAll=0,routedCount=0,outreachCount=0,pagesRead=0;
 function startProcessing(){
   if(processing)return;
   processing=true;
-  document.getElementById('sb-hub-info').style.display='none';
   document.getElementById('run-btn').disabled=true;
   document.getElementById('reset-btn').style.display='inline-block';
   document.getElementById('live-status-text').textContent='AI reading referral packages...';
@@ -1493,7 +1492,8 @@ function enableHolloway(){
   row.onclick=openHolloway;
   document.getElementById('qo-0').innerHTML='<span class="outreach-badge">📧 Sent</span>';
   document.getElementById('qs-0').innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:2px 7px;border-radius:20px">⚡ 5 Gaps · Open</span>';
-  // Show scale card and hint in sidebar
+  // Swap hub info for scale card in sidebar
+  document.getElementById('sb-hub-info').style.display='none';
   document.getElementById('scale-card').style.display='block';
   document.getElementById('holloway-hint').style.display='block';
   // Show scale callout in main
