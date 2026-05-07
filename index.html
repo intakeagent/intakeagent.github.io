@@ -1,2199 +1,244 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Intake Agent — Live Queue &amp; Pipeline</title>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<title>Workers&rsquo; Comp Intake &mdash; AI Agent Platform</title>
 <style>
-:root {
-  --blue:#2563eb;--blue-l:#eff6ff;--blue-m:#bfdbfe;
-  --green:#16a34a;--green-l:#f0fdf4;--green-m:#bbf7d0;
-  --red:#dc2626;--red-l:#fef2f2;--red-m:#fecaca;
-  --yellow:#d97706;--yellow-l:#fffbeb;--yellow-m:#fde68a;
-  --purple:#7c3aed;--purple-l:#f5f3ff;--purple-m:#ddd6fe;
-  --gray:#6b7280;--gray-l:#f9fafb;--gray-m:#e5e7eb;
-  --dark:#111827;--radius:10px;
-  --shadow:0 1px 3px rgba(0,0,0,.1);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f1f5f9;color:var(--dark);min-height:100vh}
-
-/* ── HEADER ── */
-header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100}
-.logo{display:flex;align-items:center;gap:10px;color:#fff;font-weight:800;font-size:15px;text-decoration:none}
-.logo-icon{width:28px;height:28px;background:#2563eb;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
-.header-tag{font-size:10px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);padding:2px 9px;border-radius:20px;font-weight:600}
-
-/* ── LAYOUT ── */
-.layout{display:grid;grid-template-columns:244px 1fr;min-height:calc(100vh - 52px)}
-
-/* ── SIDEBAR ── */
-.sidebar{background:white;border-right:1px solid var(--gray-m);padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
-.sidebar-label{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;padding:0 8px;margin:10px 0 5px}
-.sidebar-label:first-child{margin-top:0}
-
-/* Sidebar batch stats */
-.sb-stat{background:var(--gray-l);border:1px solid var(--gray-m);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.sb-stat-n{font-size:20px;font-weight:900;color:var(--dark)}
-.sb-stat-n.blue{color:var(--blue)}.sb-stat-n.green{color:var(--green)}.sb-stat-n.red{color:var(--red)}.sb-stat-n.purple{color:var(--purple)}.sb-stat-n.yellow{color:var(--yellow)}
-.sb-stat-l{font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:1px}
-
-/* Scale card */
-.scale-card{background:#1e3a5f;border-radius:10px;padding:14px;margin-top:8px;display:none}
-.sc-title{font-size:10px;font-weight:800;color:#93c5fd;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
-.sc-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:12px}
-.sc-row .sn{font-size:16px;font-weight:900;color:#fff}
-.sc-row .sl{font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em}
-.sc-note{font-size:10px;color:rgba(255,255,255,.45);margin-top:8px;line-height:1.5}
-
-/* Sidebar pipeline steps */
-.step{display:flex;align-items:flex-start;gap:9px;padding:8px;border-radius:8px;cursor:pointer;transition:background .15s}
-.step:hover{background:var(--gray-l)}
-.step.active{background:var(--blue-l)}
-.step.done{background:var(--green-l)}
-.step-num{width:20px;height:20px;border-radius:50%;border:2px solid var(--gray-m);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--gray);flex-shrink:0;margin-top:1px;transition:all .2s}
-.step.active .step-num{border-color:var(--blue);background:var(--blue);color:white}
-.step.done .step-num{border-color:var(--green);background:var(--green);color:white}
-.step-title{font-size:12px;font-weight:600;color:var(--dark)}
-.step.active .step-title{color:var(--blue)}
-.step.done .step-title{color:var(--green)}
-.step-sub{font-size:10px;color:var(--gray);margin-top:1px}
-.divider{height:1px;background:var(--gray-m);margin:6px 0}
-.ep-card{background:var(--gray-l);border-radius:8px;padding:10px 12px}
-.ep-label{font-size:9px;color:var(--gray);font-weight:700;margin-bottom:1px;text-transform:uppercase;letter-spacing:.04em}
-.ep-val{font-size:12px;font-weight:700;margin-bottom:5px}
-.status-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase}
-.status-pill.incomplete{background:var(--yellow-m);color:var(--yellow)}
-.status-pill.routed{background:var(--purple-m);color:var(--purple)}
-.status-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
-.log-box{flex:1;overflow-y:auto;padding:4px 0;max-height:130px}
-.log-line{font-size:10px;color:var(--gray);font-family:monospace;padding:2px 0;line-height:1.4}
-.log-line .ts{color:var(--blue);margin-right:6px}
-
-/* ── MAIN ── */
-.main{padding:20px 24px;overflow-y:auto;min-height:0}
-
-/* ── BATCH VIEW ── */
-.batch-hero{background:#1e3a5f;color:#fff;border-radius:12px;padding:22px 28px;margin-bottom:16px}
-.bh-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.bh-tag{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:5px}
-.bh-title{font-size:20px;font-weight:800;margin-bottom:5px}
-.bh-sub{font-size:12px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:14px}
-.bh-stats{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:16px}
-.bh-stat .n{font-size:22px;font-weight:800;color:#93c5fd}
-.bh-stat .l{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em}
-.btn-start{background:#16a34a;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px}
-.btn-start:hover{background:#15803d}
-.btn-start:disabled{background:#475569;cursor:not-allowed}
-.btn-reset{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:10px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:none;margin-left:8px}
-.btn-reset:hover{background:rgba(255,255,255,.18)}
-
-/* Stats bar */
-.stats-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px}
-.sb{background:white;border-radius:9px;padding:10px 12px;text-align:center;border:1px solid var(--gray-m)}
-.sb-n{font-size:20px;font-weight:900;color:var(--dark)}
-.sb-l{font-size:9px;color:var(--gray);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;font-weight:700}
-.sb-proc .sb-n{color:var(--blue)}.sb-routed .sb-n{color:var(--green)}.sb-gaps .sb-n{color:var(--red)}.sb-outreach .sb-n{color:var(--yellow)}.sb-pages .sb-n{color:var(--purple)}
-
-/* Progress */
-.prog-wrap{margin-bottom:10px}
-.prog-label-row{display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-bottom:3px;font-weight:600}
-.prog-track{height:7px;background:var(--gray-m);border-radius:4px;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:4px;transition:width .15s linear;width:0%}
-
-/* Queue table */
-.queue-card{background:white;border-radius:10px;border:1px solid var(--gray-m);overflow:hidden}
-.queue-thead{background:var(--gray-l);border-bottom:2px solid var(--gray-m)}
-.queue-thead th{padding:8px 9px;text-align:left;font-size:9px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
-.queue-body{max-height:440px;overflow-y:auto;display:block}
-.queue-body tr{display:table;width:100%;table-layout:fixed;border-bottom:1px solid #f1f5f9;transition:background .2s}
-.queue-body tr.processing{background:#eff6ff!important;animation:rowPulse 1s ease infinite}
-.queue-body tr.done-routed{background:#f0fdf4}
-.queue-body tr.done-gaps{background:#fffbeb}
-.queue-body tr.outreach-sent{background:#f0fdf4}
-@keyframes rowPulse{0%,100%{background:#eff6ff}50%{background:#dbeafe}}
-.queue-body td{padding:7px 9px;font-size:11px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-/* Holloway special row */
-.holloway-row{border-left:3px solid #f59e0b!important}
-.holloway-row.holloway-ready{border-left:3px solid var(--blue)!important;cursor:pointer!important}
-.holloway-row.holloway-ready:hover{background:#eff6ff!important}
-@keyframes holPulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.3)}70%{box-shadow:0 0 0 6px rgba(37,99,235,0)}}
-.holloway-row.holloway-ready{animation:holPulse 2s infinite}
-
-/* Status badges */
-.s-queued{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--gray);background:var(--gray-l);border:1px solid var(--gray-m);padding:2px 7px;border-radius:20px}
-.s-reading{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:2px 7px;border-radius:20px}
-.s-reading::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--blue);animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.s-routed{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--green);background:var(--green-l);border:1px solid var(--green-m);padding:2px 7px;border-radius:20px}
-.s-gaps{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--yellow);background:var(--yellow-l);border:1px solid var(--yellow-m);padding:2px 7px;border-radius:20px}
-.gap-badge{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;border-radius:9px;background:var(--red-l);color:var(--red);border:1px solid var(--red-m)}
-.gap-badge.zero{background:var(--green-l);color:var(--green);border-color:var(--green-m)}
-.outreach-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#15803d;background:#dcfce7;border:1px solid #86efac;padding:2px 7px;border-radius:20px;animation:fadeInBadge .3s ease}
-@keyframes fadeInBadge{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-.pri-badge{font-size:10px;font-weight:800;padding:2px 6px;border-radius:7px}
-.pri-HIGH{background:var(--red-l);color:var(--red)}.pri-MED{background:var(--yellow-l);color:var(--yellow)}.pri-LOW{background:var(--green-l);color:var(--green)}
-.ch-fax{font-size:9px;font-weight:700;background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:7px}
-.ch-voice{font-size:9px;font-weight:700;background:#dcfce7;color:#15803d;border:1px solid #86efac;padding:1px 5px;border-radius:7px}
-.ch-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
-.ch-voice{background:#dcfce7;color:#15803d}
-.ch-email{background:#fef9c3;color:#92400e}
-
-/* Scale callout */
-.scale-callout{background:#1e3a5f;border-radius:12px;padding:20px 24px;margin-top:14px;display:none}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.scale-callout.visible{display:block;animation:fadeUp .5s ease}
-.scl-title{font-size:11px;font-weight:800;color:#93c5fd;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
-.scl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
-.scl-stat{text-align:center}
-.scl-n{font-size:24px;font-weight:900;color:#fff}
-.scl-l{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;font-weight:700}
-.scl-note{font-size:11px;color:rgba(255,255,255,.55);line-height:1.6;border-top:1px solid rgba(255,255,255,.1);padding-top:10px}
-
-/* Outreach summary */
-.outreach-summary{background:white;border-radius:10px;border:2px solid var(--green-m);padding:16px 20px;margin-top:12px;display:none}
-.os-title{font-size:14px;font-weight:800;color:var(--green);margin-bottom:10px}
-.os-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.os-stat{text-align:center;padding:10px;border-radius:8px;background:var(--gray-l);border:1px solid var(--gray-m)}
-.os-n{font-size:22px;font-weight:900}
-.os-l{font-size:9px;color:var(--gray);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;font-weight:700}
-
-/* ── WALKTHROUGH VIEW ── */
-#view-walkthrough{display:none}
-.wt-back{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;margin-bottom:14px;width:fit-content;padding:5px 10px;border-radius:7px;background:var(--blue-l);border:1px solid var(--blue-m);transition:background .15s}
-.wt-back:hover{background:var(--blue-m)}
-.prog-track-wt{height:3px;background:var(--gray-m);border-radius:2px;margin-bottom:18px}
-.prog-fill-wt{height:100%;border-radius:2px;background:var(--blue);transition:width .4s ease}
-.section{display:none}
-.section.active{display:block}
-.page-title{font-size:18px;font-weight:800;margin-bottom:3px}
-.page-sub{font-size:13px;color:var(--gray);margin-bottom:16px}
-
-/* Cards */
-.card{background:white;border-radius:var(--radius);border:1px solid var(--gray-m);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
-.card-title{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:7px}
-.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.field{background:var(--gray-l);border-radius:7px;padding:8px 10px;border-left:3px solid var(--gray-m)}
-.field.present{border-left-color:var(--green)}
-.field.missing{border-left-color:var(--red);background:var(--red-l)}
-.f-label{font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
-.f-val{font-size:12px;font-weight:600}
-.field.missing .f-val{color:var(--red);font-style:italic}
-.f-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;display:inline-block;margin-top:2px;text-transform:uppercase}
-.fb-present{background:var(--green-m);color:var(--green)}.fb-missing{background:var(--red-m);color:var(--red)}.fb-src{background:var(--blue-m);color:var(--blue)}
-
-/* Tabs */
-.tab-bar{display:flex;border-bottom:1px solid var(--gray-m);margin-bottom:12px;gap:0;flex-wrap:wrap}
-.tab{padding:7px 14px;font-size:11px;font-weight:600;color:var(--gray);border-bottom:2px solid transparent;cursor:pointer;transition:all .15s}
-.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.tab-panel{display:none}.tab-panel.active{display:block}
-.norm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.norm-field{display:flex;flex-direction:column;gap:1px}
-.norm-field .nl{font-size:10px;color:var(--gray)}
-.norm-field .nv{font-size:12px;font-weight:600}
-.norm-field .nv.null{color:var(--red);font-style:italic}
-
-/* Alerts */
-.alert{border-radius:8px;padding:10px 13px;font-size:12px;display:flex;gap:8px;align-items:flex-start;margin-bottom:10px}
-.alert-icon{font-size:14px;flex-shrink:0;margin-top:1px}
-.alert-blue{background:var(--blue-l);border:1px solid var(--blue-m);color:#1e40af}
-.alert-green{background:var(--green-l);border:1px solid var(--green-m);color:#166534}
-.alert-yellow{background:var(--yellow-l);border:1px solid var(--yellow-m);color:#92400e}
-.alert-red{background:var(--red-l);border:1px solid var(--red-m);color:#991b1b}
-
-/* Email */
-.email-box{background:var(--gray-l);border:1px solid var(--gray-m);border-radius:var(--radius);overflow:hidden}
-.email-hdr{background:white;border-bottom:1px solid var(--gray-m);padding:10px 14px;display:grid;gap:3px}
-.email-row{display:flex;gap:7px;font-size:11px}
-.email-row .ek{color:var(--gray);font-weight:700;width:44px;flex-shrink:0}
-.email-body{padding:14px;font-size:12px;line-height:1.7;white-space:pre-wrap}
-.hl{background:#fef9c3;padding:0 2px;border-radius:2px;font-weight:600}
-
-/* Voice call */
-.call-box{background:#0f172a;border-radius:var(--radius);padding:18px;color:white}
-.call-status-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.call-badge{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700}
-.call-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
-.call-timer{font-size:13px;font-family:monospace;color:#94a3b8}
-.transcript{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto}
-.t-line{display:flex;gap:10px;align-items:flex-start}
-.t-speaker{font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px;width:40px}
-.t-speaker.agent{color:#60a5fa}
-.t-speaker.cm{color:#4ade80}
-.t-text{font-size:12px;line-height:1.5;color:#e2e8f0}
-.t-text .captured{background:rgba(250,204,21,.2);border-radius:3px;padding:0 2px;color:#fde68a;font-weight:600}
-
-/* Route card */
-.route-card{background:white;border-radius:var(--radius);border:2px solid var(--purple);padding:18px;box-shadow:0 0 0 4px var(--purple-l)}
-.route-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--gray-m)}
-.route-title{font-size:14px;font-weight:800}
-.route-ts{font-size:11px;color:var(--gray)}
-.route-section{margin-bottom:12px}
-.route-section-title{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
-.route-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.route-field .rl{font-size:10px;color:var(--gray)}
-.route-field .rv{font-size:12px;font-weight:600}
-
-/* Buttons */
-.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
-.btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:#1d4ed8}
-.btn-purple{background:var(--purple);color:white}.btn-purple:hover{background:#6d28d9}
-.btn-outline{background:white;color:var(--dark);border:1.5px solid var(--gray-m)}.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
-.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-.fade-in{animation:fadeIn .3s ease}
-
-/* Doc viewer modal */
-.doc-modal{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
-.doc-modal.open{opacity:1;pointer-events:all}
-.doc-panel{background:#fff;border-radius:14px;width:100%;max-width:660px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(14px);transition:transform .2s}
-.doc-modal.open .doc-panel{transform:translateY(0)}
-.doc-panel-hdr{padding:14px 20px;border-bottom:1px solid var(--gray-m);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.doc-panel-title{font-size:14px;font-weight:800}
-.doc-panel-close{width:28px;height:28px;border-radius:7px;background:var(--gray-l);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
-.doc-panel-close:hover{background:var(--gray-m)}
-.doc-panel-body{flex:1;overflow-y:auto;padding:18px 22px}
-
-/* Doc list */
-.doc-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.doc-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;border:1px solid var(--gray-m);background:white;font-size:12px;cursor:pointer;transition:all .15s}
-.doc-item:hover{border-color:var(--blue);background:var(--blue-l)}
-.doc-item.missing-doc{background:var(--red-l);border-color:var(--red-m)}
-.doc-item.missing-doc:hover{border-color:var(--red)}
-.doc-item .di-icon{font-size:18px;flex-shrink:0}
-.doc-item .di-name{flex:1;font-weight:600}
-.doc-item .di-tag{font-size:10px;color:var(--gray);background:var(--gray-m);padding:2px 7px;border-radius:10px}
-.doc-item .di-status{font-size:10px;font-weight:700}
-.doc-item.received .di-status{color:var(--green)}
-.doc-item.missing-doc .di-status{color:var(--red)}
-.doc-item .di-view{font-size:11px;color:var(--blue);margin-left:4px}
-
-/* Raw doc */
-.raw-doc{background:#fafaf8;border:1px solid #e2e0d8;border-radius:8px;padding:14px 18px;font-size:11px;line-height:1.7;font-family:'Courier New',monospace;color:#2d2d2d}
-.raw-doc .rd-header{text-align:center;border-bottom:2px solid #2d2d2d;padding-bottom:8px;margin-bottom:12px}
-.raw-doc .rd-org{font-size:12px;font-weight:800;letter-spacing:.06em}
-.raw-doc .rd-title{font-size:10px;letter-spacing:.04em;color:#555}
-.raw-doc .rd-section{margin-bottom:10px}
-.raw-doc .rd-sec-title{font-weight:800;text-transform:uppercase;font-size:9px;letter-spacing:.08em;border-bottom:1px solid #ccc;margin-bottom:5px;color:#444}
-.raw-doc .rd-row{display:flex;gap:6px;margin-bottom:3px}
-.raw-doc .rd-label{width:140px;flex-shrink:0;color:#666}
-.raw-doc .rd-val{color:#111;font-weight:600}
-.rd-handwritten{font-family:'Caveat',cursive;font-size:13px;font-weight:600;color:#1a3a6b}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #ffffff;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 24px 32px;
+  }
+  .top-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    background: #1e3a5f;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    z-index: 100;
+  }
+  .top-nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .01em;
+  }
+  .top-nav a:hover { opacity: .85; }
+  .top-nav .nav-icon {
+    width: 30px; height: 30px;
+    background: rgba(255,255,255,.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .top-nav .nav-tag {
+    font-size: 10px;
+    background: rgba(255,255,255,.15);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+  .badge {
+    display: inline-block;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 700;
+    text-align: center;
+    color: #0f172a;
+    line-height: 1.25;
+    max-width: 700px;
+    margin-bottom: 6px;
+  }
+  .sub {
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: center;
+    max-width: 560px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    max-width: 1020px;
+    width: 100%;
+  }
+  .cards-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    max-width: 1020px;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .section-label {
+    width: 100%;
+    max-width: 1020px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 10px;
+    margin-top: 8px;
+    padding-left: 2px;
+  }
+  .card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: #475569;
+    box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  }
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 99px;
+    width: fit-content;
+  }
+  .tag-blue  { background: rgba(59,130,246,.15); color: #60a5fa; border: 1px solid rgba(59,130,246,.3); }
+  .tag-green { background: rgba(34,197,94,.12); color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
+  .tag-amber { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.25); }
+  .tag-red    { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.25); }
+  .tag-purple { background: rgba(124,58,237,.12); color: #a78bfa; border: 1px solid rgba(124,58,237,.25); }
+  .card-icon { font-size: 22px; line-height: 1; }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.3;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .footer {
+    margin-top: 52px;
+    font-size: 13px;
+    color: #475569;
+    text-align: center;
+    letter-spacing: .02em;
+  }
+  .footer span { color: #64748b; }
+  @media (max-width: 720px) {
+    .cards, .cards-two { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div style="display:flex;align-items:center;gap:14px">
-    <a href="index.html" style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:rgba(255,255,255,.75);text-decoration:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:4px 11px;border-radius:7px">⌂ Home</a>
-    <a href="index.html" class="logo">
-      <div class="logo-icon">⚕</div>
-      Intake Agent
-      <span class="header-tag">AI-Powered · v2.0</span>
-    </a>
-  </div>
-  <div style="font-size:12px;color:rgba(255,255,255,.6)">Workers' Comp · Live Processing &amp; Pipeline</div>
-</header>
+<nav class="top-nav">
+  <a href='/dme-intake-demo-v2'>
+    <div class="nav-icon">⚕</div>
+    Intake Agent
+    <span class="nav-tag">AI-Powered · v2.0</span>
+  </a>
+</nav>
+
+<div style="height:52px"></div>
+
+<div class="badge">Workers&rsquo; Comp &middot; AI Agent Platform</div>
+
+<h1>Making Intake &amp; Referral Management an Advantage</h1>
+<p class="sub">Delivering Experience, Speed &amp; Agility &mdash; autonomous, digital, clean route-ready episodes with human in the loop.</p>
+
+<div class="section-label">&#x25CF; Resources</div>
+<div class="cards">
+
+  <a class='card' href='/dme-intake-visual'>
+    <div class="tag tag-green">Value Proposition</div>
+    <div class="card-icon">&#x1F4C8;</div>
+    <div class="card-title">Value Proposition</div>
+    <div class="card-desc">Context to intake &amp; domain — extracts fields, detects gaps, resolves exceptions digitally with embedded AI voice, human in the loop, left shifting operations.</div>
+  </a>
+
+  <a class='card' href='/agent-ecosystem-visual'>
+    <div class="tag tag-amber">Architecture</div>
+    <div class="card-icon">&#x1F9E9;</div>
+    <div class="card-title">Agent Ecosystem</div>
+    <div class="card-desc">Modular, auditable, deployable in your environment &mdash; a network of agents orchestrated for end-to-end value chain from referral to payment, with human in the loop.</div>
+  </a>
+
+  <a class='card' href='/production-considerations-visual'>
+    <div class="tag tag-red">Production Readiness</div>
+    <div class="card-icon">&#x2705;</div>
+    <div class="card-title">Considerations</div>
+    <div class="card-desc">Key questions on the path to production: Safety &amp; Guardrails, Observability, Data &amp; Compliance, Integration, and People &amp; Change.</div>
+  </a>
 
-<div class="layout">
-
-<!-- ══ SIDEBAR ══ -->
-<aside class="sidebar">
-
-  <!-- BATCH MODE SIDEBAR -->
-  <div id="sb-batch-mode">
-    <div class="sidebar-label">Live Queue</div>
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--gray-l);border-radius:8px;margin-bottom:8px">
-      <span id="sb-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--gray-m);flex-shrink:0;transition:background .3s"></span>
-      <span id="sb-status-text" style="font-size:11px;font-weight:600;color:var(--gray)">75 referrals loaded</span>
-    </div>
-
-    <!-- Hub info — shown on load, hidden when processing starts -->
-    <div id="sb-hub-info">
-
-      <!-- Value Proposition -->
-      <div style="background:var(--blue-l);border:1px solid var(--blue-m);border-radius:8px;padding:10px 11px;margin-bottom:6px">
-        <div style="font-size:9px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">⚡ What This Does</div>
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <div style="display:flex;gap:6px;font-size:10px;color:#374151"><span style="color:var(--red);font-weight:800">✕</span><span>Manual: 4–6 min per referral</span></div>
-          <div style="display:flex;gap:6px;font-size:10px;color:#374151"><span style="color:var(--green);font-weight:800">✓</span><span>Reads docs, extracts 25 fields, detects gaps</span></div>
-          <div style="display:flex;gap:6px;font-size:10px;color:#374151"><span style="color:var(--green);font-weight:800">✓</span><span>Outreach dispatched automatically</span></div>
-          <div style="display:flex;gap:6px;font-size:10px;color:#374151"><span style="color:var(--green);font-weight:800">✓</span><span>Clean route-ready episode. Zero staff hours</span></div>
-        </div>
-      </div>
-
-      <!-- 7-Step Pipeline -->
-      <div style="background:var(--purple-l);border:1px solid var(--purple-m);border-radius:8px;padding:10px 11px;margin-bottom:6px">
-        <div style="font-size:9px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">🔁 7-Step Pipeline</div>
-        <div style="display:flex;flex-direction:column;gap:3px">
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:14px;height:14px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</span><span style="font-size:10px;color:var(--dark);font-weight:600">Channel Intake</span><span style="font-size:9px;color:var(--gray)">fax · voice · email</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:14px;height:14px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</span><span style="font-size:10px;color:var(--dark);font-weight:600">Normalization</span><span style="font-size:9px;color:var(--gray)">25 fields</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:14px;height:14px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</span><span style="font-size:10px;color:var(--dark);font-weight:600">Intelligence Layer</span><span style="font-size:9px;color:var(--gray)">validate · score</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:14px;height:14px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</span><span style="font-size:10px;color:var(--dark);font-weight:600">Completeness Check</span><span style="font-size:9px;color:var(--gray)">gap triage</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:14px;height:14px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</span><span style="font-size:10px;color:var(--dark);font-weight:600">Digital Outreach</span><span style="font-size:9px;color:var(--gray)">email CM</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:14px;height:14px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">6</span><span style="font-size:10px;color:var(--dark);font-weight:600">Voice Outreach</span><span style="font-size:9px;color:var(--gray)">outbound AI call</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:14px;height:14px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">7</span><span style="font-size:10px;color:var(--dark);font-weight:600">Route Output</span><span style="font-size:9px;color:var(--gray)">episode locked</span></div>
-        </div>
-      </div>
-
-      <!-- Channels -->
-      <div style="background:var(--green-l);border:1px solid var(--green-m);border-radius:8px;padding:10px 11px;margin-bottom:8px">
-        <div style="font-size:9px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">📥 Intake Channels</div>
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <div style="font-size:10px;color:var(--dark)">📠 <b>Fax</b> — reads full package, cross-references docs</div>
-          <div style="font-size:10px;color:#15803d">📞 <b>Voice</b> — AI answers 24/7, captures live on call</div>
-          <div style="font-size:10px;color:var(--dark)">📧 <b>Email / Portal</b> — parses, normalises, enters queue</div>
-        </div>
-      </div>
-
-    </div><!-- /sb-hub-info -->
-
-    <div class="sb-stat">
-      <div><div class="sb-stat-n purple" id="sbs-pages">0</div><div class="sb-stat-l">Pages Read</div></div>
-      <span style="font-size:18px">📄</span>
-    </div>
-    <div class="sb-stat">
-      <div><div class="sb-stat-n red" id="sbs-gaps">0</div><div class="sb-stat-l">Gaps Detected</div></div>
-      <span style="font-size:18px">⚠️</span>
-    </div>
-    <div class="sb-stat">
-      <div><div class="sb-stat-n yellow" id="sbs-outreach">0</div><div class="sb-stat-l">Outreach Sent</div></div>
-      <span style="font-size:18px">📧</span>
-    </div>
-    <div class="sb-stat">
-      <div><div class="sb-stat-n green" id="sbs-routed">0</div><div class="sb-stat-l">Auto-Routed</div></div>
-      <span style="font-size:18px">✅</span>
-    </div>
-
-    <!-- Scale card — shown after processing -->
-    <div class="scale-card" id="scale-card">
-      <div class="sc-title">⚡ At this rate · 10,000 referrals</div>
-      <div class="sc-row"><div><div class="sn">~56 min</div><div class="sl">Total Time</div></div></div>
-      <div class="sc-row"><div><div class="sn">~8,200</div><div class="sl">Gaps Detected</div></div></div>
-      <div class="sc-row"><div><div class="sn">~8,200</div><div class="sl">Outreach Emails</div></div></div>
-      <div class="sc-row"><div><div class="sn">~30,000</div><div class="sl">Pages Read</div></div></div>
-      <div class="sc-note">0 staff hours · fully automated · unattended</div>
-    </div>
-
-    <div style="margin-top:10px;padding:8px;background:#fffbeb;border:1px solid var(--yellow-m);border-radius:8px;font-size:11px;color:#92400e;display:none" id="holloway-hint">
-      Click any highlighted row at the top to explore the full pipeline
-    </div>
-  </div>
-
-  <!-- WALKTHROUGH MODE SIDEBAR (hidden by default) -->
-  <div id="sb-walkthrough-mode" style="display:none">
-    <div style="margin-bottom:10px">
-      <button onclick="returnToBatch()" style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:5px 10px;border-radius:7px;cursor:pointer;width:100%">← Back to Queue</button>
-    </div>
-    <div class="sidebar-label">Pipeline</div>
-    <div class="step" id="step-1" onclick="navigateStep(1)">
-      <div class="step-num">1</div>
-      <div><div class="step-title">Channel Intake</div><div class="step-sub">Fax extraction</div></div>
-    </div>
-    <div class="step" id="step-2" onclick="navigateStep(2)">
-      <div class="step-num">2</div>
-      <div><div class="step-title">Normalization</div><div class="step-sub">Episode record</div></div>
-    </div>
-    <div class="step" id="step-iq" onclick="navigateStep(3)">
-      <div class="step-num">3</div>
-      <div><div class="step-title">Intelligence Layer</div><div class="step-sub">Validate, score, fix codes</div></div>
-    </div>
-    <div class="step" id="step-3" onclick="navigateStep(4)">
-      <div class="step-num">4</div>
-      <div><div class="step-title">Completeness Check</div><div class="step-sub">Gap triage</div></div>
-    </div>
-    <div class="step" id="step-4" onclick="navigateStep(5)">
-      <div class="step-num">5</div>
-      <div><div class="step-title">Digital Outreach</div><div class="step-sub">Email case manager</div></div>
-    </div>
-    <div class="step" id="step-5" onclick="navigateStep(6)">
-      <div class="step-num">6</div>
-      <div><div class="step-title">Voice Outreach</div><div class="step-sub">Outbound AI call</div></div>
-    </div>
-    <div class="step" id="step-6" onclick="navigateStep(7)">
-      <div class="step-num">7</div>
-      <div><div class="step-title">Route Output</div><div class="step-sub">Finalize &amp; dispatch</div></div>
-    </div>
-
-    <div class="divider"></div>
-    <div class="sidebar-label">Episode</div>
-    <div class="ep-card">
-      <div class="ep-label">Patient</div><div class="ep-val" id="wt-ep-name">—</div>
-      <div class="ep-label">Claim</div><div class="ep-val" id="wt-ep-claim">—</div>
-      <div class="ep-label">Equipment</div><div class="ep-val" id="wt-ep-item">—</div>
-      <div class="ep-label">Status</div>
-      <div id="wt-ep-status" style="margin-top:2px"><div class="status-pill incomplete"><span class="status-dot"></span>—</div></div>
-    </div>
-    <div class="divider"></div>
-    <div class="sidebar-label">Agent Log</div>
-    <div class="log-box" id="agent-log"></div>
-  </div>
-
-</aside>
-
-<!-- ══ MAIN ══ -->
-<main class="main">
-
-<!-- ─── BATCH VIEW ─── -->
-<div id="view-batch">
-
-  <!-- Hero -->
-  <div class="batch-hero">
-    <div class="bh-top">
-      <div>
-        <div class="bh-tag">Live Demo · Intake Agent Platform</div>
-        <div class="bh-title">75 Referral Processing — Live</div>
-        <div class="bh-sub">Incoming Monday queue — AI reads, extracts fields, detects gaps, and dispatches digital outreach. Under 25 seconds. Zero staff.</div>
-        <div class="bh-stats">
-          <div class="bh-stat"><div class="n">75</div><div class="l">Referrals</div></div>
-          <div class="bh-stat"><div class="n">225</div><div class="l">Pages</div></div>
-          <div class="bh-stat"><div class="n">25</div><div class="l">Fields Each</div></div>
-          <div class="bh-stat"><div class="n">&lt;25s</div><div class="l">Total Time</div></div>
-          <div class="bh-stat"><div class="n">0</div><div class="l">Staff Hours</div></div>
-        </div>
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
-          <button class="btn-start" id="run-btn" onclick="startProcessing()">🔴 Start Live Processing</button>
-          <button class="btn-reset" id="reset-btn" onclick="resetDemo()">↺ Reset</button>
-          <span id="live-status-text" style="font-size:11px;color:rgba(255,255,255,.55)">Queue loaded — 75 referrals waiting</span>
-        </div>
-        <div style="margin-top:12px;display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:7px 14px">
-          <span style="font-size:13px">📞</span>
-          <div><div style="font-size:12px;font-weight:800;color:#4ade80;letter-spacing:.04em">(201) 897-3854</div><div style="font-size:10px;color:rgba(255,255,255,.5)">Live AI intake line · 24/7 · case managers call to submit referrals</div></div>
-        </div>
-      </div>
-
-      <!-- Right side — Purpose & Vision -->
-      <div style="min-width:260px;max-width:320px;display:flex;flex-direction:column;gap:10px">
-        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Purpose</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.65">
-            Every injured worker waiting on equipment is waiting on paperwork. The Intake Agent eliminates that wait — reading every referral, closing every gap, dispatching every coordination automatically. The coordinator stays focused on judgment calls, not administrative loops.
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px">
-          <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Vision</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.65">
-            A workers' comp operation where no referral sits incomplete, no coordinator chases the same gap twice, and every route-ready episode reaches the vendor the same day it arrives. Scalable to any volume. Auditable at every step.
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-
-  <!-- Stats bar -->
-  <div class="stats-bar">
-    <div class="sb"><div class="sb-n" id="sb-queued">75</div><div class="sb-l">Queued</div></div>
-    <div class="sb sb-proc"><div class="sb-n" id="sb-proc">0</div><div class="sb-l">Processing</div></div>
-    <div class="sb sb-pages"><div class="sb-n" id="sb-pages">0</div><div class="sb-l">Pages Read</div></div>
-    <div class="sb sb-routed"><div class="sb-n" id="sb-routed">0</div><div class="sb-l">Auto-Routed</div></div>
-    <div class="sb sb-gaps"><div class="sb-n" id="sb-gaps">0</div><div class="sb-l">Gaps Detected</div></div>
-    <div class="sb sb-outreach"><div class="sb-n" id="sb-outreach">0</div><div class="sb-l">Outreach Sent</div></div>
-  </div>
-
-  <!-- Progress bar -->
-  <div class="prog-wrap">
-    <div class="prog-label-row">
-      <span id="prog-label">Queue ready — click Start to begin</span>
-      <span id="prog-pct">0%</span>
-    </div>
-    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
-  </div>
-
-  <!-- Queue Table -->
-  <div class="queue-card">
-    <table style="width:100%;table-layout:fixed">
-      <thead class="queue-thead">
-        <tr>
-          <th style="width:150px">Patient</th>
-          <th style="width:120px">Claim #</th>
-          <th style="width:150px">Equipment</th>
-          <th style="width:55px;text-align:center">Channel</th>
-          <th style="width:70px;text-align:center">Priority</th>
-          <th style="width:130px;text-align:center">Status</th>
-          <th style="width:65px;text-align:center">Gaps</th>
-          <th style="width:100px;text-align:center">Outreach</th>
-        </tr>
-      </thead>
-    </table>
-    <div class="queue-body" id="queue-body">
-      <table style="width:100%;table-layout:fixed">
-        <tbody id="queue-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Scale callout -->
-  <div class="scale-callout" id="scale-callout">
-    <div class="scl-title">⚡ Scale projection — same AI engine, same process</div>
-    <div class="scl-grid">
-      <div class="scl-stat"><div class="scl-n">10,000</div><div class="scl-l">Referrals</div></div>
-      <div class="scl-stat"><div class="scl-n">~56 min</div><div class="scl-l">Total Time</div></div>
-      <div class="scl-stat"><div class="scl-n">~8,200</div><div class="scl-l">Gaps Detected</div></div>
-      <div class="scl-stat"><div class="scl-n">~8,200</div><div class="scl-l">Outreach Sent</div></div>
-      <div class="scl-stat"><div class="scl-n">~30,000</div><div class="scl-l">Pages Read</div></div>
-    </div>
-    <div class="scl-note">Full Monday morning intake queue · 0 staff hours · Holloway's episode above shows exactly what the AI does for each one — gaps triaged, outreach dispatched, route state generated.</div>
-  </div>
-
-  <!-- Outreach summary -->
-  <div class="outreach-summary fade-in" id="outreach-summary">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="os-title">📧 Digital Outreach — Complete</div>
-      <div style="font-size:11px;color:var(--gray)" id="os-timestamp"></div>
-    </div>
-    <div class="os-grid">
-      <div class="os-stat"><div class="os-n" id="os-total" style="color:var(--blue)">0</div><div class="os-l">Processed</div></div>
-      <div class="os-stat"><div class="os-n" id="os-routed" style="color:var(--green)">0</div><div class="os-l">Auto-Routed</div></div>
-      <div class="os-stat"><div class="os-n" id="os-sent" style="color:var(--yellow)">0</div><div class="os-l">Outreach Sent</div></div>
-      <div class="os-stat"><div class="os-n" id="os-gaps-total" style="color:var(--red)">0</div><div class="os-l">Gaps Found</div></div>
-    </div>
-    <div style="margin-top:10px;padding:9px 13px;background:var(--green-l);border:1px solid var(--green-m);border-radius:7px;font-size:11px;color:#166534;line-height:1.6">
-      <b>All outreach dispatched automatically.</b> Case managers receive targeted emails listing only their specific missing fields. Replies are parsed and episodes updated in real time.
-    </div>
-  </div>
-
-</div><!-- /view-batch -->
-
-<!-- ─── WALKTHROUGH VIEW ─── -->
-<div id="view-walkthrough">
-
-  <div class="wt-back" onclick="returnToBatch()">← All Referrals</div>
-  <div class="prog-track-wt"><div class="prog-fill-wt" id="wt-progress" style="width:0%"></div></div>
-
-  <!-- ── WТ-1: Intake ── -->
-  <div class="section active" id="wt-1">
-    <div class="page-title">Step 1 — Channel Intake</div>
-    <div class="page-sub">Multi-channel intake — fax, voice, portal · AI extracts structured fields from every source</div>
-
-    <div class="card">
-      <div class="card-title">📂 Referral Package — James Holloway · WC-2026-084431</div>
-      <div class="doc-list">
-        <div class="doc-item received" onclick="openDoc(0)">
-          <div class="di-icon">📄</div>
-          <div class="di-name">WC-2026-084431_ReferralForm.pdf</div>
-          <div class="di-tag">Fax · Image PDF · 2 pages</div>
-          <div class="di-status">✓ Received</div>
-          <div class="di-view">View ›</div>
-        </div>
-        <div class="doc-item received" onclick="openDoc(1)">
-          <div class="di-icon">🩺</div>
-          <div class="di-name">WC-2026-084431_ClinicalNotes.pdf</div>
-          <div class="di-tag">Physician Notes · 2 pages</div>
-          <div class="di-status">✓ Received</div>
-          <div class="di-view">View ›</div>
-        </div>
-        <div class="doc-item received" onclick="openDoc(2)">
-          <div class="di-icon">💊</div>
-          <div class="di-name">WC-2026-084431_RxPrescription.jpg</div>
-          <div class="di-tag">Scanned Rx · 1 page</div>
-          <div class="di-status">✓ Received</div>
-          <div class="di-view">View ›</div>
-        </div>
-        <div class="doc-item missing-doc" onclick="openDoc(3)">
-          <div class="di-icon">📋</div>
-          <div class="di-name">Authorization Document</div>
-          <div class="di-tag">Auth / Insurance</div>
-          <div class="di-status">⚠ Missing / Blank</div>
-          <div class="di-view" style="color:var(--red)">View ›</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🔍 Extraction Results — All Documents</div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-
-        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--gray-m)">§1 · Worker Details</div>
-        <div class="field-grid">
-          <div class="field present"><div class="f-label">worker.name</div><div class="f-val">James Holloway</div><span class="f-badge fb-src">Referral Form</span></div>
-          <div class="field present"><div class="f-label">worker.dob</div><div class="f-val">1978-03-14</div><span class="f-badge fb-src">Referral Form</span></div>
-          <div class="field present"><div class="f-label">worker.address</div><div class="f-val">4821 Elmwood Dr, Anaheim CA 92801</div><span class="f-badge fb-src">Referral Form</span></div>
-          <div class="field missing"><div class="f-label">worker.language / interpreter</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>
-        </div></div>
-
-        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--gray-m)">§2 · Insurance</div>
-        <div class="field-grid">
-          <div class="field present"><div class="f-label">insurance.carrier</div><div class="f-val">Coastal Insurance Group</div><span class="f-badge fb-src">Referral Form</span></div>
-          <div class="field present"><div class="f-label">insurance.claim_number</div><div class="f-val">WC-2026-084431</div><span class="f-badge fb-src">Referral Form</span></div>
-          <div class="field missing"><div class="f-label">insurance.auth_reference</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>
-        </div></div>
-
-        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--gray-m)">§3 · Adjuster</div>
-        <div class="field-grid">
-          <div class="field present"><div class="f-label">adjuster.name</div><div class="f-val">Maria Santos</div><span class="f-badge fb-src">Referral Form</span></div>
-          <div class="field present"><div class="f-label">adjuster.phone / email</div><div class="f-val">714-555-0192 · m.santos@coastalins.com</div><span class="f-badge fb-src">Referral Form</span></div>
-          <div class="field present"><div class="f-label">case_manager.name</div><div class="f-val">Linda Torres</div><span class="f-badge fb-src">Fax Cover</span></div>
-          <div class="field present"><div class="f-label">case_manager.email</div><div class="f-val">l.torres@coastalins.com</div><span class="f-badge fb-src">Fax Cover</span></div>
-        </div></div>
-
-        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--gray-m)">§4 · Provider</div>
-        <div class="field-grid">
-          <div class="field present"><div class="f-label">provider.name</div><div class="f-val">Kevin Marsh, MD</div><span class="f-badge fb-src">Clinical Notes</span></div>
-          <div class="field present"><div class="f-label">provider.npi</div><div class="f-val">1234567890</div><span class="f-badge fb-src">Clinical Notes</span></div>
-          <div class="field present"><div class="f-label">provider.practice</div><div class="f-val">Pacific Orthopedic Associates</div><span class="f-badge fb-src">Clinical Notes</span></div>
-        </div></div>
-
-        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--gray-m)">§5 · Diagnosis &amp; Services</div>
-        <div class="field-grid">
-          <div class="field present"><div class="f-label">diagnosis.icd10_codes</div><div class="f-val">S83.209A</div><span class="f-badge fb-src">Clinical Notes</span></div>
-          <div class="field present"><div class="f-label">diagnosis.description</div><div class="f-val">Post-ACL reconstruction, right knee</div><span class="f-badge fb-src">Clinical Notes</span></div>
-          <div class="field present"><div class="f-label">services.item / hcpcs</div><div class="f-val">Rollator Walker · E0143</div><span class="f-badge fb-src">Referral Form</span></div>
-          <div class="field present"><div class="f-label">services.clinical_justification</div><div class="f-val">Bariatric rating req. (285 lbs). Post-ACL instability.</div><span class="f-badge fb-src">Clinical Notes</span></div>
-        </div></div>
-
-        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--gray-m)">§9 · Scheduling</div>
-        <div class="field-grid">
-          <div class="field missing"><div class="f-label">scheduling.appointment_window</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>
-          <div class="field missing"><div class="f-label">scheduling.transportation</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>
-        </div></div>
-
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button>
-    </div>
-  </div>
-
-  <!-- ── WТ-2: Normalization ── -->
-  <div class="section" id="wt-2">
-    <div class="page-title">Step 2 — Normalization</div>
-    <div class="page-sub">Raw extracted data mapped to standard Episode Record format</div>
-    <div class="card">
-      <div class="card-title">📋 Episode Record — Normalized</div>
-      <div class="tab-bar">
-        <div class="tab active" onclick="switchNormTab(0)">§1 Worker</div>
-        <div class="tab" onclick="switchNormTab(1)">§2 Insurance</div>
-        <div class="tab" onclick="switchNormTab(2)">§3 Adjuster</div>
-        <div class="tab" onclick="switchNormTab(3)">§4 Provider</div>
-        <div class="tab" onclick="switchNormTab(4)">§5 Diagnosis</div>
-        <div class="tab" onclick="switchNormTab(5)">§6 Services</div>
-        <div class="tab" onclick="switchNormTab(6)">§9 Scheduling</div>
-      </div>
-      <div class="tab-panel active" id="nt-0"><div class="norm-grid">
-        <div class="norm-field"><div class="nl">worker.name</div><div class="nv">James Holloway</div></div>
-        <div class="norm-field"><div class="nl">worker.dob</div><div class="nv">1978-03-14</div></div>
-        <div class="norm-field"><div class="nl">worker.address</div><div class="nv">4821 Elmwood Drive, Anaheim, CA 92801</div></div>
-        <div class="norm-field"><div class="nl">worker.language</div><div class="nv null">null</div></div>
-        <div class="norm-field"><div class="nl">worker.interpreter</div><div class="nv null">null</div></div>
-      </div></div>
-      <div class="tab-panel" id="nt-1"><div class="norm-grid">
-        <div class="norm-field"><div class="nl">insurance.carrier</div><div class="nv">Coastal Insurance Group</div></div>
-        <div class="norm-field"><div class="nl">insurance.claim_number</div><div class="nv">WC-2026-084431</div></div>
-        <div class="norm-field"><div class="nl">insurance.auth_reference</div><div class="nv null">null</div></div>
-      </div></div>
-      <div class="tab-panel" id="nt-2"><div class="norm-grid">
-        <div class="norm-field"><div class="nl">adjuster.name</div><div class="nv">Maria Santos</div></div>
-        <div class="norm-field"><div class="nl">adjuster.phone</div><div class="nv">+17145550192</div></div>
-        <div class="norm-field"><div class="nl">adjuster.email</div><div class="nv">m.santos@coastalins.com</div></div>
-        <div class="norm-field"><div class="nl">case_manager.name</div><div class="nv">Linda Torres</div></div>
-        <div class="norm-field"><div class="nl">case_manager.email</div><div class="nv">l.torres@coastalins.com</div></div>
-      </div></div>
-      <div class="tab-panel" id="nt-3"><div class="norm-grid">
-        <div class="norm-field"><div class="nl">provider.name</div><div class="nv">Kevin Marsh</div></div>
-        <div class="norm-field"><div class="nl">provider.npi</div><div class="nv">1234567890</div></div>
-        <div class="norm-field"><div class="nl">provider.practice</div><div class="nv">Pacific Orthopedic Associates</div></div>
-      </div></div>
-      <div class="tab-panel" id="nt-4"><div class="norm-grid">
-        <div class="norm-field"><div class="nl">diagnosis.icd10_codes</div><div class="nv">S83.209A</div></div>
-        <div class="norm-field"><div class="nl">diagnosis.description</div><div class="nv">Post-ACL reconstruction, right knee</div></div>
-        <div class="norm-field"><div class="nl">diagnosis.body_part</div><div class="nv">Right knee</div></div>
-        <div class="norm-field"><div class="nl">diagnosis.surgical_history</div><div class="nv">ACL reconstruction 2026-03-28</div></div>
-      </div></div>
-      <div class="tab-panel" id="nt-5"><div class="norm-grid">
-        <div class="norm-field"><div class="nl">services.item_description</div><div class="nv">Rollator Walker — 4-wheel</div></div>
-        <div class="norm-field"><div class="nl">services.hcpcs_code</div><div class="nv">E0143</div></div>
-        <div class="norm-field"><div class="nl">services.quantity / duration</div><div class="nv">1 / 90 days</div></div>
-        <div class="norm-field"><div class="nl">prescription.specifications</div><div class="nv null">null — not specified</div></div>
-      </div></div>
-      <div class="tab-panel" id="nt-6"><div class="norm-grid">
-        <div class="norm-field"><div class="nl">scheduling.appointment_window</div><div class="nv null">null</div></div>
-        <div class="norm-field"><div class="nl">scheduling.transportation</div><div class="nv null">null</div></div>
-        <div class="norm-field"><div class="nl">episode.channel</div><div class="nv">fax</div></div>
-        <div class="norm-field"><div class="nl">episode.status</div><div class="nv" style="color:var(--red)">incomplete</div></div>
-      </div></div>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-blue" onclick="navigateStep(3)">→ Run Intelligence Layer</button>
-    </div>
-  </div>
-
-  <!-- ── WТ-IQ: Intelligence Layer ── -->
-  <div class="section" id="wt-iq">
-    <div class="page-title">Step 3 — Intelligence Layer</div>
-    <div class="page-sub">Validate, score, fix codes, check duplicates, and determine authorization</div>
-
-    <div class="card">
-      <div class="card-title">🔁 Duplicate Detection</div>
-      <div class="alert alert-green" style="margin-bottom:0">
-        <div class="alert-icon">✅</div>
-        <div>No duplicate episode found. Checked against claim <b>WC-2026-084431</b> and patient <b>James Holloway / 1978-03-14</b> — no existing open or routed episode matches.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">✅ Compliance Validation</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px"><span>✅</span><div><b>ICD-10 S83.209A</b> — Active code, valid format, matches injury description</div></div>
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px"><span>✅</span><div><b>HCPCS E0143</b> — Active code, valid format, matches rollator walker description</div></div>
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px"><span>✅</span><div><b>HCPCS ↔ Diagnosis match</b> — E0143 appropriate for S83.209A (post-surgical knee)</div></div>
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--yellow-l);border:1px solid var(--yellow-m);font-size:12px"><span>⚠️</span><div><b>Code auto-corrected:</b> HCPCS input was <code>e0143</code> (lowercase) → normalized to <b>E0143</b></div></div>
-      </div>
-    </div>
-
-    <div class="card" style="border:2px solid #6366f1;background:#f5f3ff">
-      <div class="card-title" style="color:#4f46e5">🧠 AI Self-Correction — ICD-10 Discrepancy Detected &amp; Resolved</div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:white;border:1px solid #e0e7ff;font-size:12px">
-          <span>📄</span><div><b>Referral Form</b> — ICD-10: <code style="background:#fee2e2;color:#dc2626;padding:1px 5px;border-radius:4px">M23.611</code> &nbsp;Tear of ACL, right knee <span style="color:var(--gray)">(pre-surgical)</span></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:white;border:1px solid #e0e7ff;font-size:12px">
-          <span>🩺</span><div><b>Clinical Notes</b> — ICD-10: <code style="background:#dcfce7;color:#16a34a;padding:1px 5px;border-radius:4px">S83.209A</code> &nbsp;Post-ACL reconstruction <span style="color:var(--gray)">(post-surgical)</span></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:white;border:1px solid #e0e7ff;font-size:12px">
-          <span>💊</span><div><b>Rx Prescription</b> — ICD-10: <code style="background:#dcfce7;color:#16a34a;padding:1px 5px;border-radius:4px">S83.209A</code> &nbsp;Post-ACL reconstruction</div>
-        </div>
-      </div>
-      <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:8px;padding:10px 12px;font-size:12px;color:#4c1d95;line-height:1.6;margin-bottom:8px">
-        <b>AI Reasoning:</b> 2 of 3 documents agree on <b>S83.209A</b>. Surgical history confirms ACL reconstruction on 2026-03-28 — making S83.209A the correct post-surgical code. M23.611 is pre-surgical, carried forward on the referral form in error. Cross-reference confidence: <b>94%</b>.
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 11px;background:#dcfce7;border:1px solid #86efac;border-radius:7px;font-size:12px;font-weight:700;color:#166534">
-        ✅ Auto-corrected to S83.209A — no human review required &nbsp;·&nbsp; M23.611 superseded
-      </div>
-    </div>
-
-    <div class="card" style="border:2px solid var(--red);background:#fef2f2">
-      <div style="display:inline-flex;align-items:center;gap:6px;background:#dc2626;color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">⚠ Escalated to Manual Review Queue</div>
-      <div class="card-title" style="color:var(--red)">🚨 Reference Case — Low-Confidence ICD Conflict · AI Cannot Self-Correct</div>
-      <div style="font-size:11px;color:#991b1b;margin-bottom:10px">When document evidence is split and clinical context is ambiguous, AI flags the conflict and routes to a human specialist rather than guessing.</div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:white;border:1px solid #fecaca;font-size:12px">
-          <span>📄</span><div><b>Referral Form</b> — <code style="background:#fee2e2;color:#dc2626;padding:1px 5px;border-radius:4px">M54.5</code> &nbsp;Low back pain (non-specific)</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:white;border:1px solid #fecaca;font-size:12px">
-          <span>🩺</span><div><b>Clinical Notes</b> — <code style="background:#fef9c3;color:#92400e;padding:1px 5px;border-radius:4px">M51.16</code> &nbsp;L4-L5 disc herniation confirmed on MRI</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:white;border:1px solid #fecaca;font-size:12px">
-          <span>💊</span><div><b>Rx Prescription</b> — <code style="background:#fee2e2;color:#dc2626;padding:1px 5px;border-radius:4px">M54.5</code> &nbsp;Low back pain (non-specific)</div>
-        </div>
-      </div>
-      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:9px 12px;font-size:12px;color:#92400e;line-height:1.6;margin-bottom:8px">
-        <b>AI Reasoning:</b> Numeric vote 2/3 favors M54.5, but clinical notes document L4-L5 disc herniation on MRI — a more specific, clinically significant finding. Evidence quality conflicts with evidence count. <b>Confidence: 51%</b> — below self-correction threshold of 80%.
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 11px;background:#fee2e2;border:1px solid #fca5a5;border-radius:7px;font-size:12px;font-weight:700;color:#991b1b">
-        🚨 Routed to manual review queue — clinical specialist required · SLA: 2 business hours
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🔑 Authorization Determination</div>
-      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 11px;border-radius:7px;background:var(--red-l);border:1px solid var(--red-m);font-size:12px">
-        <span>🔑</span><div><b>Prior authorization REQUIRED</b> — Coastal Insurance Group requires prior auth for HCPCS E0143. <b>insurance.auth_reference is null</b> → added as priority gap. Routing is blocked until resolved.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📊 Risk &amp; Urgency Score</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
-        <div style="text-align:center;padding:12px;background:var(--red-l);border-radius:8px;border:1px solid var(--red-m)">
-          <div style="font-size:26px;font-weight:900;color:var(--red)">4</div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-top:2px">CLINICAL RISK</div><div style="font-size:10px;color:var(--gray)">Post-surgical, fall risk</div>
-        </div>
-        <div style="text-align:center;padding:12px;background:var(--yellow-l);border-radius:8px;border:1px solid var(--yellow-m)">
-          <div style="font-size:26px;font-weight:900;color:var(--yellow)">3</div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-top:2px">URGENCY</div><div style="font-size:10px;color:var(--gray)">Appt within 1 week</div>
-        </div>
-        <div style="text-align:center;padding:12px;background:#fdf4ff;border-radius:8px;border:1px solid var(--purple-m)">
-          <div style="font-size:26px;font-weight:900;color:var(--purple)">7</div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-top:2px">PRIORITY SCORE</div><div style="font-size:10px;color:var(--purple);font-weight:700">HIGH</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-blue" onclick="navigateStep(4)">→ Run Completeness Check</button>
-    </div>
-  </div>
-
-  <!-- ── WТ-3: Completeness ── -->
-  <div class="section" id="wt-3">
-    <div class="page-title">Step 4 — Completeness &amp; Gap Triage</div>
-    <div class="page-sub">AI classifies each gap by routing criticality — only hard blocks hold the episode</div>
-
-    <div class="alert alert-blue">
-      <div class="alert-icon">🧠</div>
-      <div><b>5 gaps detected — classified by criticality.</b> Episode partially routed to scheduling queue. Hard blocks trigger outreach. Non-blocking gaps collected in parallel.</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">✅ Present — 20 / 25 required fields</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px">
-        <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ worker.name · dob · address</span>
-        <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ insurance.carrier · claim#</span>
-        <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ adjuster + case_manager</span>
-        <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ provider.name · npi · practice</span>
-        <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ diagnosis.icd10 · description</span>
-        <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ services.item · hcpcs · justification</span>
-        <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ prescription · signature · date</span>
-      </div>
-    </div>
-
-    <div class="card" style="border-left:4px solid var(--red);padding-left:14px">
-      <div class="card-title" style="color:var(--red)">🔴 Hard Blocks — 2 gaps · Vendor dispatch blocked until resolved</div>
-      <div style="display:flex;flex-direction:column;gap:7px">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:9px 11px;background:var(--red-l);border:1px solid var(--red-m);border-radius:8px;font-size:12px">
-          <div><b>🔑 Auth Reference</b><div style="font-size:10px;color:var(--gray);margin-top:1px">insurance.auth_reference</div></div>
-          <div style="color:#991b1b">Payer will not process without prior auth number. Routing blocked.</div>
-          <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#dc2626;color:white;padding:3px 9px;border-radius:10px">📧 OUTREACH SENT</span></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:9px 11px;background:var(--red-l);border:1px solid var(--red-m);border-radius:8px;font-size:12px">
-          <div><b>⚖️ Equipment Spec</b><div style="font-size:10px;color:var(--gray);margin-top:1px">prescription.specifications</div></div>
-          <div style="color:#991b1b">Patient 285 lbs — standard rollator contraindicated. Bariatric spec required.</div>
-          <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#dc2626;color:white;padding:3px 9px;border-radius:10px">📧 OUTREACH SENT</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="border-left:4px solid var(--yellow);padding-left:14px">
-      <div class="card-title" style="color:var(--yellow)">🟡 Soft Block — 1 gap · Route to scheduling hold</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:9px 11px;background:var(--yellow-l);border:1px solid var(--yellow-m);border-radius:8px;font-size:12px">
-        <div><b>📅 Appointment Window</b><div style="font-size:10px;color:var(--gray);margin-top:1px">scheduling.appointment_window</div></div>
-        <div style="color:#92400e">Needed for scheduling but does not block episode creation. Scheduling queue holds slot pending confirmation.</div>
-        <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#d97706;color:white;padding:3px 9px;border-radius:10px">📅 SCHED. HOLD</span></div>
-      </div>
-    </div>
-
-    <div class="card" style="border-left:4px solid var(--green);padding-left:14px">
-      <div class="card-title" style="color:var(--green)">🟢 Non-Blocking — 2 gaps · Routing proceeds, collected in parallel</div>
-      <div style="display:flex;flex-direction:column;gap:7px">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:9px 11px;background:var(--green-l);border:1px solid var(--green-m);border-radius:8px;font-size:12px">
-          <div><b>🌐 Language / Interpreter</b><div style="font-size:10px;color:var(--gray);margin-top:1px">worker.language</div></div>
-          <div style="color:#166534">Operational preference only. Coordinator collects during first contact. No routing impact.</div>
-          <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#16a34a;color:white;padding:3px 9px;border-radius:10px">✓ ROUTING AHEAD</span></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:9px 11px;background:var(--green-l);border:1px solid var(--green-m);border-radius:8px;font-size:12px">
-          <div><b>🚗 Transportation</b><div style="font-size:10px;color:var(--gray);margin-top:1px">scheduling.transportation</div></div>
-          <div style="color:#166534">Day-before confirmation is standard. Does not affect equipment dispatch or auth.</div>
-          <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:#16a34a;color:white;padding:3px 9px;border-radius:10px">✓ ROUTING AHEAD</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div style="background:#f5f3ff;border:2px solid var(--purple-m);border-radius:10px;padding:13px 16px;display:flex;align-items:flex-start;gap:10px">
-      <div style="font-size:18px">🎯</div>
-      <div>
-        <div style="font-size:13px;font-weight:800;color:var(--purple);margin-bottom:3px">Routing Decision</div>
-        <div style="font-size:12px;color:#4c1d95;line-height:1.6">Episode <b>partially routed to scheduling queue</b> — vendor on standby. Outreach dispatched on 2 hard blocks via email, escalating to voice after 24 hrs. Non-blocking gaps collected in parallel — zero delay to scheduling.</div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-blue" onclick="navigateStep(5)">→ Send Digital Outreach</button>
-    </div>
-  </div>
-
-  <!-- ── WТ-4: Email Outreach ── -->
-  <div class="section" id="wt-4">
-    <div class="page-title">Step 5 — Digital Outreach</div>
-    <div class="page-sub">Agent routes outreach to the case manager — CM is responsible for auth whether TPA or insurer</div>
-
-    <div class="alert alert-blue">
-      <div class="alert-icon">🧠</div>
-      <div><b>AI routes all gaps to the case manager.</b> CM is responsible for auth # whether from a TPA or insurer directly. Auth # confirmed via email — reference numbers are better in writing than on a call.</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📧 Outreach Email — Case Manager · All 5 Gaps</div>
-      <div class="email-box">
-        <div class="email-hdr">
-          <div class="email-row"><span class="ek">To:</span><span>Linda Torres &lt;l.torres@coastalins.com&gt;</span></div>
-          <div class="email-row"><span class="ek">Subj:</span><span><b>Action Required — Missing Info · Referral [WC-2026-084431]</b></span></div>
-          <div class="email-row"><span class="ek">Sent:</span><span>2026-05-01 09:02 · via email</span></div>
-        </div>
-        <div class="email-body">Hi Linda,
-
-Thank you for the referral for <span class="hl">James Holloway</span> (DOB: 1978-03-14, Claim: <span class="hl">WC-2026-084431</span>).
-
-To complete coordination, we need:
-
-  <span class="hl">🔑 Authorization reference number</span> — please reply with the auth ref # for this claim
-  <span class="hl">📅 Appointment window</span> — preferred date and time range
-  <span class="hl">🚗 Transportation</span> — will the patient need a ride arranged?
-  <span class="hl">🌐 Language / interpreter</span> — patient's primary language?
-  <span class="hl">⚖️ Equipment specification</span> — confirm bariatric spec for patient weight (285 lbs)
-
-Please reply within <b>24 business hours</b>. If we don't hear back, our coordination agent will follow up by phone for the scheduling items.
-
-Thank you,
-Intake Coordination Agent</div>
-      </div>
-    </div>
-
-    <div class="alert alert-yellow">
-      <div class="alert-icon">⏱</div>
-      <div>No response from case manager after <b>24 business hours</b>. Escalating to outbound voice call for scheduling gaps. Auth # confirmed separately via email reply.</div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-blue" onclick="navigateStep(6)">→ Place Outbound Call</button>
-    </div>
-  </div>
-
-  <!-- ── WТ-5: Voice Outreach ── -->
-  <div class="section" id="wt-5">
-    <div class="page-title">Step 6 — Voice Outreach</div>
-    <div class="page-sub">No email response — agent places outbound AI call to case manager</div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div class="alert alert-blue" style="margin:0">
-        <div class="alert-icon">📞</div>
-        <div>Calling <b>Linda Torres</b> at <b>+1 (714) 555-0188</b> · Attempt #2 · <b>4 scheduling &amp; clinical items</b></div>
-      </div>
-      <div class="alert alert-green" style="margin:0">
-        <div class="alert-icon">🔑</div>
-        <div>Auth # <b>AUTH-2026-CIG-7741</b> confirmed via email reply — not asked on call. Reference numbers are better confirmed in writing.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📞 Outbound Call — Transcript</div>
-      <div class="call-box">
-        <div class="call-status-row">
-          <div class="call-badge"><span class="call-dot" style="background:#f59e0b;animation:none"></span> Call complete</div>
-          <div class="call-timer">01:24</div>
-        </div>
-        <div class="transcript">
-          <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Hi, this is the Intake Coordination Agent calling for Linda Torres. I'm following up on the referral for James Holloway, claim WC-2026-084431. We just need four quick scheduling confirmations — do you have a moment?</span></div>
-          <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes, go ahead.</span></div>
-          <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Great. What's the preferred appointment window for the equipment delivery?</span></div>
-          <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Can you do <span class="captured">May 5th, between 10 and noon</span>?</span></div>
-          <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Perfect — May 5th, 10 AM to 12 PM. Will the patient need transportation arranged?</span></div>
-          <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">No, <span class="captured">he'll drive himself</span>.</span></div>
-          <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Confirmed. What's the patient's primary language — does he need an interpreter?</span></div>
-          <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">English, no interpreter needed</span>.</span></div>
-          <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Got it. Last one — the prescription lists a rollator walker but doesn't specify bariatric. Patient weight is 285 lbs, which requires a bariatric frame. Can you confirm <span class="captured">bariatric specification</span>?</span></div>
-          <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes, <span class="captured">bariatric — 4-wheel, 400 lb capacity</span>. Sorry that wasn't on the form.</span></div>
-          <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Confirmed. To recap: May 5th 10–noon, self-transport, English no interpreter, bariatric spec confirmed. All correct?</span></div>
-          <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes that's right.</span></div>
-          <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Thank you Linda. All scheduling items confirmed. Your referral is now complete — we'll coordinate delivery and send a confirmation. Have a great day!</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="alert alert-green">
-      <div class="alert-icon">✅</div>
-      <div>4 scheduling &amp; clinical fields confirmed via call. Auth # captured via email. All 5 gaps resolved — Episode Record updated and complete.</div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-blue" onclick="navigateStep(7)">→ Generate Route Output</button>
-    </div>
-  </div>
-
-  <!-- ── WТ-6: Route Output ── -->
-  <div class="section" id="wt-6">
-    <div class="page-title">Step 7 — Route State Output</div>
-    <div class="page-sub">Episode complete. Normalized record locked and dispatched.</div>
-
-    <div class="alert alert-green">
-      <div class="alert-icon">✅</div>
-      <div>All hard blocks resolved via outreach. Non-blocking gaps collected in parallel. Episode fully routed. Saved to <b>output/dme-intake-WC-2026-084431-20260501.md</b></div>
-    </div>
-
-    <div class="card" style="border-left:4px solid var(--purple)">
-      <div class="card-title">🎯 Gap Resolution Summary</div>
-      <div style="display:flex;flex-direction:column;gap:5px;font-size:12px">
-        <div style="display:grid;grid-template-columns:28px 1fr 130px 150px;gap:8px;align-items:center;padding:6px 9px;background:var(--red-l);border-radius:7px">
-          <span>🔑</span><div><b>Auth Reference</b> — AUTH-2026-CIG-7741</div><span style="color:var(--red);font-weight:700">🔴 Hard Block</span><span style="color:var(--green);font-weight:700">✓ Resolved via email</span>
-        </div>
-        <div style="display:grid;grid-template-columns:28px 1fr 130px 150px;gap:8px;align-items:center;padding:6px 9px;background:var(--red-l);border-radius:7px">
-          <span>⚖️</span><div><b>Equipment Spec</b> — bariatric 400lb confirmed</div><span style="color:var(--red);font-weight:700">🔴 Hard Block</span><span style="color:var(--green);font-weight:700">✓ Resolved via call</span>
-        </div>
-        <div style="display:grid;grid-template-columns:28px 1fr 130px 150px;gap:8px;align-items:center;padding:6px 9px;background:var(--yellow-l);border-radius:7px">
-          <span>📅</span><div><b>Appointment Window</b> — May 5, 10:00–12:00</div><span style="color:var(--yellow);font-weight:700">🟡 Soft Block</span><span style="color:var(--green);font-weight:700">✓ Resolved via call</span>
-        </div>
-        <div style="display:grid;grid-template-columns:28px 1fr 130px 150px;gap:8px;align-items:center;padding:6px 9px;background:var(--green-l);border-radius:7px">
-          <span>🌐</span><div><b>Language</b> — English, no interpreter</div><span style="color:var(--green);font-weight:700">🟢 Non-Blocking</span><span style="color:var(--green);font-weight:700">✓ Collected parallel</span>
-        </div>
-        <div style="display:grid;grid-template-columns:28px 1fr 130px 150px;gap:8px;align-items:center;padding:6px 9px;background:var(--green-l);border-radius:7px">
-          <span>🚗</span><div><b>Transportation</b> — self, no ride needed</div><span style="color:var(--green);font-weight:700">🟢 Non-Blocking</span><span style="color:var(--green);font-weight:700">✓ Collected parallel</span>
-        </div>
-        <div style="display:grid;grid-template-columns:28px 1fr 130px 150px;gap:8px;align-items:center;padding:6px 9px;background:#f5f3ff;border-radius:7px">
-          <span>🧠</span><div><b>ICD-10</b> — M23.611→S83.209A self-corrected</div><span style="color:#6366f1;font-weight:700">🔵 AI Corrected</span><span style="color:#6366f1;font-weight:700">✓ No human required</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="route-card fade-in">
-      <div class="route-hdr">
-        <div>
-          <div class="route-title">Referral — Route State</div>
-          <div class="route-ts">EP-20260501-WC2026084431 · Completed: 2026-05-01 11:52</div>
-        </div>
-        <div class="status-pill routed"><span class="status-dot"></span>ROUTED</div>
-      </div>
-      <div class="route-section">
-        <div class="route-section-title">§1 · Worker</div>
-        <div class="route-grid">
-          <div class="route-field"><div class="rl">worker.name</div><div class="rv">James Holloway</div></div>
-          <div class="route-field"><div class="rl">worker.dob</div><div class="rv">1978-03-14</div></div>
-          <div class="route-field"><div class="rl">worker.address</div><div class="rv">4821 Elmwood Drive, Anaheim, CA 92801</div></div>
-          <div class="route-field"><div class="rl">worker.language / interpreter</div><div class="rv" style="color:var(--purple);font-weight:800">English / false ✦ via call</div></div>
-        </div>
-      </div>
-      <div class="route-section">
-        <div class="route-section-title">§2 · Insurance</div>
-        <div class="route-grid">
-          <div class="route-field"><div class="rl">insurance.carrier</div><div class="rv">Coastal Insurance Group</div></div>
-          <div class="route-field"><div class="rl">insurance.claim_number</div><div class="rv">WC-2026-084431</div></div>
-          <div class="route-field"><div class="rl">insurance.auth_reference</div><div class="rv" style="color:var(--purple);font-weight:800">AUTH-2026-CIG-7741 ✦ via email</div></div>
-        </div>
-      </div>
-      <div class="route-section">
-        <div class="route-section-title">§3 · Adjuster / Case Manager</div>
-        <div class="route-grid">
-          <div class="route-field"><div class="rl">adjuster.name</div><div class="rv">Maria Santos · m.santos@coastalins.com</div></div>
-          <div class="route-field"><div class="rl">case_manager</div><div class="rv">Linda Torres · l.torres@coastalins.com</div></div>
-        </div>
-      </div>
-      <div class="route-section">
-        <div class="route-section-title">§4 · Provider</div>
-        <div class="route-grid">
-          <div class="route-field"><div class="rl">provider.name / npi</div><div class="rv">Kevin Marsh, MD / 1234567890</div></div>
-          <div class="route-field"><div class="rl">provider.practice</div><div class="rv">Pacific Orthopedic Associates</div></div>
-        </div>
-      </div>
-      <div class="route-section">
-        <div class="route-section-title">§5 · Diagnosis</div>
-        <div class="route-grid">
-          <div class="route-field"><div class="rl">diagnosis.icd10_codes</div><div class="rv">S83.209A</div></div>
-          <div class="route-field"><div class="rl">diagnosis.description</div><div class="rv">Post-ACL reconstruction, right knee</div></div>
-        </div>
-      </div>
-      <div class="route-section">
-        <div class="route-section-title">§6 · Services / Prescription</div>
-        <div class="route-grid">
-          <div class="route-field"><div class="rl">services.item / hcpcs</div><div class="rv">Rollator Walker — 4-wheel, bariatric / E0143</div></div>
-          <div class="route-field"><div class="rl">prescription.specifications</div><div class="rv" style="color:var(--purple);font-weight:800">285 lb capacity, 4-wheel ✦ via call</div></div>
-          <div class="route-field"><div class="rl">prescription.signed_by / date</div><div class="rv">Kevin Marsh, MD / 2026-04-25</div></div>
-        </div>
-      </div>
-      <div class="route-section">
-        <div class="route-section-title">§9 · Scheduling</div>
-        <div class="route-grid">
-          <div class="route-field"><div class="rl">scheduling.appointment_window</div><div class="rv" style="color:var(--purple);font-weight:800">2026-05-05 · 10:00–12:00 ✦ via call</div></div>
-          <div class="route-field"><div class="rl">scheduling.transportation</div><div class="rv" style="color:var(--purple);font-weight:800">self ✦ via call</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="btn-row" style="margin-top:14px">
-      <button class="btn btn-purple" onclick="window.print()">⬇ Export Route State</button>
-      <button class="btn btn-outline" onclick="returnToBatch()">← Back to Queue</button>
-    </div>
-  </div>
-
-  <!-- ── Dynamic case walkthrough (generated for non-Holloway featured rows) ── -->
-  <div id="wt-dynamic" style="display:none"></div>
-
-</div><!-- /view-walkthrough -->
-
-</main>
-</div><!-- /layout -->
-
-<!-- Doc viewer modal -->
-<div class="doc-modal" id="doc-modal" onclick="if(event.target===this)closeDoc()">
-  <div class="doc-panel">
-    <div class="doc-panel-hdr">
-      <div class="doc-panel-title" id="doc-modal-title">Document</div>
-      <button class="doc-panel-close" onclick="closeDoc()">✕</button>
-    </div>
-    <div class="doc-panel-body" id="doc-modal-body"></div>
-  </div>
 </div>
 
-<script>
-// ── DATA ──
-const NAMES_M = ['James','Carlos','Robert','Marcus','David','Michael','Kevin','Thomas','John','William','Richard','Edward','George','Kenneth','Steven','Anthony','Donald','Mark','Paul','Andrew'];
-const NAMES_F = ['Maria','Jennifer','Patricia','Susan','Linda','Angela','Michelle','Sharon','Christine','Rebecca','Sandra','Laura','Cynthia','Diane','Helen','Barbara','Nancy','Betty','Dorothy','Carol'];
-const LAST_NAMES = ['Rodriguez','Mendez','Foster','Chen','Kim','Williams','Martinez','Johnson','Anderson','Thompson','White','Harris','Clark','Lewis','Lee','Walker','Hall','Allen','Young','Scott','Green','Adams','Baker','Gonzalez','Nelson','Carter','Mitchell','Perez','Roberts','Turner','Phillips','Campbell','Parker','Evans','Edwards','Collins','Stewart','Sanchez','Morris','Rogers','Reed','Cook','Bailey','Bell','Cooper','Richardson','Cox','Howard','Ward','Torres'];
-const DME_ITEMS = [
-  {item:'Rollator Walker',hcpcs:'E0143'},{item:'Hospital Bed',hcpcs:'E0260'},
-  {item:'CPAP Machine',hcpcs:'E0601'},{item:'Power Wheelchair',hcpcs:'K0001'},
-  {item:'Knee Brace',hcpcs:'L1820'},{item:'Back Brace',hcpcs:'L0631'},
-  {item:'Arm Sling',hcpcs:'A4570'},{item:'Shower Chair',hcpcs:'E0240'},
-  {item:'Cervical Collar',hcpcs:'L0120'},{item:'Ankle Brace',hcpcs:'L1902'},
-  {item:'Nebulizer',hcpcs:'E0570'},{item:'Compression Stocking',hcpcs:'A6531'},
-  {item:'Crutches',hcpcs:'A4570'},{item:'Transfer Bench',hcpcs:'E0244'},
-  {item:'Oxygen Concentrator',hcpcs:'E1390'},
-];
-const GAP_TYPES = ['Auth Ref','Appt Window','Transport','Language','Equip Spec','Physician NPI','ICD Code'];
+<div class="section-label" style="margin-top:20px">&#x25CB; Demos</div>
+<div class="cards-two">
 
-let _seed = 12345;
-function rng(){_seed=(_seed*1664525+1013904223)>>>0;return _seed/4294967296}
-function ri(n){return Math.floor(rng()*n)}
+  <a class='card' href='/dme-intake-demo-v2'>
+    <div class="tag tag-blue">Intake Agent Demo</div>
+    <div class="card-icon">&#x1F916;</div>
+    <div class="card-title">Context Intelligence</div>
+    <div class="card-desc">Full intake pipeline for a single referral &mdash; fax arrival to routed episode. AI reads context, detects gaps, and makes a live outbound voice call to resolve missing information.</div>
+  </a>
 
-// Generate 74 referrals (Holloway is hardcoded row 0)
-const referrals = Array.from({length:74},(_,i)=>{
-  const isMale=rng()>0.45;
-  const fn=isMale?NAMES_M[ri(NAMES_M.length)]:NAMES_F[ri(NAMES_F.length)];
-  const ln=LAST_NAMES[ri(LAST_NAMES.length)];
-  const dme=DME_ITEMS[ri(DME_ITEMS.length)];
-  const claim='WC-2026-0'+String(80000+ri(19999)).padStart(5,'0');
-  const p=rng();
-  const pri=p>0.78?'HIGH':p>0.45?'MED':'LOW';
-  const hasGaps=rng()<0.82;
-  let gapCount=0,gapList=[];
-  if(hasGaps){gapCount=1+ri(4);const avail=[...GAP_TYPES];for(let g=0;g<gapCount;g++){const idx=ri(avail.length);gapList.push(avail.splice(idx,1)[0]);}}
-  const dob=(1955+ri(45))+'-'+String(1+ri(12)).padStart(2,'0')+'-'+String(1+ri(27)).padStart(2,'0');
-  return{id:i+1,name:fn+' '+ln,dob,claim,item:dme.item,hcpcs:dme.hcpcs,pri,gaps:gapCount,gapList};
-});
+  <a class='card' href='/batch-demo'>
+    <div class="tag tag-green">Intake Agent Demo</div>
+    <div class="card-icon">&#x1F4C4;</div>
+    <div class="card-title">Live Processing</div>
+    <div class="card-desc">Watch AI read 75 real referral PDFs live &mdash; 225 pages extracted, gaps detected, and routes assigned in real time in front of your audience.</div>
+  </a>
 
-// ── VOICE INTAKE CASES ──
-const VOICE_CASES=[
-  {
-    vid:'v1',name:'Teresa Nguyen',dob:'1981-04-12',claim:'WC-2026-081923',
-    item:'Knee Brace',hcpcs:'L1820',pri:'MED',gaps:1,gapList:['Auth Ref'],
-    carrier:'Pacific Mutual WC',
-    cm:{name:'Rachel Kim',email:'r.kim@pacmutual.com',phone:'310-555-0244'},
-    prov:{name:'Aisha Patel, MD',npi:'8765432109',practice:'South Bay Orthopedics'},
-    icd:{code:'M23.201',desc:'Derangement of medial meniscus, right knee'},
-    duration:'1:47',
-    transcript:[
-      {spk:'agent',text:"Thank you for calling DME Intake. I'm Aria — ready to capture your referral. Patient name?"},
-      {spk:'cm',text:"Hi, Rachel Kim from Pacific Mutual. Patient is Teresa Nguyen, DOB April 12, 1981.",cap:true},
-      {spk:'agent',text:"Teresa Nguyen, 04/12/1981. Claim number?"},
-      {spk:'cm',text:"WC-2026-081923.",cap:true},
-      {spk:'agent',text:"DME being requested?"},
-      {spk:'cm',text:"Knee brace, L1820. Right medial meniscus derangement.",cap:true},
-      {spk:'agent',text:"Delivery address?"},
-      {spk:'cm',text:"4821 Maple Avenue, Torrance, CA 90503.",cap:true},
-      {spk:'agent',text:"Appointment preference?"},
-      {spk:'cm',text:"May 8th, 10 to 11 AM.",cap:true},
-      {spk:'agent',text:"Transportation needed?"},
-      {spk:'cm',text:"No, she can drive herself.",cap:true},
-      {spk:'agent',text:"Language or interpreter?"},
-      {spk:'cm',text:"English only.",cap:true},
-      {spk:'agent',text:"Authorization reference number?"},
-      {spk:'cm',text:"Oh, I don't have that in front of me right now."},
-      {spk:'agent',text:"Flagged as a gap. I'll follow up to r.kim@pacmutual.com. All other fields captured — episode WC-2026-081923 is now queued."},
-    ],
-    fields:[
-      {l:'Patient Name',v:'Teresa Nguyen'},
-      {l:'DOB',v:'04/12/1981'},
-      {l:'Claim #',v:'WC-2026-081923'},
-      {l:'DME Item',v:'Knee Brace (L1820)'},
-      {l:'Delivery',v:'4821 Maple Ave, Torrance'},
-      {l:'Appointment',v:'05/08 · 10:00–11:00 AM'},
-      {l:'Transportation',v:'Not required'},
-      {l:'Language',v:'English'},
-      {l:'Auth Ref',v:'⚠ Missing — gap flagged',highlight:true},
-    ]
-  },
-  {
-    vid:'v2',name:'Carlos Rivera',dob:'1974-09-03',claim:'WC-2026-082541',
-    item:'TENS Unit',hcpcs:'E0730',pri:'HIGH',gaps:2,gapList:['Auth Ref','Appt Window'],
-    carrier:'State Compensation Fund',
-    cm:{name:'Maria Gonzalez',email:'m.gonzalez@statecomp.com',phone:'415-555-0341'},
-    prov:{name:'Roberto Sanchez, MD',npi:'7654321098',practice:'Valley Occupational Health'},
-    icd:{code:'M54.5',desc:'Low back pain'},
-    duration:'2:03',
-    transcript:[
-      {spk:'agent',text:"DME Intake, this is Aria. Ready for your referral. Patient name?"},
-      {spk:'cm',text:"Maria Gonzalez, State Comp. Patient is Carlos Rivera, DOB September 3, 1974.",cap:true},
-      {spk:'agent',text:"Carlos Rivera, 09/03/1974. Claim number?"},
-      {spk:'cm',text:"WC-2026-082541.",cap:true},
-      {spk:'agent',text:"Equipment requested?"},
-      {spk:'cm',text:"TENS unit, E0730. Chronic low back pain.",cap:true},
-      {spk:'agent',text:"Delivery address?"},
-      {spk:'cm',text:"2234 Sunset Boulevard, Los Angeles, CA 90026.",cap:true},
-      {spk:'agent',text:"Transportation needed?"},
-      {spk:'cm',text:"Yes, he'll need a ride.",cap:true},
-      {spk:'agent',text:"Language or interpreter?"},
-      {spk:'cm',text:"Spanish interpreter please.",cap:true},
-      {spk:'agent',text:"Authorization reference number?"},
-      {spk:'cm',text:"Haven't received it from claims yet."},
-      {spk:'agent',text:"Gap one flagged. Preferred appointment window?"},
-      {spk:'cm',text:"Patient hasn't confirmed yet — I'm not sure."},
-      {spk:'agent',text:"Gap two flagged. I'll follow up to m.gonzalez@statecomp.com for both items. Episode WC-2026-082541 queued with 2 gaps."},
-    ],
-    fields:[
-      {l:'Patient Name',v:'Carlos Rivera'},
-      {l:'DOB',v:'09/03/1974'},
-      {l:'Claim #',v:'WC-2026-082541'},
-      {l:'DME Item',v:'TENS Unit (E0730)'},
-      {l:'Delivery',v:'2234 Sunset Blvd, LA'},
-      {l:'Transportation',v:'Required'},
-      {l:'Language',v:'Spanish (interpreter)'},
-      {l:'Auth Ref',v:'⚠ Missing — gap flagged',highlight:true},
-      {l:'Appointment',v:'⚠ Not confirmed — gap flagged',highlight:true},
-    ]
-  },
-  {
-    vid:'v3',name:'Sandra Mitchell',dob:'1968-12-07',claim:'WC-2026-083174',
-    item:'Hospital Bed',hcpcs:'E0255',pri:'HIGH',gaps:3,gapList:['Auth Ref','Equip Spec','Language'],
-    carrier:'Liberty Mutual WC',
-    cm:{name:'Thomas Bradley',email:'t.bradley@libertymutual.com',phone:'818-555-0377'},
-    prov:{name:'Mei Chen, MD',npi:'6543210987',practice:'Eastside Rehab & Pain'},
-    icd:{code:'S32.001A',desc:'Fracture of unspecified part of sacrum, initial encounter'},
-    duration:'2:18',
-    transcript:[
-      {spk:'agent',text:"DME Intake, Aria speaking. How can I help?"},
-      {spk:'cm',text:"Thomas Bradley, Liberty Mutual. Referral for Sandra Mitchell, DOB December 7, 1968.",cap:true},
-      {spk:'agent',text:"Sandra Mitchell, 12/07/1968. Claim number?"},
-      {spk:'cm',text:"WC-2026-083174.",cap:true},
-      {spk:'agent',text:"DME requested?"},
-      {spk:'cm',text:"Hospital bed, E0255. Sacral fracture — she can't use a standard bed.",cap:true},
-      {spk:'agent',text:"Any bed specifications — semi-electric, full-electric, trapeze bar?"},
-      {spk:'cm',text:"I'd have to check with the physician on that."},
-      {spk:'agent',text:"Flagging equipment specification as a gap. Delivery address?"},
-      {spk:'cm',text:"817 Birchwood Drive, Pasadena, CA 91103.",cap:true},
-      {spk:'agent',text:"Transportation needed?"},
-      {spk:'cm',text:"No, it's a home delivery.",cap:true},
-      {spk:'agent',text:"Patient's primary language?"},
-      {spk:'cm',text:"I'm not sure, actually."},
-      {spk:'agent',text:"Gap three flagged. Auth reference number?"},
-      {spk:'cm',text:"Don't have it yet."},
-      {spk:'agent',text:"Three gaps logged: auth ref, equip spec, and language. Sending all to t.bradley@libertymutual.com. Episode WC-2026-083174 queued."},
-    ],
-    fields:[
-      {l:'Patient Name',v:'Sandra Mitchell'},
-      {l:'DOB',v:'12/07/1968'},
-      {l:'Claim #',v:'WC-2026-083174'},
-      {l:'DME Item',v:'Hospital Bed (E0255)'},
-      {l:'Delivery',v:'817 Birchwood Dr, Pasadena'},
-      {l:'Transportation',v:'Not required'},
-      {l:'Equip Spec',v:'⚠ Unconfirmed — gap flagged',highlight:true},
-      {l:'Auth Ref',v:'⚠ Missing — gap flagged',highlight:true},
-      {l:'Language',v:'⚠ Unknown — gap flagged',highlight:true},
-    ]
-  },
-];
+  <a class='card' href='/batch-demo?mode=scale'>
+    <div class="tag tag-purple">Intake Agent Demo</div>
+    <div class="card-icon">&#x26A1;</div>
+    <div class="card-title">Scale Processing</div>
+    <div class="card-desc">Pre-run results from 3,500 referral packets &mdash; gap detection, priority scoring, and route assignment across a full Monday morning intake queue.</div>
+  </a>
 
-// ── RENDER ──
-function renderQueue(){
-  const tbody=document.getElementById('queue-tbody');
-  // Holloway row first
-  const holRow=`<tr id="qr-0" class="holloway-row">
-    <td style="width:150px"><div style="font-weight:700;font-size:11px">James Holloway ★</div><div style="font-size:9.5px;color:var(--gray)">DOB: 1978-03-14</div></td>
-    <td style="width:120px;color:var(--gray);font-size:10.5px">WC-2026-084431</td>
-    <td style="width:150px"><div style="font-size:11px;font-weight:600">Rollator Walker</div><div style="font-size:9.5px;color:var(--gray)">E0143</div></td>
-    <td style="width:55px;text-align:center"><span class="ch-fax">fax</span></td>
-    <td style="width:70px;text-align:center" id="qp-0">—</td>
-    <td style="width:130px;text-align:center" id="qs-0"><span class="s-queued">⏳ Queued</span></td>
-    <td style="width:65px;text-align:center" id="qg-0">—</td>
-    <td style="width:100px;text-align:center" id="qo-0">—</td>
-  </tr>`;
-  const voiceRows=VOICE_CASES.map(vc=>`
-    <tr id="qr-${vc.vid}">
-      <td style="width:150px"><div style="font-weight:700;font-size:11px">${vc.name}</div><div style="font-size:9.5px;color:var(--gray)">DOB: ${vc.dob}</div></td>
-      <td style="width:120px;color:var(--gray);font-size:10.5px">${vc.claim}</td>
-      <td style="width:150px"><div style="font-size:11px;font-weight:600">${vc.item}</div><div style="font-size:9.5px;color:var(--gray)">${vc.hcpcs}</div></td>
-      <td style="width:55px;text-align:center"><span class="ch-voice">📞 voice</span></td>
-      <td style="width:70px;text-align:center" id="qp-${vc.vid}">—</td>
-      <td style="width:130px;text-align:center" id="qs-${vc.vid}"><span class="s-queued">⏳ Queued</span></td>
-      <td style="width:65px;text-align:center" id="qg-${vc.vid}">—</td>
-      <td style="width:100px;text-align:center" id="qo-${vc.vid}">—</td>
-    </tr>`).join('');
-  const otherRows=referrals.map(r=>`
-    <tr id="qr-${r.id}">
-      <td style="width:150px"><div style="font-weight:700;font-size:11px">${r.name}</div><div style="font-size:9.5px;color:var(--gray)">DOB: ${r.dob}</div></td>
-      <td style="width:120px;color:var(--gray);font-size:10.5px">${r.claim}</td>
-      <td style="width:150px"><div style="font-size:11px;font-weight:600">${r.item}</div><div style="font-size:9.5px;color:var(--gray)">${r.hcpcs}</div></td>
-      <td style="width:55px;text-align:center"><span class="ch-fax">fax</span></td>
-      <td style="width:70px;text-align:center" id="qp-${r.id}">—</td>
-      <td style="width:130px;text-align:center" id="qs-${r.id}"><span class="s-queued">⏳ Queued</span></td>
-      <td style="width:65px;text-align:center" id="qg-${r.id}">—</td>
-      <td style="width:100px;text-align:center" id="qo-${r.id}">—</td>
-    </tr>`).join('');
-  tbody.innerHTML=holRow+voiceRows+otherRows;
-}
-renderQueue();
-
-// ── PROCESSING ──
-let processing=false;
-let totalGapsAll=0,routedCount=0,outreachCount=0,pagesRead=0;
-
-function showScaleProjection(){
-    document.getElementById('scale-callout').classList.add('visible');
-  document.getElementById('scale-callout').scrollIntoView({behavior:'smooth',block:'center'});
-  document.getElementById('reset-btn').style.display='inline-block';
-}
-
-function startProcessing(){
-  if(processing)return;
-  processing=true;
-    document.getElementById('run-btn').disabled=true;
-  document.getElementById('reset-btn').style.display='inline-block';
-  document.getElementById('live-status-text').textContent='AI reading referral packages...';
-  document.getElementById('sb-status-dot').style.background='#22c55e';
-  document.getElementById('sb-status-text').textContent='Processing live...';
-  document.getElementById('sb-status-dot').style.animation='pulse 1.2s infinite';
-
-  // Holloway first — 2.5 seconds (special treatment)
-  const HOL_DURATION=2500;
-  const OTHERS_DURATION=22500;
-  const STEP=OTHERS_DURATION/74;
-
-  // Process Holloway
-  const holRow=document.getElementById('qr-0');
-  holRow.classList.add('processing');
-  document.getElementById('qs-0').innerHTML='<span class="s-reading">Reading…</span>';
-  document.getElementById('sb-proc').textContent=1;
-  document.getElementById('sb-queued').textContent=74;
-  pagesRead+=3;
-  document.getElementById('sb-pages').textContent=pagesRead;
-  document.getElementById('sbs-pages').textContent=pagesRead;
-  updateProgress(2,'Reading James Holloway — Rollator Walker');
-  holRow.scrollIntoView({block:'nearest',behavior:'smooth'});
-
-  setTimeout(()=>{
-    holRow.classList.remove('processing');
-    holRow.classList.add('done-gaps');
-    document.getElementById('qp-0').innerHTML='<span class="pri-badge pri-HIGH">HIGH</span>';
-    document.getElementById('qs-0').innerHTML='<span class="s-gaps">⚠ 5 Gaps</span>';
-    document.getElementById('qg-0').innerHTML='<span class="gap-badge">5</span>';
-    totalGapsAll+=5;
-    document.getElementById('sb-gaps').textContent=totalGapsAll;
-    document.getElementById('sbs-gaps').textContent=totalGapsAll;
-    document.getElementById('sb-proc').textContent=0;
-  },HOL_DURATION);
-
-  // Process 3 voice rows right after Holloway (quick — transcription)
-  VOICE_CASES.forEach((vc,i)=>{
-    const tStart=HOL_DURATION+i*450;
-    const tDone=tStart+380;
-    setTimeout(()=>{
-      const vrow=document.getElementById('qr-'+vc.vid);
-      if(!vrow)return;
-      vrow.classList.add('processing');
-      document.getElementById('qs-'+vc.vid).innerHTML='<span class="s-reading" style="color:#15803d;background:#f0fdf4;border-color:#86efac">Transcribing…</span>';
-      document.getElementById('sb-proc').textContent=1;
-      pagesRead+=1;
-      document.getElementById('sb-pages').textContent=pagesRead;
-      document.getElementById('sbs-pages').textContent=pagesRead;
-      updateProgress((tStart/25000)*90,'Transcribing '+vc.name+' — '+vc.item);
-      vrow.scrollIntoView({block:'nearest',behavior:'smooth'});
-    },tStart);
-    setTimeout(()=>{
-      const vrow=document.getElementById('qr-'+vc.vid);
-      if(!vrow)return;
-      vrow.classList.remove('processing');
-      document.getElementById('qp-'+vc.vid).innerHTML='<span class="pri-badge pri-'+vc.pri+'">'+vc.pri+'</span>';
-      if(vc.gaps===0){
-        vrow.classList.add('done-routed');
-        document.getElementById('qs-'+vc.vid).innerHTML='<span class="s-routed">✅ Routed</span>';
-        document.getElementById('qg-'+vc.vid).innerHTML='<span class="gap-badge zero">0</span>';
-        routedCount++;document.getElementById('sb-routed').textContent=routedCount;document.getElementById('sbs-routed').textContent=routedCount;
-      }else{
-        vrow.classList.add('done-gaps');
-        document.getElementById('qs-'+vc.vid).innerHTML='<span class="s-gaps">⚠ '+vc.gaps+' Gap'+(vc.gaps>1?'s':'')+'</span>';
-        document.getElementById('qg-'+vc.vid).innerHTML='<span class="gap-badge">'+vc.gaps+'</span>';
-        totalGapsAll+=vc.gaps;document.getElementById('sb-gaps').textContent=totalGapsAll;document.getElementById('sbs-gaps').textContent=totalGapsAll;
-      }
-      document.getElementById('sb-proc').textContent=0;
-    },tDone);
-  });
-
-  // Process other 74
-  referrals.forEach((r,i)=>{
-    const t=HOL_DURATION+(i*STEP);
-    setTimeout(()=>{
-      const row=document.getElementById('qr-'+r.id);
-      row.classList.add('processing');
-      document.getElementById('qs-'+r.id).innerHTML='<span class="s-reading">Reading…</span>';
-      document.getElementById('sb-proc').textContent=1;
-      document.getElementById('sb-queued').textContent=73-i;
-      pagesRead+=3;
-      document.getElementById('sb-pages').textContent=pagesRead;
-      document.getElementById('sbs-pages').textContent=pagesRead;
-      updateProgress((HOL_DURATION+(i/74)*OTHERS_DURATION)/25000*90,'Reading '+r.name+' — '+r.item);
-      row.scrollIntoView({block:'nearest',behavior:'smooth'});
-    },t);
-    setTimeout(()=>{
-      const row=document.getElementById('qr-'+r.id);
-      row.classList.remove('processing');
-      document.getElementById('qp-'+r.id).innerHTML='<span class="pri-badge pri-'+r.pri+'">'+r.pri+'</span>';
-      if(r.gaps===0){
-        row.classList.add('done-routed');
-        document.getElementById('qs-'+r.id).innerHTML='<span class="s-routed">✅ Routed</span>';
-        document.getElementById('qg-'+r.id).innerHTML='<span class="gap-badge zero">0</span>';
-        routedCount++;
-        document.getElementById('sb-routed').textContent=routedCount;
-        document.getElementById('sbs-routed').textContent=routedCount;
-      }else{
-        row.classList.add('done-gaps');
-        document.getElementById('qs-'+r.id).innerHTML='<span class="s-gaps">⚠ Gaps</span>';
-        document.getElementById('qg-'+r.id).innerHTML='<span class="gap-badge">'+r.gaps+'</span>';
-        totalGapsAll+=r.gaps;
-        document.getElementById('sb-gaps').textContent=totalGapsAll;
-        document.getElementById('sbs-gaps').textContent=totalGapsAll;
-      }
-      document.getElementById('sb-proc').textContent=0;
-    },t+STEP*0.85);
-  });
-
-  // After all processed
-  setTimeout(()=>{
-    updateProgress(93,'Processing complete — dispatching digital outreach...');
-    document.getElementById('live-status-text').textContent='📧 Sending digital outreach for all referrals with gaps...';
-    sendOutreach(STEP);
-  },HOL_DURATION+OTHERS_DURATION+400);
-}
-
-function sendOutreach(STEP){
-  // Holloway outreach first
-  setTimeout(()=>{
-    document.getElementById('qo-0').innerHTML='<span class="outreach-badge">📧 Sent</span>';
-    outreachCount++;
-    document.getElementById('sb-outreach').textContent=outreachCount;
-    document.getElementById('sbs-outreach').textContent=outreachCount;
-  },0);
-
-  // Voice row outreach
-  VOICE_CASES.filter(vc=>vc.gaps>0).forEach((vc,i)=>{
-    setTimeout(()=>{
-      const el=document.getElementById('qo-'+vc.vid);
-      if(el)el.innerHTML='<span class="outreach-badge">📧 Sent</span>';
-      document.getElementById('qr-'+vc.vid).classList.remove('done-gaps');
-      document.getElementById('qr-'+vc.vid).classList.add('outreach-sent');
-      outreachCount++;document.getElementById('sb-outreach').textContent=outreachCount;document.getElementById('sbs-outreach').textContent=outreachCount;
-    },i*200+150);
-  });
-
-  const gapRefs=referrals.filter(r=>r.gaps>0);
-  const outreachDuration=4000;
-  const outStep=outreachDuration/gapRefs.length;
-  gapRefs.forEach((r,i)=>{
-    setTimeout(()=>{
-      document.getElementById('qo-'+r.id).innerHTML='<span class="outreach-badge">📧 Sent</span>';
-      document.getElementById('qr-'+r.id).classList.remove('done-gaps');
-      document.getElementById('qr-'+r.id).classList.add('outreach-sent');
-      outreachCount++;
-      document.getElementById('sb-outreach').textContent=outreachCount;
-      document.getElementById('sbs-outreach').textContent=outreachCount;
-    },i*outStep);
-  });
-  // Holloway row outreach class
-  setTimeout(()=>{
-    document.getElementById('qr-0').classList.remove('done-gaps');
-    document.getElementById('qr-0').classList.add('outreach-sent');
-  },100);
-
-  setTimeout(()=>{
-    updateProgress(100,'✅ All 75 referrals processed · Outreach dispatched');
-    document.getElementById('live-status-text').textContent='✅ Complete';
-    document.getElementById('sb-status-dot').style.background='#60a5fa';
-    document.getElementById('sb-status-dot').style.animation='none';
-    document.getElementById('sb-status-text').textContent='Processing complete';
-    showSummary();
-    enableHolloway();
-  },outreachDuration+500);
-}
-
-function enableHolloway(){
-  const row=document.getElementById('qr-0');
-  row.classList.add('holloway-ready');
-  row.onclick=openHolloway;
-  setTimeout(()=>row.scrollIntoView({behavior:'smooth',block:'center'}),400);
-  document.getElementById('qo-0').innerHTML='<span class="outreach-badge">📧 Sent</span>';
-  document.getElementById('qs-0').innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:2px 7px;border-radius:20px">⚡ 5 Gaps · Open</span>';
-  // Swap hub info for scale card in sidebar
-  document.getElementById('sb-hub-info').style.display='none';
-  document.getElementById('scale-card').style.display='block';
-  document.getElementById('holloway-hint').style.display='block';
-  // Show scale callout in main
-  document.getElementById('scale-callout').classList.add('visible');
-  // Enable voice rows and 4 featured rows for deep dive
-  enableVoiceRows();
-  enableFeaturedCases();
-}
-
-function showSummary(){
-  const el=document.getElementById('outreach-summary');
-  el.style.display='block';
-  document.getElementById('os-total').textContent=75;
-  document.getElementById('os-routed').textContent=routedCount;
-  document.getElementById('os-sent').textContent=outreachCount;
-  document.getElementById('os-gaps-total').textContent=totalGapsAll;
-  document.getElementById('os-timestamp').textContent='Completed '+new Date().toLocaleTimeString();
-}
-
-function updateProgress(pct,label){
-  document.getElementById('prog-fill').style.width=pct+'%';
-  document.getElementById('prog-pct').textContent=Math.round(pct)+'%';
-  if(label)document.getElementById('prog-label').textContent=label;
-}
-
-function resetDemo(){
-  processing=false;
-  totalGapsAll=0;routedCount=0;outreachCount=0;pagesRead=0;
-  _seed=12345;
-    document.getElementById('sb-hub-info').style.display='block';
-  document.getElementById('run-btn').disabled=false;
-  document.getElementById('reset-btn').style.display='none';
-  document.getElementById('live-status-text').textContent='Queue loaded — 75 referrals waiting';
-  document.getElementById('sb-status-dot').style.background='var(--gray-m)';
-  document.getElementById('sb-status-dot').style.animation='none';
-  document.getElementById('sb-status-text').textContent='75 referrals loaded';
-  updateProgress(0,'Queue ready — click Start to begin');
-  ['sb-queued','sb-proc','sb-pages','sb-routed','sb-gaps','sb-outreach'].forEach((id,i)=>document.getElementById(id).textContent=i===0?'75':'0');
-  ['sbs-pages','sbs-gaps','sbs-outreach','sbs-routed'].forEach(id=>document.getElementById(id).textContent='0');
-  document.getElementById('outreach-summary').style.display='none';
-  document.getElementById('scale-callout').classList.remove('visible');
-  document.getElementById('scale-card').style.display='none';
-  document.getElementById('holloway-hint').style.display='none';
-  currentCaseType='holloway';
-  renderQueue();
-}
-
-// ── WALKTHROUGH ──
-const wtSections=['wt-1','wt-2','wt-iq','wt-3','wt-4','wt-5','wt-6'];
-const wtStepIds=['step-1','step-2','step-iq','step-3','step-4','step-5','step-6'];
-const wtProgress=[0,17,34,51,68,85,100];
-let currentStep=0;
-
-function openHolloway(){
-  currentCaseType='holloway';
-  // Restore Holloway sections, hide dynamic
-  ['wt-1','wt-2','wt-iq','wt-3','wt-4','wt-5','wt-6'].forEach(sid=>{const el=document.getElementById(sid);if(el)el.style.display='';});
-  document.getElementById('wt-dynamic').style.display='none';
-  // Reset sidebar episode card
-  document.getElementById('wt-ep-name').textContent='James Holloway';
-  document.getElementById('wt-ep-claim').textContent='WC-2026-084431';
-  document.getElementById('wt-ep-item').textContent='Rollator Walker · E0143';
-  document.getElementById('wt-ep-status').innerHTML='<div class="status-pill incomplete"><span class="status-dot"></span>5 Gaps · Outreach</div>';
-  document.getElementById('view-batch').style.display='none';
-  document.getElementById('view-walkthrough').style.display='block';
-  document.getElementById('sb-batch-mode').style.display='none';
-  document.getElementById('sb-walkthrough-mode').style.display='block';
-  goTo(1);
-  log('Opening Holloway pipeline — WC-2026-084431');
-}
-
-function returnToBatch(){
-  // Restore Holloway sections visibility for next open
-  ['wt-1','wt-2','wt-iq','wt-3','wt-4','wt-5','wt-6'].forEach(sid=>{const el=document.getElementById(sid);if(el)el.style.display='';});
-  document.getElementById('wt-dynamic').style.display='none';
-  currentCaseType='holloway';
-  document.getElementById('view-walkthrough').style.display='none';
-  document.getElementById('view-batch').style.display='block';
-  document.getElementById('sb-walkthrough-mode').style.display='none';
-  document.getElementById('sb-batch-mode').style.display='block';
-}
-
-function goTo(n){
-  // n is 1-indexed; maps to array index n-1
-  currentStep=n;
-  wtSections.forEach((id,i)=>{
-    const el=document.getElementById(id);
-    if(el)el.classList.toggle('active',i===n-1);
-  });
-  const pct=wtProgress[n-1]||0;
-  document.getElementById('wt-progress').style.width=pct+'%';
-  // Update sidebar steps
-  wtStepIds.forEach((sid,i)=>{
-    const el=document.getElementById(sid);
-    if(!el)return;
-    el.className='step';
-    if(i===n-1)el.className='step active';
-    else if(i<n-1)el.className='step done';
-  });
-  // Update step nums for done
-  wtStepIds.forEach((sid,i)=>{
-    const el=document.getElementById(sid);
-    if(!el)return;
-    const numEl=el.querySelector('.step-num');
-    if(numEl)numEl.textContent=i<n-1?'✓':(i+1);
-  });
-  // Update status after route output
-  if(n===7){
-    document.getElementById('wt-ep-status').innerHTML='<div class="status-pill routed"><span class="status-dot"></span>ROUTED</div>';
-  }
-  // Log entry
-  const msgs=['Channel intake loaded','Normalization complete','Intelligence layer running','Completeness check — 5 gaps','Digital outreach dispatched','Voice outreach complete','Route output generated — ROUTED'];
-  log(msgs[n-1]||'Step '+n);
-  // Scroll to top
-  document.querySelector('.main').scrollTop=0;
-}
-
-function switchNormTab(n){
-  for(let i=0;i<7;i++){
-    const tp=document.getElementById('nt-'+i);
-    if(tp)tp.classList.toggle('active',i===n);
-  }
-  const tabs=document.querySelectorAll('#wt-2 .tab');
-  tabs.forEach((t,i)=>t.classList.toggle('active',i===n));
-}
-
-// ── FEATURED CASES — 4 clickable deep-dive rows ──
-const CARRIERS_D=['Pacific Mutual WC','National Indemnity','State Compensation Fund','Liberty Mutual WC','Zenith Insurance','ICW Group'];
-const ADJUSTERS_D=[
-  {name:'Robert Kim',email:'r.kim@pacmutual.com',phone:'310-555-0143'},
-  {name:'Patricia Holmes',email:'p.holmes@natindemnity.com',phone:'213-555-0187'},
-  {name:'David Wilson',email:'d.wilson@statecomp.com',phone:'415-555-0221'},
-  {name:'Nancy Lee',email:'n.lee@libertymutual.com',phone:'818-555-0164'},
-  {name:'Gary Torres',email:'g.torres@zenithins.com',phone:'714-555-0199'},
-  {name:'Sharon Patel',email:'s.patel@icwgroup.com',phone:'626-555-0118'},
-];
-const CMS_D=[
-  {name:'Sandra Park',email:'s.park@pacmutual.com'},
-  {name:'Kevin Brown',email:'k.brown@natindemnity.com'},
-  {name:'Helen Roberts',email:'h.roberts@statecomp.com'},
-  {name:'Anthony Reed',email:'a.reed@libertymutual.com'},
-  {name:'Christine Vega',email:'c.vega@zenithins.com'},
-  {name:'Laura Kim',email:'l.kim@icwgroup.com'},
-];
-const PROVS_D=[
-  {name:'James Alvarez, MD',npi:'9876543210',practice:'Valley Physical Medicine'},
-  {name:'Susan Chen, MD',npi:'2345678901',practice:'Coastal Spine Center'},
-  {name:'Thomas Garcia, MD',npi:'3456789012',practice:'Westside Rehabilitation'},
-  {name:'Michael Evans, MD',npi:'4567890123',practice:'SportsMed Partners'},
-  {name:'Diana Moss, MD',npi:'5678901234',practice:'Regional Orthopaedics'},
-  {name:'Carlos Reyes, MD',npi:'6789012345',practice:'Pacific Medical Group'},
-];
-const ICD_MAP={
-  'Rollator Walker':{code:'M79.3',desc:'Regional pain syndrome, right knee'},
-  'Hospital Bed':{code:'S32.001A',desc:'Burst fracture L1 vertebra'},
-  'CPAP Machine':{code:'G47.33',desc:'Obstructive sleep apnea (adult)'},
-  'Power Wheelchair':{code:'G35',desc:'Multiple sclerosis'},
-  'Knee Brace':{code:'M23.501',desc:'Chronic instability of right knee'},
-  'Back Brace':{code:'M51.16',desc:'L4-L5 intervertebral disc herniation'},
-  'Arm Sling':{code:'S42.201A',desc:'Fracture of upper end of humerus'},
-  'Shower Chair':{code:'Z87.39',desc:'Post-operative mobility limitation'},
-  'Cervical Collar':{code:'S13.4XXA',desc:'Sprain of cervical spine ligaments'},
-  'Ankle Brace':{code:'S93.401A',desc:'Sprain of right ankle ligaments'},
-  'Nebulizer':{code:'J45.41',desc:'Moderate persistent asthma'},
-  'Compression Stocking':{code:'I87.2',desc:'Chronic venous insufficiency'},
-  'Crutches':{code:'S82.001A',desc:'Fracture of right patella'},
-  'Transfer Bench':{code:'M54.5',desc:'Low back pain'},
-  'Oxygen Concentrator':{code:'J44.1',desc:'COPD with acute exacerbation'},
-};
-const GAP_DEFS={
-  'Auth Ref':{icon:'🔑',field:'insurance.auth_reference',sev:'hard',label:'Auth Reference',reason:'Payer requires prior auth number before equipment dispatch.'},
-  'Appt Window':{icon:'📅',field:'scheduling.appointment_window',sev:'soft',label:'Appointment Window',reason:'Needed for scheduling; does not block episode creation.'},
-  'Transport':{icon:'🚗',field:'scheduling.transportation',sev:'green',label:'Transportation',reason:'Day-before confirmation standard; no dispatch impact.'},
-  'Language':{icon:'🌐',field:'worker.language',sev:'green',label:'Language / Interpreter',reason:'Operational preference; collected on first contact.'},
-  'Equip Spec':{icon:'⚖️',field:'prescription.specifications',sev:'hard',label:'Equipment Specification',reason:'Equipment cannot be ordered without confirmed specifications.'},
-  'Physician NPI':{icon:'🩺',field:'provider.npi',sev:'hard',label:'Physician NPI',reason:'NPI required for payer authorization submission.'},
-  'ICD Code':{icon:'🧬',field:'diagnosis.icd10_codes',sev:'hard',label:'ICD-10 Conflict',reason:'Conflicting codes across documents; requires clinical validation.'},
-};
-
-let featuredRowIds=[];
-let currentCaseType='holloway';
-let currentFeaturedRef=null;
-
-function navigateStep(n){
-  if(currentCaseType==='featured'||currentCaseType==='voice')goToD(n);else goTo(n);
-}
-
-function enableVoiceRows(){
-  VOICE_CASES.forEach(vc=>{
-    const row=document.getElementById('qr-'+vc.vid);
-    if(!row)return;
-    row.style.cursor='pointer';
-    row.title='Click to explore voice intake pipeline';
-    row.onclick=(()=>{const v=vc.vid;return()=>openVoiceCase(v);})();
-    const sc=document.getElementById('qs-'+vc.vid);
-    if(sc)sc.innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#15803d;background:#f0fdf4;border:1px solid #86efac;padding:2px 7px;border-radius:20px">📞 '+vc.gaps+' Gap'+(vc.gaps>1?'s':'')+' · Open</span>';
-  });
-}
-
-function openVoiceCase(vid){
-  const vc=VOICE_CASES.find(x=>x.vid===vid);
-  if(!vc)return;
-  currentCaseType='voice';
-  const vidN=parseInt(vid.replace('v',''));
-  currentFeaturedRef={id:vid,name:vc.name,claim:vc.claim,item:vc.item,hcpcs:vc.hcpcs,gaps:vc.gaps,dob:vc.dob,pri:vc.pri,gapList:vc.gapList};
-
-  document.getElementById('view-batch').style.display='none';
-  document.getElementById('view-walkthrough').style.display='block';
-  document.getElementById('sb-batch-mode').style.display='none';
-  document.getElementById('sb-walkthrough-mode').style.display='block';
-
-  ['wt-1','wt-2','wt-iq','wt-3','wt-4','wt-5','wt-6'].forEach(sid=>{const el=document.getElementById(sid);if(el)el.style.display='none';});
-  const dyn=document.getElementById('wt-dynamic');
-  dyn.innerHTML=buildVoiceHTML(vc);
-  dyn.style.display='block';
-
-  document.getElementById('wt-ep-name').textContent=vc.name;
-  document.getElementById('wt-ep-claim').textContent=vc.claim;
-  document.getElementById('wt-ep-item').textContent=vc.item+' · '+vc.hcpcs;
-  document.getElementById('wt-ep-status').innerHTML='<div class="status-pill incomplete"><span class="status-dot"></span>'+vc.gaps+' Gap'+(vc.gaps>1?'s':'')+' · Voice intake</div>';
-
-  goToD(1);
-  log('Opening voice intake — '+vc.name+' · '+vc.claim);
-}
-
-function buildVoiceStep1HTML(vc){
-  const tLines=vc.transcript.map(t=>{
-    const txt=t.cap?'<span class="captured">'+t.text+'</span>':t.text;
-    return '<div class="t-line"><span class="t-speaker '+(t.spk==='agent'?'agent':'cm')+'">'+(t.spk==='agent'?'AGENT':'CM')+'</span><span class="t-text">'+txt+'</span></div>';
-  }).join('');
-  const fRows=vc.fields.map(f=>'<div class="norm-field" style="padding:4px 8px"><div class="nl">'+f.l+'</div><div class="nv'+(f.null?' null':'')+(f.highlight?' style="color:var(--purple);font-weight:800"':'')+'" style="font-size:11px'+(f.highlight?';color:var(--purple);font-weight:800':'')+'">'+f.v+'</div></div>').join('');
-  return `<div class="dyn-section section active" id="dyn-1">
-  <div class="page-title">Step 1 — Voice Intake</div>
-  <div class="page-sub">Inbound call on (201) 897-3854 · AI agent answered · ${vc.fields.length} fields captured · ${vc.gaps} gap${vc.gaps>1?'s':''} flagged in real time</div>
-  <div class="card" style="border:2px solid rgba(34,197,94,.4);background:linear-gradient(135deg,#f0fdf4 0%,#fff 100%)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="card-title" style="color:#15803d;margin-bottom:0">📞 Voice Channel — Inbound Call</div>
-      <div style="display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.04em"><span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block"></span>(201) 897-3854 · AI answers 24/7</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 220px;gap:12px">
-      <div class="call-box" style="margin:0">
-        <div class="call-status-row">
-          <div class="call-badge"><span class="call-dot" style="background:#f59e0b;animation:none"></span> Call complete · Referral captured</div>
-          <div class="call-timer">${vc.duration}</div>
-        </div>
-        <div class="transcript">${tLines}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div style="font-size:10px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Fields Captured — Live</div>
-        <div class="norm-grid" style="grid-template-columns:1fr;gap:4px">${fRows}</div>
-        <div style="margin-top:4px;background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:8px 10px;font-size:11px;color:#166534;font-weight:700;text-align:center">
-          ✅ Episode entered queue<br><span style="font-weight:400;font-size:10px">${vc.claim} · ${vc.fields.length} fields · ${vc.gaps} gap${vc.gaps>1?'s':''} flagged</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="btn-row"><button class="btn btn-outline" onclick="returnToBatch()">← Back to Queue</button><button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button></div>
-</div>`;
-}
-
-function buildVoiceHTML(vc){
-  const vidN=parseInt(vc.vid.replace('v',''));
-  const r={id:74+vidN,name:vc.name,dob:vc.dob,claim:vc.claim,item:vc.item,hcpcs:vc.hcpcs,pri:vc.pri,gaps:vc.gaps,gapList:vc.gapList};
-  const gapDetails=vc.gapList.map(g=>({...(GAP_DEFS[g]||{icon:'❓',field:g,sev:'hard',label:g,reason:'Review required.'}),key:g}));
-  const hardBlocks=gapDetails.filter(g=>g.sev==='hard');
-  const softBlocks=gapDetails.filter(g=>g.sev==='soft');
-  const nonBlocking=gapDetails.filter(g=>g.sev==='green');
-  const authNum='AUTH-2026-'+vc.carrier.replace(/[^A-Z]/g,'').substring(0,3)+'-'+String(5000+vidN*311).padStart(4,'0');
-  const apptDate=vc.gapList.includes('Appt Window')?'2026-05-12':'2026-05-08';
-  const allSteps=buildDynamicHTML({r,carrier:vc.carrier,adj:ADJUSTERS_D[vidN%ADJUSTERS_D.length],cm:vc.cm,prov:vc.prov,icd:vc.icd,authNum,apptDate,gapDetails,hardBlocks,softBlocks,nonBlocking});
-  const dyn2idx=allSteps.indexOf('<div class="dyn-section section" id="dyn-2">');
-  const steps2to7=dyn2idx>=0?allSteps.slice(dyn2idx):'';
-  return buildVoiceStep1HTML(vc)+'\n'+steps2to7;
-}
-
-function enableFeaturedCases(){
-  featuredRowIds=referrals.filter(r=>r.gaps>0).slice(0,4).map(r=>r.id);
-  featuredRowIds.forEach(fid=>{
-    const row=document.getElementById('qr-'+fid);
-    if(!row)return;
-    row.style.cursor='pointer';
-    row.title='Click to explore full pipeline';
-    const sc=document.getElementById('qs-'+fid);
-    if(sc){
-      const ref=referrals.find(x=>x.id===fid);
-      const gaps=ref?ref.gaps:0;
-      sc.innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:2px 7px;border-radius:20px">⚡ '+gaps+' Gaps · Open</span>';
-    }
-    row.onclick=(()=>{const id=fid;return ()=>openFeaturedCase(id);})();
-  });
-}
-
-function openFeaturedCase(id){
-  const r=referrals.find(x=>x.id===id);
-  if(!r)return;
-  currentCaseType='featured';
-  currentFeaturedRef=r;
-
-  const ci=r.id%CARRIERS_D.length;
-  const carrier=CARRIERS_D[ci];
-  const adj=ADJUSTERS_D[ci%ADJUSTERS_D.length];
-  const cm=CMS_D[ci%CMS_D.length];
-  const prov=PROVS_D[ci%PROVS_D.length];
-  const icd=ICD_MAP[r.item]||{code:'M79.3',desc:'Regional pain syndrome'};
-  const authNum='AUTH-2026-'+carrier.replace(/[^A-Z]/g,'').substring(0,3)+'-'+String(4100+r.id*41).padStart(4,'0');
-  const apptDate='2026-05-'+String(6+r.id%18).padStart(2,'0');
-  const gapDetails=r.gapList.map(g=>({...(GAP_DEFS[g]||{icon:'❓',field:g,sev:'hard',label:g,reason:'Review required.'}),key:g}));
-  const hardBlocks=gapDetails.filter(g=>g.sev==='hard');
-  const softBlocks=gapDetails.filter(g=>g.sev==='soft');
-  const nonBlocking=gapDetails.filter(g=>g.sev==='green');
-
-  // Switch views
-  document.getElementById('view-batch').style.display='none';
-  document.getElementById('view-walkthrough').style.display='block';
-  document.getElementById('sb-batch-mode').style.display='none';
-  document.getElementById('sb-walkthrough-mode').style.display='block';
-
-  // Hide Holloway sections, show dynamic
-  ['wt-1','wt-2','wt-iq','wt-3','wt-4','wt-5','wt-6'].forEach(sid=>{
-    const el=document.getElementById(sid);if(el)el.style.display='none';
-  });
-  const dyn=document.getElementById('wt-dynamic');
-  dyn.innerHTML=buildDynamicHTML({r,carrier,adj,cm,prov,icd,authNum,apptDate,gapDetails,hardBlocks,softBlocks,nonBlocking});
-  dyn.style.display='block';
-
-  // Sidebar episode card
-  document.getElementById('wt-ep-name').textContent=r.name;
-  document.getElementById('wt-ep-claim').textContent=r.claim;
-  document.getElementById('wt-ep-item').textContent=r.item+' · '+r.hcpcs;
-  document.getElementById('wt-ep-status').innerHTML='<div class="status-pill incomplete"><span class="status-dot"></span>'+r.gaps+' Gaps · Outreach</div>';
-
-  goToD(1);
-  log('Opening pipeline — '+r.name+' · '+r.claim);
-}
-
-function goToD(n){
-  currentStep=n;
-  const dyn=document.getElementById('wt-dynamic');
-  dyn.querySelectorAll('.dyn-section').forEach((el,i)=>el.classList.toggle('active',i===n-1));
-  document.getElementById('wt-progress').style.width=(wtProgress[n-1]||0)+'%';
-  wtStepIds.forEach((sid,i)=>{
-    const el=document.getElementById(sid);
-    if(!el)return;
-    el.className=i===n-1?'step active':i<n-1?'step done':'step';
-    const numEl=el.querySelector('.step-num');
-    if(numEl)numEl.textContent=i<n-1?'✓':(i+1);
-  });
-  if(n===7)document.getElementById('wt-ep-status').innerHTML='<div class="status-pill routed"><span class="status-dot"></span>ROUTED</div>';
-  const gapN=currentFeaturedRef?currentFeaturedRef.gaps:0;
-  const msgs=['Channel intake loaded','Normalization complete','Intelligence layer running','Completeness check — '+gapN+' gaps','Digital outreach dispatched','Resolution complete','Route output generated — ROUTED'];
-  log(msgs[n-1]||'Step '+n);
-  document.querySelector('.main').scrollTop=0;
-}
-
-function buildDynamicHTML(d){
-  const {r,carrier,adj,cm,prov,icd,authNum,apptDate,gapDetails,hardBlocks,softBlocks,nonBlocking}=d;
-  const presentFields=25-r.gaps;
-  const priColor=r.pri==='HIGH'?'var(--red)':r.pri==='MED'?'var(--yellow)':'var(--green)';
-  const priScore=r.pri==='HIGH'?8:r.pri==='MED'?5:3;
-  const clinRisk=r.pri==='HIGH'?4:r.pri==='MED'?3:2;
-  const sevColor=sev=>sev==='hard'?'red':sev==='soft'?'yellow':'green';
-  const sevBadge=sev=>sev==='hard'?'📧 OUTREACH SENT':sev==='soft'?'📅 SCHED. HOLD':'✓ ROUTING AHEAD';
-  const sevBadgeBg=sev=>sev==='hard'?'#dc2626':sev==='soft'?'#d97706':'#16a34a';
-  const sevTextColor=sev=>sev==='hard'?'#991b1b':sev==='soft'?'#92400e':'#166534';
-
-  function gapRow(g){
-    const sc=sevColor(g.sev);
-    return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:9px 11px;background:var(--${sc}-l);border:1px solid var(--${sc}-m);border-radius:8px;font-size:12px">
-      <div><b>${g.icon} ${g.label}</b><div style="font-size:10px;color:var(--gray);margin-top:1px">${g.field}</div></div>
-      <div style="color:${sevTextColor(g.sev)}">${g.reason}</div>
-      <div style="text-align:right"><span style="font-size:10px;font-weight:800;background:${sevBadgeBg(g.sev)};color:white;padding:3px 9px;border-radius:10px">${sevBadge(g.sev)}</span></div>
-    </div>`;
-  }
-
-  const missingFieldRows=gapDetails.map(g=>`<div class="field missing"><div class="f-label">${g.field}</div><div class="f-val">Not found</div><span class="f-badge fb-missing">Missing</span></div>`).join('');
-  const gapEmailLines=gapDetails.map(g=>`  <span class="hl">${g.icon} ${g.label}</span>`).join('\n');
-  const hasVoice=hardBlocks.length>1;
-  const callItems=gapDetails.filter(g=>g.key!=='Auth Ref');
-
-  return `
-<div class="dyn-section section active" id="dyn-1">
-  <div class="page-title">Step 1 — Channel Intake</div>
-  <div class="page-sub">Extracting structured fields from 3 documents · 4 pages</div>
-  <div class="card">
-    <div class="card-title">📂 Referral Package — ${r.name} · ${r.claim}</div>
-    <div class="doc-list">
-      <div class="doc-item received"><div class="di-icon">📄</div><div class="di-name">${r.claim}_ReferralForm.pdf</div><div class="di-tag">Fax · Image PDF · 2 pages</div><div class="di-status">✓ Received</div></div>
-      <div class="doc-item received"><div class="di-icon">🩺</div><div class="di-name">${r.claim}_ClinicalNotes.pdf</div><div class="di-tag">Physician Notes · 1 page</div><div class="di-status">✓ Received</div></div>
-      <div class="doc-item received"><div class="di-icon">💊</div><div class="di-name">${r.claim}_RxPrescription.pdf</div><div class="di-tag">Prescription · 1 page</div><div class="di-status">✓ Received</div></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">🔍 Extraction Results</div>
-    <div class="field-grid">
-      <div class="field present"><div class="f-label">worker.name</div><div class="f-val">${r.name}</div><span class="f-badge fb-src">Referral Form</span></div>
-      <div class="field present"><div class="f-label">worker.dob</div><div class="f-val">${r.dob}</div><span class="f-badge fb-src">Referral Form</span></div>
-      <div class="field present"><div class="f-label">insurance.carrier</div><div class="f-val">${carrier}</div><span class="f-badge fb-src">Referral Form</span></div>
-      <div class="field present"><div class="f-label">insurance.claim_number</div><div class="f-val">${r.claim}</div><span class="f-badge fb-src">Referral Form</span></div>
-      <div class="field present"><div class="f-label">case_manager.name / email</div><div class="f-val">${cm.name} · ${cm.email}</div><span class="f-badge fb-src">Fax Cover</span></div>
-      <div class="field present"><div class="f-label">services.item / hcpcs</div><div class="f-val">${r.item} · ${r.hcpcs}</div><span class="f-badge fb-src">Referral Form</span></div>
-      <div class="field present"><div class="f-label">diagnosis.icd10</div><div class="f-val">${icd.code} — ${icd.desc}</div><span class="f-badge fb-src">Clinical Notes</span></div>
-      <div class="field present"><div class="f-label">provider.name</div><div class="f-val">${prov.name} · ${prov.practice}</div><span class="f-badge fb-src">Clinical Notes</span></div>
-      ${missingFieldRows}
-    </div>
-  </div>
-  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button></div>
 </div>
 
-<div class="dyn-section section" id="dyn-2">
-  <div class="page-title">Step 2 — Normalization</div>
-  <div class="page-sub">Raw extracted data mapped to standard Episode Record format</div>
-  <div class="card">
-    <div class="card-title">📋 Episode Record — Normalized</div>
-    <div class="norm-grid">
-      <div class="norm-field"><div class="nl">worker.name</div><div class="nv">${r.name}</div></div>
-      <div class="norm-field"><div class="nl">worker.dob</div><div class="nv">${r.dob}</div></div>
-      <div class="norm-field"><div class="nl">insurance.carrier</div><div class="nv">${carrier}</div></div>
-      <div class="norm-field"><div class="nl">insurance.claim_number</div><div class="nv">${r.claim}</div></div>
-      <div class="norm-field"><div class="nl">insurance.auth_reference</div><div class="nv ${gapDetails.find(g=>g.key==='Auth Ref')?'null':''}">${gapDetails.find(g=>g.key==='Auth Ref')?'null':'(present)'}</div></div>
-      <div class="norm-field"><div class="nl">case_manager.name</div><div class="nv">${cm.name}</div></div>
-      <div class="norm-field"><div class="nl">case_manager.email</div><div class="nv">${cm.email}</div></div>
-      <div class="norm-field"><div class="nl">provider.name / npi</div><div class="nv">${prov.name} / ${gapDetails.find(g=>g.key==='Physician NPI')?'<span class="null">null</span>':prov.npi}</div></div>
-      <div class="norm-field"><div class="nl">diagnosis.icd10_codes</div><div class="nv">${icd.code}</div></div>
-      <div class="norm-field"><div class="nl">diagnosis.description</div><div class="nv">${icd.desc}</div></div>
-      <div class="norm-field"><div class="nl">services.item / hcpcs</div><div class="nv">${r.item} / ${r.hcpcs}</div></div>
-      <div class="norm-field"><div class="nl">scheduling.appointment_window</div><div class="nv ${gapDetails.find(g=>g.key==='Appt Window')?'null':''}">${gapDetails.find(g=>g.key==='Appt Window')?'null':'(present)'}</div></div>
-      <div class="norm-field"><div class="nl">episode.status</div><div class="nv" style="color:var(--red)">incomplete</div></div>
-    </div>
-  </div>
-  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(3)">→ Run Intelligence Layer</button></div>
+<div class="footer">
+  Live intake line &middot; <span>(201) 897-3854</span> &middot; AI answers 24/7
 </div>
 
-<div class="dyn-section section" id="dyn-3">
-  <div class="page-title">Step 3 — Intelligence Layer</div>
-  <div class="page-sub">Validate, score, fix codes, check duplicates, and determine authorization</div>
-  <div class="card">
-    <div class="card-title">🔁 Duplicate Detection</div>
-    <div class="alert alert-green" style="margin-bottom:0"><div class="alert-icon">✅</div><div>No duplicate episode found. Checked against claim <b>${r.claim}</b> and patient <b>${r.name} / ${r.dob}</b> — no existing open or routed episode matches.</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title">✅ Compliance Validation</div>
-    <div style="display:flex;flex-direction:column;gap:6px">
-      <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px"><span>✅</span><div><b>ICD-10 ${icd.code}</b> — Active code, valid format, matches injury description</div></div>
-      <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px"><span>✅</span><div><b>HCPCS ${r.hcpcs}</b> — Active code, valid, appropriate for diagnosis</div></div>
-      <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:7px;background:var(--green-l);border:1px solid var(--green-m);font-size:12px"><span>✅</span><div><b>HCPCS ↔ Diagnosis match</b> — ${r.hcpcs} clinically appropriate for ${icd.code}</div></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">🔑 Authorization Determination</div>
-    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 11px;border-radius:7px;background:var(--red-l);border:1px solid var(--red-m);font-size:12px">
-      <span>🔑</span><div><b>Prior authorization REQUIRED</b> — ${carrier} requires prior auth for HCPCS ${r.hcpcs}.${gapDetails.find(g=>g.key==='Auth Ref')?' <b>insurance.auth_reference is null</b> → added as priority gap.':' Auth reference present.'}</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">📊 Risk &amp; Urgency Score</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div style="text-align:center;padding:12px;background:var(--${r.pri==='HIGH'?'red':'yellow'}-l);border-radius:8px;border:1px solid var(--${r.pri==='HIGH'?'red':'yellow'}-m)"><div style="font-size:26px;font-weight:900;color:${priColor}">${clinRisk}</div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-top:2px">CLINICAL RISK</div></div>
-      <div style="text-align:center;padding:12px;background:var(--yellow-l);border-radius:8px;border:1px solid var(--yellow-m)"><div style="font-size:26px;font-weight:900;color:var(--yellow)">${r.gaps}</div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-top:2px">GAP COUNT</div></div>
-      <div style="text-align:center;padding:12px;background:#fdf4ff;border-radius:8px;border:1px solid var(--purple-m)"><div style="font-size:26px;font-weight:900;color:var(--purple)">${priScore}</div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-top:2px">PRIORITY SCORE</div><div style="font-size:10px;color:var(--purple);font-weight:700">${r.pri}</div></div>
-    </div>
-  </div>
-  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(4)">→ Run Completeness Check</button></div>
-</div>
-
-<div class="dyn-section section" id="dyn-4">
-  <div class="page-title">Step 4 — Completeness &amp; Gap Triage</div>
-  <div class="page-sub">AI classifies each gap by routing criticality</div>
-  <div class="alert alert-blue"><div class="alert-icon">🧠</div><div><b>${r.gaps} gap${r.gaps>1?'s':''} detected — classified by criticality.</b> ${hardBlocks.length} hard block${hardBlocks.length!==1?'s':''}, ${softBlocks.length} soft, ${nonBlocking.length} non-blocking.</div></div>
-  <div class="card">
-    <div class="card-title">✅ Present — ${presentFields} / 25 required fields</div>
-    <div style="display:flex;flex-wrap:wrap;gap:5px">
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ worker.name · dob · address</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ insurance.carrier · claim#</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ case_manager · adjuster</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ services.item · hcpcs</span>
-      <span style="font-size:11px;background:var(--green-l);color:var(--green);padding:3px 9px;border-radius:20px;font-weight:700">✓ diagnosis.icd10 · description</span>
-    </div>
-  </div>
-  ${hardBlocks.length?`<div class="card" style="border-left:4px solid var(--red);padding-left:14px"><div class="card-title" style="color:var(--red)">🔴 Hard Block${hardBlocks.length>1?'s':''} — ${hardBlocks.length} gap${hardBlocks.length>1?'s':''} · Vendor dispatch blocked</div><div style="display:flex;flex-direction:column;gap:7px">${hardBlocks.map(g=>gapRow(g)).join('')}</div></div>`:''}
-  ${softBlocks.length?`<div class="card" style="border-left:4px solid var(--yellow);padding-left:14px"><div class="card-title" style="color:var(--yellow)">🟡 Soft Block${softBlocks.length>1?'s':''} — ${softBlocks.length} gap${softBlocks.length>1?'s':''} · Scheduling hold</div><div style="display:flex;flex-direction:column;gap:7px">${softBlocks.map(g=>gapRow(g)).join('')}</div></div>`:''}
-  ${nonBlocking.length?`<div class="card" style="border-left:4px solid var(--green);padding-left:14px"><div class="card-title" style="color:var(--green)">🟢 Non-Blocking — ${nonBlocking.length} gap${nonBlocking.length>1?'s':''} · Routing proceeds</div><div style="display:flex;flex-direction:column;gap:7px">${nonBlocking.map(g=>gapRow(g)).join('')}</div></div>`:''}
-  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(5)">→ Send Digital Outreach</button></div>
-</div>
-
-<div class="dyn-section section" id="dyn-5">
-  <div class="page-title">Step 5 — Digital Outreach</div>
-  <div class="page-sub">Agent routes outreach to the case manager for all gaps</div>
-  <div class="card">
-    <div class="card-title">📧 Outreach Email — Case Manager · ${r.gaps} Gap${r.gaps>1?'s':''}</div>
-    <div class="email-box">
-      <div class="email-hdr">
-        <div class="email-row"><span class="ek">To:</span><span>${cm.name} &lt;${cm.email}&gt;</span></div>
-        <div class="email-row"><span class="ek">Subj:</span><span><b>Action Required — Missing Info · Referral [${r.claim}]</b></span></div>
-        <div class="email-row"><span class="ek">Sent:</span><span>2026-05-01 09:15 · via email</span></div>
-      </div>
-      <div class="email-body">Hi ${cm.name.split(' ')[0]},
-
-Thank you for the referral for <span class="hl">${r.name}</span> (DOB: ${r.dob}, Claim: <span class="hl">${r.claim}</span>).
-
-To complete coordination, we need:
-
-${gapEmailLines}
-
-Please reply within <b>24 business hours</b>. If we don't hear back, our coordination agent will follow up by phone.
-
-Thank you,
-Intake Coordination Agent</div>
-    </div>
-  </div>
-  <div class="alert alert-${hasVoice?'yellow':'green'}">
-    <div class="alert-icon">${hasVoice?'⏱':'✅'}</div>
-    <div>${hasVoice?'No response after <b>24 business hours</b>. Escalating to outbound voice call for remaining gaps.':'<b>Auth reference confirmed via email reply</b> — '+authNum+'. All gaps resolved digitally.'}</div>
-  </div>
-  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(6)">→ ${hasVoice?'Place Outbound Call':'View Resolution'}</button></div>
-</div>
-
-<div class="dyn-section section" id="dyn-6">
-  <div class="page-title">Step 6 — ${hasVoice?'Voice Outreach':'Resolution'}</div>
-  <div class="page-sub">${hasVoice?'No email response — agent places outbound AI call':'All gaps resolved digitally — no voice call required'}</div>
-  ${hasVoice?`<div class="card"><div class="card-title">📞 Outbound Call — ${cm.name} · ${adj.phone}</div><div class="call-box"><div class="call-status-row"><div class="call-badge"><span class="call-dot" style="background:#f59e0b;animation:none"></span> Call complete</div><div class="call-timer">01:${String(12+r.id%20).padStart(2,'0')}</div></div><div class="transcript"><div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Hi, this is the Intake Coordination Agent calling for ${cm.name}. Following up on the referral for ${r.name}, claim ${r.claim}. Just need a couple of quick confirmations — do you have a moment?</span></div><div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Yes, go ahead.</span></div>${callItems.map(g=>`<div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Can you confirm the ${g.label.toLowerCase()} for this referral?</span></div><div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">${g.key==='Appt Window'?apptDate+', 10:00–12:00':g.key==='Transport'?'No transport needed, patient will self-transport':g.key==='Language'?'English, no interpreter needed':g.key==='Equip Spec'?'Standard specification confirmed':g.key==='Physician NPI'?prov.npi:'Confirmed.'}</span></span></div>`).join('')}<div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">All confirmed — thank you. Your referral is now complete. We'll coordinate delivery and send a confirmation shortly.</span></div></div></div></div>`:`<div class="alert alert-green"><div class="alert-icon">✅</div><div>Auth <b>${authNum}</b> confirmed via email reply. All gaps resolved digitally — fastest resolution path, no voice call required.</div></div>`}
-  <div class="alert alert-green"><div class="alert-icon">✅</div><div>All ${r.gaps} gap${r.gaps>1?'s':''} resolved. Episode Record updated and complete.</div></div>
-  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(7)">→ Generate Route Output</button></div>
-</div>
-
-<div class="dyn-section section" id="dyn-7">
-  <div class="page-title">Step 7 — Route State Output</div>
-  <div class="page-sub">Episode complete. Normalized record locked and dispatched.</div>
-  <div class="alert alert-green"><div class="alert-icon">✅</div><div>All gaps resolved. Episode fully routed. Saved to <b>output/dme-intake-${r.claim}-20260501.md</b></div></div>
-  <div class="route-card fade-in">
-    <div class="route-hdr">
-      <div><div class="route-title">Referral — Route State</div><div class="route-ts">EP-20260501-${r.claim.replace(/-/g,'')} · Completed: 2026-05-01 ${String(10+r.id%3).padStart(2,'0')}:${String(10+r.id%45).padStart(2,'0')}</div></div>
-      <div class="status-pill routed"><span class="status-dot"></span>ROUTED</div>
-    </div>
-    <div class="route-section"><div class="route-section-title">§1 · Worker</div><div class="route-grid">
-      <div class="route-field"><div class="rl">worker.name</div><div class="rv">${r.name}</div></div>
-      <div class="route-field"><div class="rl">worker.dob</div><div class="rv">${r.dob}</div></div>
-    </div></div>
-    <div class="route-section"><div class="route-section-title">§2 · Insurance</div><div class="route-grid">
-      <div class="route-field"><div class="rl">insurance.carrier</div><div class="rv">${carrier}</div></div>
-      <div class="route-field"><div class="rl">insurance.claim_number</div><div class="rv">${r.claim}</div></div>
-      <div class="route-field"><div class="rl">insurance.auth_reference</div><div class="rv" style="color:var(--purple);font-weight:800">${authNum} ✦ via email</div></div>
-    </div></div>
-    <div class="route-section"><div class="route-section-title">§3 · Case Manager</div><div class="route-grid">
-      <div class="route-field"><div class="rl">case_manager</div><div class="rv">${cm.name} · ${cm.email}</div></div>
-    </div></div>
-    <div class="route-section"><div class="route-section-title">§4 · Provider</div><div class="route-grid">
-      <div class="route-field"><div class="rl">provider.name / npi</div><div class="rv">${prov.name} / ${prov.npi}</div></div>
-      <div class="route-field"><div class="rl">provider.practice</div><div class="rv">${prov.practice}</div></div>
-    </div></div>
-    <div class="route-section"><div class="route-section-title">§5 · Diagnosis</div><div class="route-grid">
-      <div class="route-field"><div class="rl">diagnosis.icd10_codes</div><div class="rv">${icd.code}</div></div>
-      <div class="route-field"><div class="rl">diagnosis.description</div><div class="rv">${icd.desc}</div></div>
-    </div></div>
-    <div class="route-section"><div class="route-section-title">§6 · Services</div><div class="route-grid">
-      <div class="route-field"><div class="rl">services.item / hcpcs</div><div class="rv">${r.item} / ${r.hcpcs}</div></div>
-    </div></div>
-    <div class="route-section"><div class="route-section-title">§9 · Scheduling</div><div class="route-grid">
-      <div class="route-field"><div class="rl">scheduling.appointment_window</div><div class="rv" style="color:var(--purple);font-weight:800">${apptDate} · 10:00–12:00 ✦ confirmed</div></div>
-      <div class="route-field"><div class="rl">scheduling.transportation</div><div class="rv" style="color:var(--purple);font-weight:800">self ✦ confirmed</div></div>
-    </div></div>
-  </div>
-  <div class="btn-row" style="margin-top:14px">
-    <button class="btn btn-outline" onclick="returnToBatch()">← Back to Queue</button>
-  </div>
-</div>
-`;
-}
-
-// ── DOCUMENT VIEWER ──
-const docDefs = [
-  { title: '📄 Referral Form — WC-2026-084431_ReferralForm.pdf', html: `
-    <div class="raw-doc">
-      <div class="rd-header"><div class="rd-org">COASTAL INSURANCE GROUP</div><div class="rd-title">WORKERS' COMPENSATION — DME REFERRAL FORM</div><div style="font-size:10px;margin-top:4px;color:#888">Date: 04/28/2026 &nbsp;·&nbsp; Fax: (201) 555-8821 &nbsp;·&nbsp; Claim: WC-2026-084431</div></div>
-      <div class="rd-section"><div class="rd-sec-title">Patient Information</div>
-        <div class="rd-row"><span class="rd-label">Patient Name:</span><span class="rd-val rd-handwritten">James Holloway</span></div>
-        <div class="rd-row"><span class="rd-label">Date of Birth:</span><span class="rd-val rd-handwritten">03/14/1978</span></div>
-        <div class="rd-row"><span class="rd-label">Address:</span><span class="rd-val rd-handwritten">4821 Elmwood Dr, Anaheim CA 92801</span></div>
-        <div class="rd-row"><span class="rd-label">Language:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-      </div>
-      <div class="rd-section"><div class="rd-sec-title">Insurance / Authorization</div>
-        <div class="rd-row"><span class="rd-label">Carrier:</span><span class="rd-val">Coastal Insurance Group</span></div>
-        <div class="rd-row"><span class="rd-label">Claim #:</span><span class="rd-val">WC-2026-084431</span></div>
-        <div class="rd-row"><span class="rd-label">Auth Reference #:</span><span class="rd-blank" style="color:#dc2626;font-style:italic">&nbsp;NOT PROVIDED</span></div>
-        <div class="rd-row"><span class="rd-label">Adjuster:</span><span class="rd-val">Maria Santos &nbsp;·&nbsp; 714-555-0192</span></div>
-      </div>
-      <div class="rd-section"><div class="rd-sec-title">Equipment Ordered</div>
-        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val rd-handwritten">Rollator Walker, 4-Wheel</span></div>
-        <div class="rd-row"><span class="rd-label">HCPCS Code:</span><span class="rd-val">e0143</span></div>
-        <div class="rd-row"><span class="rd-label">Specifications:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-        <div class="rd-row"><span class="rd-label">Delivery Address:</span><span class="rd-val rd-handwritten">4821 Elmwood Dr, Anaheim CA</span></div>
-      </div>
-      <div class="rd-section"><div class="rd-sec-title">Diagnosis</div>
-        <div class="rd-row"><span class="rd-label">ICD-10:</span><span class="rd-val" style="color:#dc2626">M23.611</span><span style="font-size:10px;color:#888;margin-left:8px">Tear of ACL, right knee</span></div>
-        <div class="rd-row"><span class="rd-label">Appointment:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-        <div class="rd-row"><span class="rd-label">Transportation:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-      </div>
-      <div style="margin-top:10px;padding:8px;background:#fef9c3;border:1px solid #fde68a;border-radius:6px;font-size:10px;color:#92400e">
-        ⚠ AI note: ICD-10 M23.611 on this form conflicts with clinical notes (S83.209A). Auth reference #, appointment window, transportation, language, and equipment specifications are blank.
-      </div>
-    </div>` },
-  { title: '🩺 Clinical Notes — WC-2026-084431_ClinicalNotes.pdf', html: `
-    <div class="raw-doc">
-      <div class="rd-header"><div class="rd-org">PACIFIC ORTHOPEDIC ASSOCIATES</div><div class="rd-title">CLINICAL NOTES — WORKERS' COMPENSATION</div><div style="font-size:10px;margin-top:4px;color:#888">Provider: Kevin Marsh, MD &nbsp;·&nbsp; NPI: 1234567890 &nbsp;·&nbsp; Date: 04/25/2026</div></div>
-      <div class="rd-section"><div class="rd-sec-title">Patient</div>
-        <div class="rd-row"><span class="rd-label">Name:</span><span class="rd-val">James Holloway</span></div>
-        <div class="rd-row"><span class="rd-label">DOB:</span><span class="rd-val">1978-03-14</span></div>
-        <div class="rd-row"><span class="rd-label">Claim #:</span><span class="rd-val">WC-2026-084431</span></div>
-      </div>
-      <div class="rd-section"><div class="rd-sec-title">Diagnosis</div>
-        <div class="rd-row"><span class="rd-label">ICD-10:</span><span class="rd-val" style="color:#16a34a">S83.209A</span><span style="font-size:10px;color:#888;margin-left:8px">Post-ACL reconstruction, right knee</span></div>
-        <div class="rd-row"><span class="rd-label">Surgical History:</span><span class="rd-val">ACL reconstruction 2026-03-28</span></div>
-        <div class="rd-row"><span class="rd-label">Body Part:</span><span class="rd-val">Right knee</span></div>
-      </div>
-      <div class="rd-section"><div class="rd-sec-title">Clinical Narrative</div>
-        <div style="font-size:11px;line-height:1.7;color:#333;margin:4px 0 8px">Patient is 4 weeks post-op ACL repair. Limited weight-bearing. ROM 0–65°. Ambulatory with assistance. <b>Fall risk documented.</b> Patient weight: <b>285 lbs</b> — bariatric rating required for all assistive devices.</div>
-      </div>
-      <div class="rd-section"><div class="rd-sec-title">Treatment Plan</div>
-        <div class="rd-row"><span class="rd-label">PT:</span><span class="rd-val">3x/week</span></div>
-        <div class="rd-row"><span class="rd-label">Follow-up:</span><span class="rd-val">2026-05-28 (6-week post-op)</span></div>
-      </div>
-      <div class="rd-section"><div class="rd-sec-title">Equipment Recommendation</div>
-        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val">Rollator Walker, 4-wheel — <b>bariatric spec required</b> (285 lbs)</span></div>
-        <div class="rd-row"><span class="rd-label">HCPCS:</span><span class="rd-val">E0143</span></div>
-        <div class="rd-row"><span class="rd-label">Justification:</span><span class="rd-val">Post-ACL instability. Bariatric rating req. Fall risk.</span></div>
-      </div>
-      <div style="margin-top:10px;padding:8px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;font-size:10px;color:#15803d">
-        ✓ AI note: ICD-10 S83.209A confirmed here and on prescription. Clinical notes also flag bariatric specification requirement (285 lbs) not present on referral form.
-      </div>
-    </div>` },
-  { title: '💊 Rx Prescription — WC-2026-084431_RxPrescription.jpg', html: `
-    <div class="raw-doc">
-      <div class="rd-header"><div class="rd-org">PACIFIC ORTHOPEDIC ASSOCIATES</div><div class="rd-title">PRESCRIPTION — DURABLE MEDICAL EQUIPMENT</div><div style="font-size:10px;margin-top:4px;color:#888">Kevin Marsh, MD &nbsp;·&nbsp; NPI: 1234567890 &nbsp;·&nbsp; Date Signed: 04/25/2026</div></div>
-      <div class="rd-section"><div class="rd-sec-title">Patient</div>
-        <div class="rd-row"><span class="rd-label">Name:</span><span class="rd-val rd-handwritten">James Holloway</span></div>
-        <div class="rd-row"><span class="rd-label">DOB:</span><span class="rd-val">1978-03-14</span></div>
-        <div class="rd-row"><span class="rd-label">Diagnosis ICD-10:</span><span class="rd-val" style="color:#16a34a">S83.209A</span></div>
-      </div>
-      <div class="rd-section"><div class="rd-sec-title">Equipment Prescribed</div>
-        <div class="rd-row"><span class="rd-label">Item:</span><span class="rd-val rd-handwritten">Rollator Walker, 4-Wheel</span></div>
-        <div class="rd-row"><span class="rd-label">HCPCS:</span><span class="rd-val">E0143</span></div>
-        <div class="rd-row"><span class="rd-label">Specifications:</span><span class="rd-blank" style="color:#dc2626;font-style:italic">&nbsp;NOT SPECIFIED</span></div>
-        <div class="rd-row"><span class="rd-label">Qty / Duration:</span><span class="rd-val">1 / 90 days</span></div>
-        <div class="rd-row"><span class="rd-label">No Substitution:</span><span class="rd-val">☑ YES</span></div>
-      </div>
-      <div class="rd-section"><div class="rd-sec-title">Physician Signature</div>
-        <div class="rd-row"><span class="rd-label">Signed:</span><span class="rd-val rd-handwritten" style="font-size:18px">Kevin Marsh</span></div>
-        <div class="rd-row"><span class="rd-label">Date:</span><span class="rd-val">04/25/2026</span></div>
-        <div class="rd-row"><span class="rd-label">License / NPI:</span><span class="rd-val">1234567890</span></div>
-      </div>
-      <div style="margin-top:10px;padding:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:10px;color:#dc2626">
-        ⚠ AI note: Specifications field is blank. Clinical notes document patient weight 285 lbs — standard rollator is contraindicated. Bariatric specification (400 lb capacity) added to gap list as hard block.
-      </div>
-    </div>` },
-  { title: '📋 Authorization Document — Missing / Blank', html: `
-    <div class="raw-doc">
-      <div class="rd-header"><div class="rd-org">COASTAL INSURANCE GROUP</div><div class="rd-title">PRIOR AUTHORIZATION — ATTACHMENT</div><div style="font-size:10px;margin-top:4px;color:#888">Claim: WC-2026-084431 &nbsp;·&nbsp; Date: 04/28/2026</div></div>
-      <div class="rd-section"><div class="rd-sec-title">Authorization Details</div>
-        <div class="rd-row"><span class="rd-label">Auth Reference #:</span><span class="rd-blank" style="color:#dc2626;font-style:italic">&nbsp;BLANK — not completed</span></div>
-        <div class="rd-row"><span class="rd-label">Approved Items:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-        <div class="rd-row"><span class="rd-label">Effective Date:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-        <div class="rd-row"><span class="rd-label">Expiry Date:</span><span class="rd-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-      </div>
-      <div style="margin-top:12px;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:10px;color:#dc2626;font-weight:700">
-        ⚠ Authorization reference number not present on this page or any other document in the package. Added to gap list as hard block — routing cannot proceed until resolved. CM has been contacted to provide auth ref #.
-      </div>
-    </div>` }
-];
-
-function openDoc(idx) {
-  const def = docDefs[idx];
-  document.getElementById('doc-modal-title').textContent = def.title;
-  document.getElementById('doc-modal-body').innerHTML = def.html;
-  document.getElementById('doc-modal').classList.add('open');
-}
-
-function closeDoc() {
-  document.getElementById('doc-modal').classList.remove('open');
-}
-
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeDoc(); });
-
-function log(text){
-  const box=document.getElementById('agent-log');
-  if(!box)return;
-  const now=new Date();
-  const ts=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
-  const el=document.createElement('div');
-  el.className='log-line';
-  el.innerHTML='<span class="ts">'+ts+'</span>'+text;
-  box.appendChild(el);
-  box.scrollTop=box.scrollHeight;
-}
-</script>
 </body>
 </html>
