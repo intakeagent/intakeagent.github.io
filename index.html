@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1497,6 +1497,7 @@ function enableHolloway(){
   const row=document.getElementById('qr-0');
   row.classList.add('holloway-ready');
   row.onclick=openHolloway;
+  setTimeout(()=>row.scrollIntoView({behavior:'smooth',block:'center'}),400);
   document.getElementById('qo-0').innerHTML='<span class="outreach-badge">📧 Sent</span>';
   document.getElementById('qs-0').innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:2px 7px;border-radius:20px">⚡ 5 Gaps · Open</span>';
   // Swap hub info for scale card in sidebar
