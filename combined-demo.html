@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -296,7 +296,10 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
       <span class="header-tag">AI-Powered · v2.0</span>
     </a>
   </div>
-  <div style="font-size:12px;color:rgba(255,255,255,.6)">Workers' Comp · Live Processing &amp; Pipeline</div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button id="demo-back-btn" onclick="backToLanding()" style="display:none;align-items:center;gap:6px;font-size:11px;font-weight:700;color:rgba(255,255,255,.8);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:4px 11px;border-radius:7px;cursor:pointer">← Overview</button>
+    <div style="font-size:12px;color:rgba(255,255,255,.6)">Workers' Comp · Live Processing &amp; Pipeline</div>
+  </div>
 </header>
 
 <div class="layout">
@@ -311,6 +314,7 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
       <span id="sb-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--gray-m);flex-shrink:0;transition:background .3s"></span>
       <span id="sb-status-text" style="font-size:11px;font-weight:600;color:var(--gray)">75 referrals loaded</span>
     </div>
+
 
     <div class="sb-stat">
       <div><div class="sb-stat-n purple" id="sbs-pages">0</div><div class="sb-stat-l">Pages Read</div></div>
@@ -340,7 +344,7 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
     </div>
 
     <div style="margin-top:10px;padding:8px;background:#fffbeb;border:1px solid var(--yellow-m);border-radius:8px;font-size:11px;color:#92400e;display:none" id="holloway-hint">
-      <b>James Holloway</b> is at the top — click his row to explore the full pipeline
+      Click any highlighted row at the top to explore the full pipeline
     </div>
   </div>
 
@@ -382,11 +386,11 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
     <div class="divider"></div>
     <div class="sidebar-label">Episode</div>
     <div class="ep-card">
-      <div class="ep-label">Patient</div><div class="ep-val" id="wt-ep-name">James Holloway</div>
-      <div class="ep-label">Claim</div><div class="ep-val" id="wt-ep-claim">WC-2026-084431</div>
-      <div class="ep-label">Equipment</div><div class="ep-val" id="wt-ep-item">Rollator Walker · E0143</div>
+      <div class="ep-label">Patient</div><div class="ep-val" id="wt-ep-name">—</div>
+      <div class="ep-label">Claim</div><div class="ep-val" id="wt-ep-claim">—</div>
+      <div class="ep-label">Equipment</div><div class="ep-val" id="wt-ep-item">—</div>
       <div class="ep-label">Status</div>
-      <div id="wt-ep-status" style="margin-top:2px"><div class="status-pill incomplete"><span class="status-dot"></span>5 Gaps · Outreach</div></div>
+      <div id="wt-ep-status" style="margin-top:2px"><div class="status-pill incomplete"><span class="status-dot"></span>—</div></div>
     </div>
     <div class="divider"></div>
     <div class="sidebar-label">Agent Log</div>
@@ -398,8 +402,93 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
 <!-- ══ MAIN ══ -->
 <main class="main">
 
+<!-- ─── LANDING VIEW ─── -->
+<div id="view-landing">
+  <div style="max-width:820px;margin:40px auto;padding:0 8px">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px">Intake Agent Platform · Workers' Comp DME</div>
+      <div style="font-size:28px;font-weight:900;color:var(--dark);margin-bottom:10px;line-height:1.2">AI-Powered Referral Intake</div>
+      <div style="font-size:14px;color:var(--gray);max-width:520px;margin:0 auto;line-height:1.6">Fax, voice, and portal referrals processed automatically — extraction, gap detection, and outreach without staff involvement.</div>
+    </div>
+
+    <!-- Two panels -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+
+      <!-- Panel 1: Live Demo Summary -->
+      <div style="background:white;border-radius:14px;border:1px solid var(--gray-m);padding:28px;box-shadow:0 2px 8px rgba(0,0,0,.07)">
+        <div style="font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Live Processing Demo</div>
+        <div style="font-size:18px;font-weight:800;color:var(--dark);margin-bottom:6px">75 Referrals · Monday Morning Queue</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:20px;line-height:1.6">AI reads every document, extracts 25 fields per referral, detects gaps, and dispatches targeted outreach — all in under 25 seconds. Zero staff.</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:22px">
+          <div style="text-align:center;background:var(--blue-l);border-radius:9px;padding:12px 8px">
+            <div style="font-size:22px;font-weight:900;color:var(--blue)">75</div>
+            <div style="font-size:9px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">Referrals</div>
+          </div>
+          <div style="text-align:center;background:var(--green-l);border-radius:9px;padding:12px 8px">
+            <div style="font-size:22px;font-weight:900;color:var(--green)">&lt;25s</div>
+            <div style="font-size:9px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">Total Time</div>
+          </div>
+          <div style="text-align:center;background:var(--purple-l);border-radius:9px;padding:12px 8px">
+            <div style="font-size:22px;font-weight:900;color:var(--purple)">25</div>
+            <div style="font-size:9px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">Fields Each</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:24px">
+          <div style="display:flex;gap:8px;font-size:12px;align-items:flex-start"><span style="color:var(--green);font-weight:800;margin-top:1px">✓</span><span>Multi-channel: fax, voice (AI-answered 24/7), portal</span></div>
+          <div style="display:flex;gap:8px;font-size:12px;align-items:flex-start"><span style="color:var(--green);font-weight:800;margin-top:1px">✓</span><span>ICD-10 conflict detection with AI self-correction</span></div>
+          <div style="display:flex;gap:8px;font-size:12px;align-items:flex-start"><span style="color:var(--green);font-weight:800;margin-top:1px">✓</span><span>Targeted outreach — email then outbound AI call</span></div>
+          <div style="display:flex;gap:8px;font-size:12px;align-items:flex-start"><span style="color:var(--green);font-weight:800;margin-top:1px">✓</span><span>Route-ready episode output. 0 staff hours.</span></div>
+        </div>
+
+        <button onclick="goToDemo()" style="width:100%;background:var(--blue);color:white;border:none;padding:13px 20px;border-radius:9px;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='var(--blue)'">
+          🔴 Start Live Demo →
+        </button>
+      </div>
+
+      <!-- Panel 2: Scale at 10,000 -->
+      <div style="background:#1e3a5f;border-radius:14px;padding:28px;box-shadow:0 2px 8px rgba(0,0,0,.12)">
+        <div style="font-size:10px;font-weight:800;color:#93c5fd;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">⚡ Scale Projection</div>
+        <div style="font-size:18px;font-weight:800;color:white;margin-bottom:6px">10,000 Referrals</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:24px;line-height:1.6">Same AI engine, same pipeline. No additional staff. Unattended.</div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:12px">
+            <div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Total Time</div>
+            <div style="font-size:24px;font-weight:900;color:#fff">~56 min</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:12px">
+            <div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Pages Read</div>
+            <div style="font-size:24px;font-weight:900;color:#fff">~30,000</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:12px">
+            <div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Gaps Detected</div>
+            <div style="font-size:24px;font-weight:900;color:#93c5fd">~8,200</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:12px">
+            <div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Outreach Dispatched</div>
+            <div style="font-size:24px;font-weight:900;color:#4ade80">~8,200</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Staff Hours</div>
+            <div style="font-size:24px;font-weight:900;color:#fff">0</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:12px 14px;font-size:11px;color:rgba(255,255,255,.55);line-height:1.6">
+          Full Monday morning intake queue · modular agent network · human stays in loop for flagged decisions only
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- ─── BATCH VIEW ─── -->
-<div id="view-batch">
+<div id="view-batch" style="display:none">
 
   <!-- Hero -->
   <div class="batch-hero">
@@ -425,8 +514,10 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
           <div><div style="font-size:12px;font-weight:800;color:#4ade80;letter-spacing:.04em">(201) 897-3854</div><div style="font-size:10px;color:rgba(255,255,255,.5)">Live AI intake line · 24/7 · case managers call to submit referrals</div></div>
         </div>
       </div>
+
     </div>
   </div>
+
 
   <!-- Stats bar -->
   <div class="stats-bar">
@@ -512,66 +603,6 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
   <div class="section active" id="wt-1">
     <div class="page-title">Step 1 — Channel Intake</div>
     <div class="page-sub">Multi-channel intake — fax, voice, portal · AI extracts structured fields from every source</div>
-
-    <!-- Voice Intake Card -->
-    <div class="card" style="border:2px solid rgba(34,197,94,.4);background:linear-gradient(135deg,#f0fdf4 0%,#fff 100%)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div class="card-title" style="color:#15803d;margin-bottom:0">📞 Voice Channel — Inbound Call · Live Intake Line</div>
-        <div style="display:inline-flex;align-items:center;gap:6px;background:#15803d;color:white;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.04em"><span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;animation:pulse 1.2s infinite"></span>(201) 897-3854 · AI answers 24/7</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 220px;gap:12px">
-        <!-- Transcript -->
-        <div class="call-box" style="margin:0">
-          <div class="call-status-row">
-            <div class="call-badge"><span class="call-dot" style="background:#f59e0b;animation:none"></span> Call complete · Referral captured</div>
-            <div class="call-timer">01:47</div>
-          </div>
-          <div class="transcript">
-            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Thank you for calling the Intake Coordination line — I'm the AI intake agent. I'll collect your referral and get the episode into the system. What's the worker's full name?</span></div>
-            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">Teresa Nguyen</span>.</span></div>
-            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Date of birth?</span></div>
-            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">April 12th, 1981</span>.</span></div>
-            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Claim number and carrier?</span></div>
-            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">WC-2026-081923</span>, carrier is <span class="captured">Pacific Mutual</span>.</span></div>
-            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">What equipment is being requested?</span></div>
-            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Knee brace — medial meniscus tear, she had surgery last week.</span></div>
-            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">HCPCS <span class="captured">L1820</span> — knee orthosis, post-surgical. Do you have an authorization reference?</span></div>
-            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Not yet — still processing with the adjuster.</span></div>
-            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Noted — flagged as a gap. Preferred appointment window?</span></div>
-            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text"><span class="captured">May 8th, any time afternoon</span>.</span></div>
-            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Transportation needed?</span></div>
-            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">No, <span class="captured">she'll drive herself</span>.</span></div>
-            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Your name and callback?</span></div>
-            <div class="t-line"><span class="t-speaker cm">CM</span><span class="t-text">Rachel Kim, <span class="captured">310-555-0244</span>.</span></div>
-            <div class="t-line"><span class="t-speaker agent">AGENT</span><span class="t-text">Thank you Rachel — <span class="captured">14 fields captured</span>, 1 gap flagged: authorization reference. Episode is in the system. Confirmation email sent to address on file.</span></div>
-          </div>
-        </div>
-        <!-- Extracted fields + queue entry -->
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="font-size:10px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Fields Captured — Live</div>
-          <div class="norm-grid" style="grid-template-columns:1fr;gap:4px">
-            <div class="norm-field" style="padding:4px 8px"><div class="nl">worker.name</div><div class="nv" style="font-size:11px">Teresa Nguyen</div></div>
-            <div class="norm-field" style="padding:4px 8px"><div class="nl">worker.dob</div><div class="nv" style="font-size:11px">1981-04-12</div></div>
-            <div class="norm-field" style="padding:4px 8px"><div class="nl">insurance.claim_number</div><div class="nv" style="font-size:11px">WC-2026-081923</div></div>
-            <div class="norm-field" style="padding:4px 8px"><div class="nl">insurance.carrier</div><div class="nv" style="font-size:11px">Pacific Mutual</div></div>
-            <div class="norm-field" style="padding:4px 8px"><div class="nl">services.hcpcs</div><div class="nv" style="font-size:11px">L1820 · Knee Brace</div></div>
-            <div class="norm-field" style="padding:4px 8px"><div class="nl">insurance.auth_reference</div><div class="nv null" style="font-size:11px">null — flagged</div></div>
-            <div class="norm-field" style="padding:4px 8px"><div class="nl">scheduling.appointment_window</div><div class="nv" style="font-size:11px">2026-05-08 · PM</div></div>
-            <div class="norm-field" style="padding:4px 8px"><div class="nl">scheduling.transportation</div><div class="nv" style="font-size:11px">self</div></div>
-            <div class="norm-field" style="padding:4px 8px"><div class="nl">case_manager.name</div><div class="nv" style="font-size:11px">Rachel Kim</div></div>
-          </div>
-          <div style="margin-top:4px;background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:8px 10px;font-size:11px;color:#166534;font-weight:700;text-align:center">
-            ✅ Episode entered queue<br><span style="font-weight:400;font-size:10px">WC-2026-081923 · 14 fields · 1 gap</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:8px;margin:4px 0 2px;font-size:10px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">
-      <div style="flex:1;height:1px;background:var(--gray-m)"></div>
-      <span>Holloway's referral — came via fax</span>
-      <div style="flex:1;height:1px;background:var(--gray-m)"></div>
-    </div>
 
     <div class="card">
       <div class="card-title">📂 Referral Package — James Holloway · WC-2026-084431</div>
@@ -1153,6 +1184,127 @@ const referrals = Array.from({length:74},(_,i)=>{
   return{id:i+1,name:fn+' '+ln,dob,claim,item:dme.item,hcpcs:dme.hcpcs,pri,gaps:gapCount,gapList};
 });
 
+// ── VOICE INTAKE CASES ──
+const VOICE_CASES=[
+  {
+    vid:'v1',name:'Teresa Nguyen',dob:'1981-04-12',claim:'WC-2026-081923',
+    item:'Knee Brace',hcpcs:'L1820',pri:'MED',gaps:1,gapList:['Auth Ref'],
+    carrier:'Pacific Mutual WC',
+    cm:{name:'Rachel Kim',email:'r.kim@pacmutual.com',phone:'310-555-0244'},
+    prov:{name:'Aisha Patel, MD',npi:'8765432109',practice:'South Bay Orthopedics'},
+    icd:{code:'M23.201',desc:'Derangement of medial meniscus, right knee'},
+    duration:'1:47',
+    transcript:[
+      {spk:'agent',text:"Thank you for calling DME Intake. I'm Aria — ready to capture your referral. Patient name?"},
+      {spk:'cm',text:"Hi, Rachel Kim from Pacific Mutual. Patient is Teresa Nguyen, DOB April 12, 1981.",cap:true},
+      {spk:'agent',text:"Teresa Nguyen, 04/12/1981. Claim number?"},
+      {spk:'cm',text:"WC-2026-081923.",cap:true},
+      {spk:'agent',text:"DME being requested?"},
+      {spk:'cm',text:"Knee brace, L1820. Right medial meniscus derangement.",cap:true},
+      {spk:'agent',text:"Delivery address?"},
+      {spk:'cm',text:"4821 Maple Avenue, Torrance, CA 90503.",cap:true},
+      {spk:'agent',text:"Appointment preference?"},
+      {spk:'cm',text:"May 8th, 10 to 11 AM.",cap:true},
+      {spk:'agent',text:"Transportation needed?"},
+      {spk:'cm',text:"No, she can drive herself.",cap:true},
+      {spk:'agent',text:"Language or interpreter?"},
+      {spk:'cm',text:"English only.",cap:true},
+      {spk:'agent',text:"Authorization reference number?"},
+      {spk:'cm',text:"Oh, I don't have that in front of me right now."},
+      {spk:'agent',text:"Flagged as a gap. I'll follow up to r.kim@pacmutual.com. All other fields captured — episode WC-2026-081923 is now queued."},
+    ],
+    fields:[
+      {l:'Patient Name',v:'Teresa Nguyen'},
+      {l:'DOB',v:'04/12/1981'},
+      {l:'Claim #',v:'WC-2026-081923'},
+      {l:'DME Item',v:'Knee Brace (L1820)'},
+      {l:'Delivery',v:'4821 Maple Ave, Torrance'},
+      {l:'Appointment',v:'05/08 · 10:00–11:00 AM'},
+      {l:'Transportation',v:'Not required'},
+      {l:'Language',v:'English'},
+      {l:'Auth Ref',v:'⚠ Missing — gap flagged',highlight:true},
+    ]
+  },
+  {
+    vid:'v2',name:'Carlos Rivera',dob:'1974-09-03',claim:'WC-2026-082541',
+    item:'TENS Unit',hcpcs:'E0730',pri:'HIGH',gaps:2,gapList:['Auth Ref','Appt Window'],
+    carrier:'State Compensation Fund',
+    cm:{name:'Maria Gonzalez',email:'m.gonzalez@statecomp.com',phone:'415-555-0341'},
+    prov:{name:'Roberto Sanchez, MD',npi:'7654321098',practice:'Valley Occupational Health'},
+    icd:{code:'M54.5',desc:'Low back pain'},
+    duration:'2:03',
+    transcript:[
+      {spk:'agent',text:"DME Intake, this is Aria. Ready for your referral. Patient name?"},
+      {spk:'cm',text:"Maria Gonzalez, State Comp. Patient is Carlos Rivera, DOB September 3, 1974.",cap:true},
+      {spk:'agent',text:"Carlos Rivera, 09/03/1974. Claim number?"},
+      {spk:'cm',text:"WC-2026-082541.",cap:true},
+      {spk:'agent',text:"Equipment requested?"},
+      {spk:'cm',text:"TENS unit, E0730. Chronic low back pain.",cap:true},
+      {spk:'agent',text:"Delivery address?"},
+      {spk:'cm',text:"2234 Sunset Boulevard, Los Angeles, CA 90026.",cap:true},
+      {spk:'agent',text:"Transportation needed?"},
+      {spk:'cm',text:"Yes, he'll need a ride.",cap:true},
+      {spk:'agent',text:"Language or interpreter?"},
+      {spk:'cm',text:"Spanish interpreter please.",cap:true},
+      {spk:'agent',text:"Authorization reference number?"},
+      {spk:'cm',text:"Haven't received it from claims yet."},
+      {spk:'agent',text:"Gap one flagged. Preferred appointment window?"},
+      {spk:'cm',text:"Patient hasn't confirmed yet — I'm not sure."},
+      {spk:'agent',text:"Gap two flagged. I'll follow up to m.gonzalez@statecomp.com for both items. Episode WC-2026-082541 queued with 2 gaps."},
+    ],
+    fields:[
+      {l:'Patient Name',v:'Carlos Rivera'},
+      {l:'DOB',v:'09/03/1974'},
+      {l:'Claim #',v:'WC-2026-082541'},
+      {l:'DME Item',v:'TENS Unit (E0730)'},
+      {l:'Delivery',v:'2234 Sunset Blvd, LA'},
+      {l:'Transportation',v:'Required'},
+      {l:'Language',v:'Spanish (interpreter)'},
+      {l:'Auth Ref',v:'⚠ Missing — gap flagged',highlight:true},
+      {l:'Appointment',v:'⚠ Not confirmed — gap flagged',highlight:true},
+    ]
+  },
+  {
+    vid:'v3',name:'Sandra Mitchell',dob:'1968-12-07',claim:'WC-2026-083174',
+    item:'Hospital Bed',hcpcs:'E0255',pri:'HIGH',gaps:3,gapList:['Auth Ref','Equip Spec','Language'],
+    carrier:'Liberty Mutual WC',
+    cm:{name:'Thomas Bradley',email:'t.bradley@libertymutual.com',phone:'818-555-0377'},
+    prov:{name:'Mei Chen, MD',npi:'6543210987',practice:'Eastside Rehab & Pain'},
+    icd:{code:'S32.001A',desc:'Fracture of unspecified part of sacrum, initial encounter'},
+    duration:'2:18',
+    transcript:[
+      {spk:'agent',text:"DME Intake, Aria speaking. How can I help?"},
+      {spk:'cm',text:"Thomas Bradley, Liberty Mutual. Referral for Sandra Mitchell, DOB December 7, 1968.",cap:true},
+      {spk:'agent',text:"Sandra Mitchell, 12/07/1968. Claim number?"},
+      {spk:'cm',text:"WC-2026-083174.",cap:true},
+      {spk:'agent',text:"DME requested?"},
+      {spk:'cm',text:"Hospital bed, E0255. Sacral fracture — she can't use a standard bed.",cap:true},
+      {spk:'agent',text:"Any bed specifications — semi-electric, full-electric, trapeze bar?"},
+      {spk:'cm',text:"I'd have to check with the physician on that."},
+      {spk:'agent',text:"Flagging equipment specification as a gap. Delivery address?"},
+      {spk:'cm',text:"817 Birchwood Drive, Pasadena, CA 91103.",cap:true},
+      {spk:'agent',text:"Transportation needed?"},
+      {spk:'cm',text:"No, it's a home delivery.",cap:true},
+      {spk:'agent',text:"Patient's primary language?"},
+      {spk:'cm',text:"I'm not sure, actually."},
+      {spk:'agent',text:"Gap three flagged. Auth reference number?"},
+      {spk:'cm',text:"Don't have it yet."},
+      {spk:'agent',text:"Three gaps logged: auth ref, equip spec, and language. Sending all to t.bradley@libertymutual.com. Episode WC-2026-083174 queued."},
+    ],
+    fields:[
+      {l:'Patient Name',v:'Sandra Mitchell'},
+      {l:'DOB',v:'12/07/1968'},
+      {l:'Claim #',v:'WC-2026-083174'},
+      {l:'DME Item',v:'Hospital Bed (E0255)'},
+      {l:'Delivery',v:'817 Birchwood Dr, Pasadena'},
+      {l:'Transportation',v:'Not required'},
+      {l:'Equip Spec',v:'⚠ Unconfirmed — gap flagged',highlight:true},
+      {l:'Auth Ref',v:'⚠ Missing — gap flagged',highlight:true},
+      {l:'Language',v:'⚠ Unknown — gap flagged',highlight:true},
+    ]
+  },
+];
+
 // ── RENDER ──
 function renderQueue(){
   const tbody=document.getElementById('queue-tbody');
@@ -1197,10 +1349,16 @@ renderQueue();
 let processing=false;
 let totalGapsAll=0,routedCount=0,outreachCount=0,pagesRead=0;
 
+function showScaleProjection(){
+    document.getElementById('scale-callout').classList.add('visible');
+  document.getElementById('scale-callout').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('reset-btn').style.display='inline-block';
+}
+
 function startProcessing(){
   if(processing)return;
   processing=true;
-  document.getElementById('run-btn').disabled=true;
+    document.getElementById('run-btn').disabled=true;
   document.getElementById('reset-btn').style.display='inline-block';
   document.getElementById('live-status-text').textContent='AI reading referral packages...';
   document.getElementById('sb-status-dot').style.background='#22c55e';
@@ -1372,9 +1530,11 @@ function enableHolloway(){
   const row=document.getElementById('qr-0');
   row.classList.add('holloway-ready');
   row.onclick=openHolloway;
+  setTimeout(()=>row.scrollIntoView({behavior:'smooth',block:'center'}),400);
   document.getElementById('qo-0').innerHTML='<span class="outreach-badge">📧 Sent</span>';
   document.getElementById('qs-0').innerHTML='<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:2px 7px;border-radius:20px">⚡ 5 Gaps · Open</span>';
-  // Show scale card and hint in sidebar
+  // Swap hub info for scale card in sidebar
+  document.getElementById('sb-hub-info').style.display='none';
   document.getElementById('scale-card').style.display='block';
   document.getElementById('holloway-hint').style.display='block';
   // Show scale callout in main
@@ -1404,6 +1564,7 @@ function resetDemo(){
   processing=false;
   totalGapsAll=0;routedCount=0;outreachCount=0;pagesRead=0;
   _seed=12345;
+    document.getElementById('sb-hub-info').style.display='block';
   document.getElementById('run-btn').disabled=false;
   document.getElementById('reset-btn').style.display='none';
   document.getElementById('live-status-text').textContent='Queue loaded — 75 referrals waiting';
@@ -1499,103 +1660,6 @@ function switchNormTab(n){
   const tabs=document.querySelectorAll('#wt-2 .tab');
   tabs.forEach((t,i)=>t.classList.toggle('active',i===n));
 }
-
-// ── VOICE INTAKE CASES ──
-const VOICE_CASES=[
-  {vid:'v1',name:'Teresa Nguyen',dob:'1981-04-12',claim:'WC-2026-081923',item:'Knee Brace',hcpcs:'L1820',pri:'MED',gaps:1,gapList:['Auth Ref'],
-   carrier:'Pacific Mutual WC',cm:{name:'Rachel Kim',email:'r.kim@pacmutual.com',phone:'310-555-0244'},
-   prov:{name:'Aisha Patel, MD',npi:'8765432109',practice:'South Bay Orthopedics'},
-   icd:{code:'M23.201',desc:'Derangement of medial meniscus, right knee'},
-   duration:'1:47',
-   transcript:[
-    {spk:'agent',text:'Thank you for calling the Intake Coordination line — I\'m the AI intake agent. I\'ll collect your referral details and get the episode into the system. What\'s the worker\'s full name?'},
-    {spk:'cm',text:'Teresa Nguyen.',cap:true},
-    {spk:'agent',text:'Date of birth?'},
-    {spk:'cm',text:'April 12th, 1981.',cap:true},
-    {spk:'agent',text:'Claim number and carrier?'},
-    {spk:'cm',text:'WC-2026-081923 — carrier is Pacific Mutual.',cap:true},
-    {spk:'agent',text:'What equipment is being requested?'},
-    {spk:'cm',text:'Knee brace — medial meniscus tear, she had surgery last week.'},
-    {spk:'agent',text:'HCPCS L1820 — knee orthosis, post-surgical. Do you have an authorization reference?'},
-    {spk:'cm',text:'Not yet — still processing with the adjuster.'},
-    {spk:'agent',text:'Flagged as a gap. Preferred appointment window?'},
-    {spk:'cm',text:'May 8th, any time afternoon.',cap:true},
-    {spk:'agent',text:'Transportation needed?'},
-    {spk:'cm',text:'No, she\'ll drive herself.',cap:true},
-    {spk:'agent',text:'Your name and callback?'},
-    {spk:'cm',text:'Rachel Kim, 310-555-0244.',cap:true},
-    {spk:'agent',text:'14 fields captured, 1 gap flagged: authorization reference. Episode is in the system. Confirmation email sent to address on file.'},
-   ],
-   fields:[
-    {l:'worker.name',v:'Teresa Nguyen'},{l:'worker.dob',v:'1981-04-12'},
-    {l:'insurance.claim_number',v:'WC-2026-081923'},{l:'insurance.carrier',v:'Pacific Mutual WC'},
-    {l:'services.hcpcs',v:'L1820 · Knee Brace'},{l:'insurance.auth_reference',v:'null — flagged',null:true},
-    {l:'scheduling.appointment_window',v:'2026-05-08 · PM'},{l:'scheduling.transportation',v:'self'},
-    {l:'case_manager.name',v:'Rachel Kim'},
-   ]},
-  {vid:'v2',name:'Carlos Rivera',dob:'1969-07-22',claim:'WC-2026-088742',item:'Back Brace',hcpcs:'L0631',pri:'HIGH',gaps:2,gapList:['Auth Ref','Appt Window'],
-   carrier:'Liberty Mutual WC',cm:{name:'Jennifer Walsh',email:'j.walsh@libertymutual.com',phone:'818-555-0317'},
-   prov:{name:'Robert Chen, MD',npi:'7654321098',practice:'Spine & Rehab Center'},
-   icd:{code:'M51.16',desc:'L4-L5 intervertebral disc herniation'},
-   duration:'2:03',
-   transcript:[
-    {spk:'agent',text:'Intake Coordination line — AI intake agent. Worker\'s full name?'},
-    {spk:'cm',text:'Carlos Rivera.',cap:true},
-    {spk:'agent',text:'Date of birth?'},
-    {spk:'cm',text:'July 22nd, 1969.',cap:true},
-    {spk:'agent',text:'Claim number and carrier?'},
-    {spk:'cm',text:'WC-2026-088742 — Liberty Mutual.',cap:true},
-    {spk:'agent',text:'What equipment is needed?'},
-    {spk:'cm',text:'Lumbar back brace — he has a herniated disc at L4-L5, confirmed on MRI.'},
-    {spk:'agent',text:'HCPCS L0631 — lumbar-sacral orthosis. Authorization reference?'},
-    {spk:'cm',text:'No, I\'m still waiting on that from the adjuster.'},
-    {spk:'agent',text:'Flagged as a hard block. Preferred appointment window?'},
-    {spk:'cm',text:'I don\'t have that yet — I\'ll need to check with him.'},
-    {spk:'agent',text:'Flagged as a soft block. Delivery address?'},
-    {spk:'cm',text:'3817 Ventura Blvd, Encino, CA 91436.',cap:true},
-    {spk:'agent',text:'Your name and callback?'},
-    {spk:'cm',text:'Jennifer Walsh, 818-555-0317.',cap:true},
-    {spk:'agent',text:'13 fields captured, 2 gaps flagged: authorization reference and appointment window. Episode is in the system.'},
-   ],
-   fields:[
-    {l:'worker.name',v:'Carlos Rivera'},{l:'worker.dob',v:'1969-07-22'},
-    {l:'insurance.claim_number',v:'WC-2026-088742'},{l:'insurance.carrier',v:'Liberty Mutual WC'},
-    {l:'services.hcpcs',v:'L0631 · Back Brace'},{l:'insurance.auth_reference',v:'null — flagged',null:true},
-    {l:'scheduling.appointment_window',v:'null — flagged',null:true},
-    {l:'worker.address',v:'3817 Ventura Blvd, Encino CA 91436'},{l:'case_manager.name',v:'Jennifer Walsh'},
-   ]},
-  {vid:'v3',name:'Sandra Mitchell',dob:'1974-11-08',claim:'WC-2026-092156',item:'CPAP Machine',hcpcs:'E0601',pri:'MED',gaps:3,gapList:['Auth Ref','Equip Spec','Language'],
-   carrier:'State Compensation Fund',cm:{name:'David Park',email:'d.park@statecomp.com',phone:'213-555-0489'},
-   prov:{name:'Maria Torres, MD',npi:'6543210987',practice:'Westside Sleep Medicine'},
-   icd:{code:'G47.33',desc:'Obstructive sleep apnea (adult)'},
-   duration:'2:18',
-   transcript:[
-    {spk:'agent',text:'Intake Coordination line. Worker\'s name?'},
-    {spk:'cm',text:'Sandra Mitchell.',cap:true},
-    {spk:'agent',text:'Date of birth?'},
-    {spk:'cm',text:'November 8, 1974.',cap:true},
-    {spk:'agent',text:'Claim number and carrier?'},
-    {spk:'cm',text:'WC-2026-092156 — State Compensation Fund.',cap:true},
-    {spk:'agent',text:'Equipment being requested?'},
-    {spk:'cm',text:'CPAP machine — she has sleep apnea confirmed by sleep study.'},
-    {spk:'agent',text:'HCPCS E0601 — CPAP. What pressure setting and mask type has the physician specified?'},
-    {spk:'cm',text:'I don\'t have that on the form — the sleep study results have it.'},
-    {spk:'agent',text:'Flagged as a gap — equipment specification missing. Authorization reference?'},
-    {spk:'cm',text:'No, not yet.'},
-    {spk:'agent',text:'Flagged. Does the patient need a Spanish interpreter?'},
-    {spk:'cm',text:'Actually yes — she prefers Spanish.',cap:true},
-    {spk:'agent',text:'Noted — language flagged as Spanish, interpreter required. Your name and callback?'},
-    {spk:'cm',text:'David Park, 213-555-0489.',cap:true},
-    {spk:'agent',text:'12 fields captured, 3 gaps flagged: auth reference, equipment specification, and language confirmed Spanish. Episode is in the system.'},
-   ],
-   fields:[
-    {l:'worker.name',v:'Sandra Mitchell'},{l:'worker.dob',v:'1974-11-08'},
-    {l:'insurance.claim_number',v:'WC-2026-092156'},{l:'insurance.carrier',v:'State Compensation Fund'},
-    {l:'services.hcpcs',v:'E0601 · CPAP Machine'},{l:'insurance.auth_reference',v:'null — flagged',null:true},
-    {l:'prescription.specifications',v:'null — flagged',null:true},
-    {l:'worker.language',v:'Spanish · interpreter needed',highlight:true},{l:'case_manager.name',v:'David Park'},
-   ]},
-];
 
 // ── FEATURED CASES — 4 clickable deep-dive rows ──
 const CARRIERS_D=['Pacific Mutual WC','National Indemnity','State Compensation Fund','Liberty Mutual WC','Zenith Insurance','ICW Group'];
@@ -1727,7 +1791,7 @@ function buildVoiceStep1HTML(vc){
       </div>
     </div>
   </div>
-  <div class="btn-row"><button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button></div>
+  <div class="btn-row"><button class="btn btn-outline" onclick="returnToBatch()">← Back to Queue</button><button class="btn btn-blue" onclick="navigateStep(2)">→ Normalize Data</button></div>
 </div>`;
 }
 
@@ -2152,6 +2216,17 @@ function closeDoc() {
 
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeDoc(); });
 
+function goToDemo(){
+  document.getElementById('view-landing').style.display='none';
+  document.getElementById('view-batch').style.display='block';
+  document.getElementById('demo-back-btn').style.display='flex';
+}
+function backToLanding(){
+  document.getElementById('view-landing').style.display='block';
+  document.getElementById('view-batch').style.display='none';
+  document.getElementById('view-walkthrough').style.display='none';
+  document.getElementById('demo-back-btn').style.display='none';
+}
 function log(text){
   const box=document.getElementById('agent-log');
   if(!box)return;
