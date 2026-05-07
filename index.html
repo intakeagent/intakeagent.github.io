@@ -486,70 +486,65 @@ header{background:#1e3a5f;padding:0 24px;display:flex;align-items:center;justify
   </div>
 
   <!-- ── Hub Panels — visible on load, hidden when processing starts ── -->
-  <div id="hub-panels" style="margin:14px 0">
+  <div id="hub-panels">
 
-    <!-- 3-column grid -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+    <!-- Original 3 panels -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding:16px 0 14px;background:#f1f5f9;border-bottom:1px solid var(--gray-m)">
 
-      <!-- Value Proposition -->
-      <div style="background:white;border:1px solid var(--gray-m);border-radius:10px;padding:14px 16px">
-        <div style="font-size:9px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px">⚡ Value Proposition</div>
+      <!-- Panel 1: Value Proposition -->
+      <div style="background:white;border-radius:10px;border:1px solid var(--gray-m);padding:16px;box-shadow:var(--shadow)">
+        <div style="font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">⚡ What This Does</div>
+        <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:8px;line-height:1.4">Automates the full DME referral intake loop — end to end</div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;gap:7px;align-items:flex-start;font-size:11px;color:var(--dark)"><span style="color:var(--red);font-weight:900;flex-shrink:0;line-height:1.4">✕</span><span>Manual intake: 4–6 min per referral, staff-dependent, error-prone</span></div>
-          <div style="display:flex;gap:7px;align-items:flex-start;font-size:11px;color:var(--dark)"><span style="color:var(--green);font-weight:900;flex-shrink:0;line-height:1.4">✓</span><span>25 structured fields extracted per episode — every channel, every format</span></div>
-          <div style="display:flex;gap:7px;align-items:flex-start;font-size:11px;color:var(--dark)"><span style="color:var(--green);font-weight:900;flex-shrink:0;line-height:1.4">✓</span><span>Gaps detected, outreach dispatched — no coordinator required</span></div>
-          <div style="display:flex;gap:7px;align-items:flex-start;font-size:11px;color:var(--dark)"><span style="color:var(--green);font-weight:900;flex-shrink:0;line-height:1.4">✓</span><span>Route-ready episode locked and dispatched same day it arrives</span></div>
-          <div style="display:flex;gap:7px;align-items:flex-start;font-size:11px;color:var(--dark)"><span style="color:var(--green);font-weight:900;flex-shrink:0;line-height:1.4">✓</span><span>Staff handle judgment only — zero hours on routine intake</span></div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#374151"><span style="color:var(--red);font-weight:800;margin-top:1px">✕</span><span>4–6 min per referral manually · coordinator reads, chases, routes</span></div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#374151"><span style="color:var(--green);font-weight:800;margin-top:1px">✓</span><span>Agent reads every document, extracts 25 fields, detects gaps by severity</span></div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#374151"><span style="color:var(--green);font-weight:800;margin-top:1px">✓</span><span>Outreach dispatched automatically — email and voice — before staff log in</span></div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#374151"><span style="color:var(--green);font-weight:800;margin-top:1px">✓</span><span>Clean route-ready episode generated for every referral. Zero staff hours</span></div>
         </div>
-        <div style="margin-top:10px;padding:7px 10px;background:var(--blue-l);border-radius:6px;font-size:10px;color:var(--blue);font-weight:700">10,000 referrals · ~56 min · 0 staff hours</div>
-      </div>
-
-      <!-- Architecture -->
-      <div style="background:white;border:1px solid var(--gray-m);border-radius:10px;padding:14px 16px">
-        <div style="font-size:9px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px">🔁 Architecture</div>
-        <div style="font-size:9px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">5-Module Agent Pipeline</div>
-        <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:9px">
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:15px;height:15px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</span><span style="font-size:10px;font-weight:700;color:var(--dark)">Intake</span><span style="font-size:9px;color:var(--gray)">— read, parse, extract 25 fields</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:15px;height:15px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</span><span style="font-size:10px;font-weight:700;color:var(--dark)">Normalization</span><span style="font-size:9px;color:var(--gray)">— structure episode record</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:15px;height:15px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</span><span style="font-size:10px;font-weight:700;color:var(--dark)">Intelligence</span><span style="font-size:9px;color:var(--gray)">— validate, score, self-correct</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:15px;height:15px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</span><span style="font-size:10px;font-weight:700;color:var(--dark)">Completeness</span><span style="font-size:9px;color:var(--gray)">— gap triage by criticality</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:15px;height:15px;background:var(--purple);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</span><span style="font-size:10px;font-weight:700;color:var(--dark)">Outreach</span><span style="font-size:9px;color:var(--gray)">— email + voice, track response</span></div>
-          <div style="display:flex;gap:6px;align-items:center"><span style="width:15px;height:15px;background:var(--blue);color:white;border-radius:3px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">→</span><span style="font-size:10px;font-weight:700;color:var(--dark)">Route Output</span><span style="font-size:9px;color:var(--gray)">— clean episode, vendor dispatch</span></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:3px;padding:7px 9px;background:var(--purple-l);border-radius:6px">
-          <div style="font-size:9px;color:var(--purple);font-weight:700">Channels: 📠 Fax OCR · 📞 Voice AI · 📧 Email/Portal</div>
-          <div style="font-size:9px;color:var(--gray)">Human-in-the-loop on confidence escalations · Auditable at every step</div>
+        <div style="margin-top:12px;padding:8px 10px;background:var(--blue-l);border:1px solid var(--blue-m);border-radius:7px;font-size:11px;color:var(--blue);font-weight:700;text-align:center">
+          10,000 referrals · under 1 hour · 0 staff
         </div>
       </div>
 
-      <!-- 17 Production Considerations -->
-      <div style="background:white;border:1px solid var(--gray-m);border-radius:10px;padding:14px 16px">
-        <div style="font-size:9px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px">✅ 17 Production Considerations</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:y 2px;row-gap:3px;column-gap:8px">
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>HIPAA-compliant data</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>PHI encryption at rest</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Full field-level audit log</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>AI confidence scoring</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Human escalation &lt;80%</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Duplicate claim detection</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Cross-doc ICD validation</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Fax format variability</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Voice compliance (per-state)</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Outreach deliverability</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>SLA breach alerting</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Holiday queue handling</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Multi-language detection</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Equipment spec validation</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Staff override any step</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>Reprocess &amp; rollback</div>
-          <div style="font-size:9.5px;color:var(--dark);display:flex;gap:4px"><span style="color:var(--green);font-weight:700">✓</span>EHR/adjuster integration</div>
+      <!-- Panel 2: 7-Step Pipeline -->
+      <div style="background:white;border-radius:10px;border:1px solid var(--gray-m);padding:16px;box-shadow:var(--shadow)">
+        <div style="font-size:10px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🔁 7-Step Pipeline</div>
+        <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px;line-height:1.4">Modular agent network — each step auditable</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:18px;background:var(--purple-l);border:1px solid var(--purple-m);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--purple);flex-shrink:0">1</div><div><div style="font-size:11px;font-weight:700;color:var(--dark)">Channel Intake</div><div style="font-size:10px;color:var(--gray)">Fax · voice · email · portal</div></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:18px;background:var(--purple-l);border:1px solid var(--purple-m);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--purple);flex-shrink:0">2</div><div><div style="font-size:11px;font-weight:700;color:var(--dark)">Normalization</div><div style="font-size:10px;color:var(--gray)">25 fields · structured episode record</div></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:18px;background:var(--purple-l);border:1px solid var(--purple-m);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--purple);flex-shrink:0">3</div><div><div style="font-size:11px;font-weight:700;color:var(--dark)">Intelligence Layer</div><div style="font-size:10px;color:var(--gray)">ICD validation · duplicate check · risk score</div></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:18px;background:var(--purple-l);border:1px solid var(--purple-m);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--purple);flex-shrink:0">4</div><div><div style="font-size:11px;font-weight:700;color:var(--dark)">Completeness Check</div><div style="font-size:10px;color:var(--gray)">Gap triage by routing criticality</div></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:18px;background:var(--purple-l);border:1px solid var(--purple-m);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--purple);flex-shrink:0">5</div><div><div style="font-size:11px;font-weight:700;color:var(--dark)">Digital Outreach</div><div style="font-size:10px;color:var(--gray)">Email case manager — specific fields, deadline</div></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:18px;background:var(--purple-l);border:1px solid var(--purple-m);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--purple);flex-shrink:0">6</div><div><div style="font-size:11px;font-weight:700;color:var(--dark)">Voice Outreach</div><div style="font-size:10px;color:var(--gray)">Outbound AI call if no response at 24h</div></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:18px;background:var(--purple-l);border:1px solid var(--purple-m);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--purple);flex-shrink:0">7</div><div><div style="font-size:11px;font-weight:700;color:var(--dark)">Route Output</div><div style="font-size:10px;color:var(--gray)">Clean episode locked · vendor dispatches</div></div></div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Intake Channels -->
+      <div style="background:white;border-radius:10px;border:1px solid var(--gray-m);padding:16px;box-shadow:var(--shadow)">
+        <div style="font-size:10px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📥 Intake Channels</div>
+        <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px;line-height:1.4">Any channel — same pipeline, same output</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="padding:10px;background:#f8fafc;border:1px solid var(--gray-m);border-radius:8px">
+            <div style="font-size:11px;font-weight:800;color:var(--dark);margin-bottom:3px">📠 Fax</div>
+            <div style="font-size:10px;color:var(--gray);line-height:1.5">Agent reads the full package — referral form, clinical notes, prescription. Cross-references fields across all documents.</div>
+          </div>
+          <div style="padding:10px;background:#f0fdf4;border:1px solid var(--green-m);border-radius:8px">
+            <div style="font-size:11px;font-weight:800;color:#15803d;margin-bottom:3px">📞 Voice · (201) 897-3854</div>
+            <div style="font-size:10px;color:#166534;line-height:1.5">AI agent answers 24/7. Captures 14 fields live on the call. Flags gaps in real time. Episode enters queue before the call ends.</div>
+          </div>
+          <div style="padding:10px;background:#f8fafc;border:1px solid var(--gray-m);border-radius:8px">
+            <div style="font-size:11px;font-weight:800;color:var(--dark);margin-bottom:3px">📧 Email / Portal</div>
+            <div style="font-size:10px;color:var(--gray);line-height:1.5">Structured or unstructured — agent parses, normalises, and enters the episode. Same gap detection. Same outreach logic.</div>
+          </div>
         </div>
       </div>
 
     </div>
 
     <!-- Navigation Panel -->
-    <div style="background:white;border:1px solid var(--gray-m);border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="background:white;border-bottom:1px solid var(--gray-m);padding:13px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <div style="font-size:11px;font-weight:700;color:var(--dark);flex:1;min-width:160px">See the system in action:</div>
       <button onclick="startProcessing()" style="display:flex;align-items:center;gap:7px;background:var(--blue);color:white;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:.02em">▶ Start Live Processing <span style="font-size:10px;font-weight:600;opacity:.8">— 75 referrals · under 25 sec</span></button>
       <button onclick="showScaleProjection()" style="display:flex;align-items:center;gap:7px;background:var(--green-l);color:var(--green);border:1px solid var(--green-m);border-radius:8px;padding:9px 18px;font-size:12px;font-weight:800;cursor:pointer">⚡ Scale Projection <span style="font-size:10px;font-weight:600;opacity:.8">— 10,000 referrals</span></button>
